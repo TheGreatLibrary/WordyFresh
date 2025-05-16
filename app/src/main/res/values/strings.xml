@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Wordy Rare</string>
+    <string name="play">Играть</string>
+    <string name="friend_mode">Дружеский вызов</string>
+    <string name="hard_mode">Сложный режим</string>
+    <string name="random_mode">Случайный режим</string>
+    <string name="continue_text">Продолжить</string>
+    <string name="new_game">Новая игра</string>
+    <string name="statistic_screen">Статистика</string>
+    <string name="all_modes">Все режимы</string>
+    <string name="classic_mode">Классика</string>
+    <string name="hard_m">Сложный</string>
+    <string name="random_m">Случайный</string>
+    <string name="friend_m">Дружеский</string>
+    <string name="settings_screen">Настройки</string>
+    <string name="achievements">Достижения</string>
+    <string name="profile_screen">Профиль</string>
+    <string name="login">Войти</string>
+    <string name="sign_up">Зарегистрироваться</string>
+</resources>

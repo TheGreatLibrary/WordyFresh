@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play">Play</string>
+    <string name="friend_mode">Friendly mode</string>
+    <string name="hard_mode">Hard mode</string>
+    <string name="random_mode">Randomode</string>
+    <string name="continue_text">Продолжить</string>
+    <string name="new_game">New game</string>
+    <string name="statistic_screen">Statistics</string>
+    <string name="all_modes">All modes</string>
+    <string name="classic_mode">Classic</string>
+    <string name="hard_m">Hard</string>
+    <string name="random_m">Random</string>
+    <string name="friend_m">Friendly</string>
+    <string name="settings_screen">Settings</string>
+    <string name="achievements">Achievements</string>
+    <string name="profile_screen">Profile</string>
+    <string name="login">Sign in</string>
+    <string name="sign_up">Sign up</string>
+</resources>
