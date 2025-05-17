@@ -80,26 +80,28 @@ fun MainActivityScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleVi
 //            }
 //        }
 //    }
-    val withBottomBar = currentRoute == "game/{mode}/{wordLength}/{lang}/{hiddenWord}" ||
+    val withOutBottomBar = currentRoute == "game/{mode}/{wordLength}/{lang}/{hiddenWord}" ||
         currentRoute == "settingsII" ||
         currentRoute == "profile" ||
         currentRoute == "login" ||
-        currentRoute == "register"
+        currentRoute == "register" || currentRoute == "language" || currentRoute == "themeMode"
+
+    val withOutImage = currentRoute == "language" || currentRoute == "themeMode"
 
     Scaffold(
-        Modifier.background(color = WordleColor.colors.backgroundBtnMkII),
+        Modifier.background(color = WordleColor.colors.background),
         bottomBar = {
-            if (withBottomBar) {
+            if (withOutBottomBar) {
                 AddBlock()
             } else BottomNavigation(navController)
         }
     ) { innerPadding ->
-        Image(
+        if (!withOutImage) Image(
             painter = painterResource(R.drawable.bg1),
             contentDescription = "Фон",
             modifier = Modifier
                 .fillMaxSize()
-                .blur(if (withBottomBar) 5.dp else 0.dp)
+                .blur(if (withOutBottomBar) 5.dp else 0.dp)
                 .background(color = WordleColor.colors.backgroundBtnMkII),
             contentScale = ContentScale.Crop
         )

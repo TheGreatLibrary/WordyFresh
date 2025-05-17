@@ -17,4 +17,7 @@
     <string name="profile_screen">Профиль</string>
     <string name="login">Войти</string>
     <string name="sign_up">Зарегистрироваться</string>
+    <string name="change_lang">Язык</string>
+    <string name="light">Светлая</string>
+    <string name="dark">Темная</string>
 </resources>

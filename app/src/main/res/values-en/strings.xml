@@ -17,4 +17,9 @@
     <string name="profile_screen">Profile</string>
     <string name="login">Sign in</string>
     <string name="sign_up">Sign up</string>
+
+    <string name="change_lang">Language</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+
 </resources>

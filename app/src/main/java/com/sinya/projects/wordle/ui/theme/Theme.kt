@@ -57,8 +57,8 @@ data class WordleColors (
 )
 
 val LightWordleColors = WordleColors(
-    backgroundCard = white, // Белая карточка
-    background = gray100, // Светлый фон
+    backgroundCard = gray600, // Белая карточка
+    background = white, // Светлый фон
     backgroundIcon = gray100, // Серый фон иконок
     foregroundIcon = gray600, // Чёрные иконки
     backgroundBtnMkI = white, // Светло-серый цвет кнопок
@@ -80,7 +80,7 @@ val LightWordleColors = WordleColors(
 
 val DarkWordleColors = WordleColors(
     backgroundCard = white, // Белая карточка
-    background = gray100, // Светлый фон
+    background = gray800, // Светлый фон
     backgroundIcon = gray100, // Серый фон иконок
     foregroundIcon = gray600, // Чёрные иконки
     backgroundBtnMkI = white, // Светло-серый цвет кнопок

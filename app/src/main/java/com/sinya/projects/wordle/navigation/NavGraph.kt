@@ -18,11 +18,13 @@ import com.sinya.projects.wordle.screen.statistic.StatisticScreen
 import com.sinya.projects.wordle.screen.login.LoginScreen
 import com.sinya.projects.wordle.screen.profile.ProfileScreen
 import com.sinya.projects.wordle.screen.register.RegisterScreen
+import com.sinya.projects.wordle.screen.settings.subscreens.LanguageScreen
+import com.sinya.projects.wordle.screen.settings.subscreens.ThemeModeScreen
 import io.github.jan.supabase.auth.auth
 
 @Composable
 fun NavGraph(
-    viewModel: ThemeViewModel,
+    themeViewModel: ThemeViewModel,
     localeViewModel: LocaleViewModel,
     navHostController: NavHostController,
     modifier: Modifier
@@ -43,16 +45,14 @@ fun NavGraph(
                 supabase = SupabaseClientHolder.client
             )
         }
-        composable("login") {
-            LoginScreen(navHostController, supabase = SupabaseClientHolder.client) {
+        composable("login") { LoginScreen(navHostController, supabase = SupabaseClientHolder.client) {
                 val session = supabase.auth.currentSessionOrNull()
                 if (session != null) {
                     navHostController.navigate("profile") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
-            }
-        }
+            } }
         composable("register") {
             RegisterScreen(navHostController, supabase = SupabaseClientHolder.client) {
                 val session = supabase.auth.currentSessionOrNull()
@@ -68,8 +68,6 @@ fun NavGraph(
                 }
             }
         }
-
-
 
         composable("game/{mode}/{wordLength}/{lang}/{hiddenWord}") { backStackEntry ->
             val mode = backStackEntry.arguments?.getString("mode")?.toIntOrNull() ?: 0
@@ -94,12 +92,14 @@ fun NavGraph(
                 navHostController
             )
         }
-        composable("settingsII") { SettingsScreen(viewModel, localeViewModel, navHostController) }
+        composable("settingsI") { SettingsScreen(themeViewModel, localeViewModel, navHostController) }
+        composable("settingsII") { SettingsScreen(themeViewModel, localeViewModel, navHostController) }
+        composable("language") { LanguageScreen(localeViewModel, navHostController) }
+        composable("themeMode") { ThemeModeScreen(themeViewModel, navHostController) }
 
         composable("statistic") { StatisticScreen(navHostController) }
         composable("achieves") { AchieveScreen(navHostController) }
 
         composable("dictionary") { DictionaryScreen(navController = navHostController) }
-        composable("settingsI") { SettingsScreen(viewModel, localeViewModel, navHostController) }
     }
 }

@@ -38,17 +38,7 @@ class LocaleViewModel(application: Application) : AndroidViewModel(application) 
     fun changeLanguage(lang: String) {
         viewModelScope.launch {
             AppDataStore.setLanguage(context, lang)
-//            context.findActivity()?.rec
-            _languageChanged.emit(Unit) // <- сигнал о смене языка
+            _languageChanged.emit(Unit)
         }
-    }
-
-    fun Context.findActivity(): Activity? {
-        var ctx = this
-        while (ctx is ContextWrapper) {
-            if (ctx is Activity) return ctx
-            ctx = ctx.baseContext
-        }
-        return null
     }
 }

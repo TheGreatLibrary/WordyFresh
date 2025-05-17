@@ -64,9 +64,8 @@ fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewMo
     val isDark by themeViewModel.isDarkMode.collectAsState()
     val lang by localeViewModel.language.collectAsState()
 
-
     LaunchedEffect(Unit) {
-        localeViewModel.languageChanged.collect {
+        themeViewModel.themeChanged.collect {
             // После подтверждённой смены языка — перезапускаем
             (context as? Activity)?.recreate()
         }
@@ -93,9 +92,9 @@ fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewMo
                     .padding(vertical = 16.dp, horizontal = 13.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                RowSettingLink("Язык", "Русский", R.drawable.icon_home)
-                RowSettingLink("Темный режим", "Светлый", R.drawable.icon_home)
-                RowSettingLink("Как играть", "Пройти", R.drawable.icon_home)
+                RowSettingLink("Язык", "Русский", R.drawable.icon_home) { navController.navigate("language") }
+                RowSettingLink("Темный режим", "Светлый", R.drawable.icon_home) { navController.navigate("themeMode") }
+                RowSettingLink("Как играть", "Пройти", R.drawable.icon_home) {}
             }
         }
         Card(
@@ -113,38 +112,7 @@ fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewMo
                 RowSettingSwitch("Музыка",  R.drawable.icon_home)
                 RowSettingSwitch("Звуковые эффекты",  R.drawable.icon_home)
                 RowSettingSwitch("Вибрация",  R.drawable.icon_home)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Тёмная тема", modifier = Modifier.weight(1f))
-                    Switch(
-                        checked = isDark,
-                        onCheckedChange = {
-                            themeViewModel.toggleTheme(it)
-                            (context as? Activity)?.recreate()
-                            Toast.makeText(
-                                context,
-                                if (it) "Включена тёмная тема" else "Включена светлая тема",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-
-                        }
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(id = R.string.play), modifier = Modifier.weight(1f))
-                    DropdownMenuLanguage(lang) { selectedLang ->
-                        localeViewModel.changeLanguage(selectedLang)
-//                        (context as? Activity)?.recreate()
-
-                        Toast.makeText(
-                            context,
-                            if (selectedLang == "ru") "Выбран русский" else "Selected English",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+              
             }
         }
         Card(
@@ -161,7 +129,7 @@ fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewMo
             ) {
                 RowSettingSwitch("Конфетти-анимация",  R.drawable.icon_home)
                 RowSettingSwitch("Взрослые слова",  R.drawable.icon_home)
-                RowSettingLink("Расположение DELETE", "Слева", R.drawable.icon_home)
+                RowSettingLink("Расположение DELETE", "Слева", R.drawable.icon_home) {}
             }
         }
         Card(
@@ -205,9 +173,9 @@ fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewMo
 }
 
 @Composable
-fun RowSettingLink(title: String, mode: String, @DrawableRes icon: Int) {
+fun RowSettingLink(title: String, mode: String, @DrawableRes icon: Int, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth(),
+        Modifier.fillMaxWidth().clickable { onClick() },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
