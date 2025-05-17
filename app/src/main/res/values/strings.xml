@@ -20,4 +20,9 @@
     <string name="change_lang">Язык</string>
     <string name="light">Светлая</string>
     <string name="dark">Темная</string>
+    <string name="keyboard_classic">Классика</string>
+    <string name="keyboard_wordle">Вордли</string>
+    <string name="keyboard_reverse">Отраженная</string>
+    <string name="keyboard_big_enter">Большой Enter</string>
+    <string name="change_keyboard">Клавиатура</string>
 </resources>

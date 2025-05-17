@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -18,6 +19,7 @@ import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.dao.OfflineDictionaryDao
 import com.sinya.projects.wordle.data.local.dao.OfflineStatisticDao
 import com.sinya.projects.wordle.data.local.dao.WordDao
+import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.domain.model.data.Cell
 import com.sinya.projects.wordle.domain.model.data.Key
 import com.sinya.projects.wordle.domain.model.entity.OfflineDictionary
@@ -30,6 +32,7 @@ import com.sinya.projects.wordle.ui.theme.yellow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -77,7 +80,16 @@ class GameViewModel(
         ): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return GameViewModel(mode, wordLength, lang, hiddenWord, context, wordDao, offlineDictionaryDao, offlineStatisticDao) as T
+                    return GameViewModel(
+                        mode,
+                        wordLength,
+                        lang,
+                        hiddenWord,
+                        context,
+                        wordDao,
+                        offlineDictionaryDao,
+                        offlineStatisticDao
+                    ) as T
                 }
             }
         }
@@ -115,7 +127,8 @@ class GameViewModel(
         gridState = mutableStateListOf<Cell>().apply {
             repeat(wordLength * 6) { add(Cell()) }
         }
-        keyboardState = generateKeyboard() // Инициализация клавиатуры в зависимости от языка
+
+        viewModelScope.launch { keyboardState = generateKeyboard() } // Инициализация клавиатуры в зависимости от языка
 
         viewModelScope.launch {
             if (hiddenWord.isEmpty()) {
@@ -127,7 +140,7 @@ class GameViewModel(
     fun reloadGame() {
         result = ""
         dialogFinish.value = false
-        
+
         gridState.forEach { cell ->
             cell.letter = ""
             cell.backgroundColor = white30
@@ -147,19 +160,67 @@ class GameViewModel(
 
     }
 
-    private fun generateKeyboard(): SnapshotStateList<MutableList<Key>> {
-        return when (lang) {
-            "ru" -> listOf(
-                "ЙЦУКЕНГШЩЗХЪ",
-                "ФЫВАПРОЛДЖЭ",
-                "<ЯЧСМИТЬБЮ>"
-            )
+    suspend fun generateKeyboard(): SnapshotStateList<MutableList<Key>> {
+        val codeKeyboard = AppDataStore.getKeyboardMode(context).first() // ← блокирует, ждёт первый элемент
 
-            else -> listOf(
-                "QWERTYUIOP",
-                "ASDFGHJKL",
-                "<ZXCVBNM>"
-            )
+        return when (lang) {
+            "ru" -> when (codeKeyboard) {
+                0 -> listOf(
+                    "ЙЦУКЕНГШЩЗХЪ",
+                    "ФЫВАПРОЛДЖЭ",
+                    "<ЯЧСМИТЬБЮ>"
+                )
+                1 -> listOf(
+                    "ЙЦУКЕНГШЩЗХЪ",
+                    "ФЫВАПРОЛДЖЭ<",
+                    "ЯЧСМИТЬБЮ>"
+                )
+                2 -> listOf(
+                    "ЙЦУКЕНГШЩЗХЪ",
+                    "ФЫВАПРОЛДЖЭ",
+                    ">ЯЧСМИТЬБЮ<"
+                )
+                3 -> listOf(
+                    "ЙЦУКЕНГШЩЗХЪ",
+                    "ФЫВАПРОЛДЖЭ",
+                    "ЯЧСМИТЬБЮ<",
+                    ">"
+                )
+                else -> listOf(
+                    "ЙЦУКЕНГШЩЗХЪ",
+                    "ФЫВАПРОЛДЖЭ",
+                    "<ЯЧСМИТЬБЮ>"
+                )
+            }
+
+            else -> when (codeKeyboard) {
+                0 -> listOf(
+                    "QWERTYUIOP",
+                    "ASDFGHJKL",
+                    "<ZXCVBNM>"
+                )
+                1 -> listOf(
+                    "QWERTYUIOP",
+                    "ASDFGHJKL<",
+                    "ZXCVBNM>"
+                )
+                2 -> listOf(
+                    "QWERTYUIOP",
+                    "ASDFGHJKL",
+                    ">ZXCVBNM<"
+                )
+                3 -> listOf(
+                    "QWERTYUIOP",
+                    "ASDFGHJKL",
+                    "ZXCVBNM<",
+                    ">"
+                )
+                else -> listOf(
+                    "QWERTYUIOP",
+                    "ASDFGHJKL",
+                    "<ZXCVBNM>"
+                )
+            }
         }.map { row -> mutableStateListOf(*row.map { Key(it) }.toTypedArray()) }
             .toMutableStateList()
     }
@@ -183,20 +244,20 @@ class GameViewModel(
                     }
                 }
             }
+
             '>' -> {
                 if (result == "") {
                     val enteredWord = getWordFromRow(row) // получаем слово из строки
                     if (gridState[focusedCell].letter == "") {
-                        if (col < wordLength-1) {
+                        if (col < wordLength - 1) {
                             setFocusedCell(row, col + 1)
                         }
-                    }
-                    else if (enteredWord.length == wordLength) {
+                    } else if (enteredWord.length == wordLength) {
                         viewModelScope.launch {
                             if (wordDao.findWord(enteredWord, lang, false) != null) {
                                 val tryResult = checkWord(enteredWord, row, coroutineScope)
                                 if (result != "") {
-                                  ///  focusedCell = 999
+                                    ///  focusedCell = 999
                                     dialogFinish.value = true // Показываем диалог
 
                                 } else if (col < wordLength && row < 5 && tryResult) {
@@ -210,6 +271,7 @@ class GameViewModel(
                     reloadGame()
                 } // если игра уже окончена
             }
+
             else -> {
                 if (result == "") {
                     updateCellText(row, col, char.toString()/*, gridState*/)
@@ -228,7 +290,10 @@ class GameViewModel(
             .joinToString("") { it.letter }
     }
 
-    private fun updateKeyColor(char: Char, color: Color/*, keyboardState: SnapshotStateList<MutableList<Key>>*/) {
+    private fun updateKeyColor(
+        char: Char,
+        color: Color/*, keyboardState: SnapshotStateList<MutableList<Key>>*/
+    ) {
         keyboardState.forEachIndexed { rowIndex, row ->
             val index = row.indexOfFirst { it.char == char }
             if (index != -1) {
@@ -237,7 +302,11 @@ class GameViewModel(
         }
     }
 
-    private fun updateCellText(row: Int, col: Int, text: String/*, gridState: SnapshotStateList<Cell>*/) {
+    private fun updateCellText(
+        row: Int,
+        col: Int,
+        text: String/*, gridState: SnapshotStateList<Cell>*/
+    ) {
         val index = row * wordLength + col // Вычисляем индекс в одномерном списке
         if (index in gridState.indices) {
             gridState[index] = gridState[index].copy(letter = text)
@@ -263,7 +332,7 @@ class GameViewModel(
         focusedCell = rowC * wordLength
     }
 
-    private  suspend fun getColorsByWord(enteredWord: String, row: Int): MutableList<Color> {
+    private suspend fun getColorsByWord(enteredWord: String, row: Int): MutableList<Color> {
         val countRowBox = hiddenWord.length // Длина строки
         val colors = MutableList(countRowBox) { gray250 } // По умолчанию серый
         val usedIndices = BooleanArray(hiddenWord.length) // Отмечает, какие буквы уже использованы
@@ -297,7 +366,7 @@ class GameViewModel(
         return colors
     }
 
-    private suspend fun checkWord(enteredWord: String, row: Int, scope: CoroutineScope) : Boolean {
+    private suspend fun checkWord(enteredWord: String, row: Int, scope: CoroutineScope): Boolean {
         val countRowBox = hiddenWord.length
 
         // Проверка "Сложного режима"
@@ -311,9 +380,12 @@ class GameViewModel(
                 val prevChar = previousWord[i]
 
                 if (lastColor == green800 && enteredWord[i] != prevChar) {
-                    Log.d("ошибка1", "Сложный режим: буква '${prevChar}' должна быть на позиции ${i + 1}")
+                    Log.d(
+                        "ошибка1",
+                        "Сложный режим: буква '${prevChar}' должна быть на позиции ${i + 1}"
+                    )
 
-                //    showNotFoundWordDialog("Сложный режим: буква '${prevChar}' должна быть на позиции ${i + 1}")
+                    //    showNotFoundWordDialog("Сложный режим: буква '${prevChar}' должна быть на позиции ${i + 1}")
                     return false
                 }
 
@@ -325,7 +397,7 @@ class GameViewModel(
             for (char in requiredLetters) {
                 if (!enteredWord.contains(char)) {
                     Log.d("ошибка2", "Сложный режим: слово должно содержать букву '$char'")
-              //      showNotFoundWordDialog("Сложный режим: слово должно содержать букву '$char'")
+                    //      showNotFoundWordDialog("Сложный режим: слово должно содержать букву '$char'")
                     return false
                 }
             }
@@ -364,7 +436,8 @@ class GameViewModel(
                     val char = enteredWord[i]
                     val newColor = colors[i]
 
-                    val currentColor = keyboardState.flatten().find { it.char == char }?.color ?: gray250
+                    val currentColor =
+                        keyboardState.flatten().find { it.char == char }?.color ?: gray250
                     val finalColor = when {
                         currentColor == green800 -> green800
                         currentColor == yellow && newColor == gray250 -> yellow
@@ -380,7 +453,7 @@ class GameViewModel(
     }
 
     suspend fun addStatisticData(result: String) {
-        val modeId = when(mode) {
+        val modeId = when (mode) {
             0 -> "12f9d2ce-1234-4321-aaaa-000000000001"
             1 -> "12f9d2ce-1234-4321-aaaa-000000000002"
             2 -> "12f9d2ce-1234-4321-aaaa-000000000004"
@@ -399,21 +472,21 @@ class GameViewModel(
         }
         val currentStatistic = offlineStatisticDao.getStatisticByMode(modeId)
 
-        val currentStreak =  if (result == "Победа!") currentStatistic.currentStreak + 1 else 0
+        val currentStreak = if (result == "Победа!") currentStatistic.currentStreak + 1 else 0
         val row = focusedCell / wordLength
         val win = result == "Победа!"
         val updated = currentStatistic.copy(
             countGame = currentStatistic.countGame + 1,
-            currentStreak =  currentStreak,
-            bestStreak = if (currentStatistic.bestStreak<currentStreak) currentStreak else currentStatistic.bestStreak,
+            currentStreak = currentStreak,
+            bestStreak = if (currentStatistic.bestStreak < currentStreak) currentStreak else currentStatistic.bestStreak,
             winGame = if (result == "Победа!") currentStatistic.winGame + 1 else currentStatistic.winGame,
             sumTime = currentStatistic.sumTime + totalSeconds,
-            firstTry = if (row == 0 && win) currentStatistic.firstTry+1 else  currentStatistic.firstTry, // первая попытка
-            secondTry = if (row == 1 && win) currentStatistic.secondTry+1 else  currentStatistic.secondTry, // вторая попытка
-            thirdTry = if (row == 2 && win) currentStatistic.thirdTry+1 else  currentStatistic.thirdTry, // третья попытка
-            fourthTry = if (row == 3 && win) currentStatistic.fourthTry+1 else  currentStatistic.fourthTry, // четвертная попытка
-            fifthTry = if (row == 4 && win) currentStatistic.fifthTry+1 else  currentStatistic.fifthTry, // пятая попытка
-            sixthTry = if (row == 5 && win) currentStatistic.sixthTry+1 else  currentStatistic.sixthTry // шестая попытка
+            firstTry = if (row == 0 && win) currentStatistic.firstTry + 1 else currentStatistic.firstTry, // первая попытка
+            secondTry = if (row == 1 && win) currentStatistic.secondTry + 1 else currentStatistic.secondTry, // вторая попытка
+            thirdTry = if (row == 2 && win) currentStatistic.thirdTry + 1 else currentStatistic.thirdTry, // третья попытка
+            fourthTry = if (row == 3 && win) currentStatistic.fourthTry + 1 else currentStatistic.fourthTry, // четвертная попытка
+            fifthTry = if (row == 4 && win) currentStatistic.fifthTry + 1 else currentStatistic.fifthTry, // пятая попытка
+            sixthTry = if (row == 5 && win) currentStatistic.sixthTry + 1 else currentStatistic.sixthTry // шестая попытка
         )
         offlineStatisticDao.updateStatistic(updated)
     }
@@ -424,12 +497,18 @@ class GameViewModel(
         if (wordExists == null) {
             val description = getWikipediaDefinition(word) // Получаем описание
             val wordId = wordDao.getWordId(word)
-            offlineDictionaryDao.insertWord(OfflineDictionary(wordId = wordId, description = description))
+            offlineDictionaryDao.insertWord(
+                OfflineDictionary(
+                    wordId = wordId,
+                    description = description
+                )
+            )
         }
     }
 
     private fun isInternetAvailable(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: NetworkInfo? = connectivityManager.activeNetworkInfo
         return activeNetwork?.isConnected == true
     }

@@ -7,10 +7,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -34,6 +37,8 @@ import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.datastore.ThemeViewModel
 import com.sinya.projects.wordle.navigation.Header
+import com.sinya.projects.wordle.ui.components.AppThemes
+import com.sinya.projects.wordle.ui.components.CheckedIcon
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import kotlinx.coroutines.delay
 
@@ -41,11 +46,7 @@ import kotlinx.coroutines.delay
 fun ThemeModeScreen(themeViewModel: ThemeViewModel, navController: NavController) {
     val context = LocalContext.current
     val isDark by themeViewModel.isDarkMode.collectAsState()
-
-    val themes = listOf(
-        false to stringResource(R.string.light),
-        true to stringResource(R.string.dark)
-    )
+    val themes = AppThemes.supported
 
     LaunchedEffect(Unit) {
         themeViewModel.themeChanged.collect {
@@ -63,10 +64,13 @@ fun ThemeModeScreen(themeViewModel: ThemeViewModel, navController: NavController
         Header(stringResource(R.string.change_lang), false, navController)
         LazyColumn {
             items(themes.size) { index ->
+                if (index == 0) {
+                    Spacer(Modifier.height(20.dp))
+                }
                 ThemeModeItem(
-                    nativeName = themes[index].second,
-                    isSelected = themes[index].first == isDark,
-                    onClick = { themeViewModel.toggleTheme(themes[index].first) }
+                    nativeName = stringResource(themes[index].nameRes),
+                    isSelected = themes[index].isDark == isDark,
+                    onClick = { themeViewModel.toggleTheme(themes[index].isDark) }
                 )
                 if (index < themes.lastIndex) {
                     HorizontalDivider(
@@ -90,27 +94,14 @@ fun ThemeModeItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(23.dp),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-
-        Text(text = nativeName, style = MaterialTheme.typography.bodyLarge)
-        val scale by animateFloatAsState(
-            targetValue = if (isSelected) 1f else 0f,
-            animationSpec = tween(
-                durationMillis = 150,
-                easing = FastOutSlowInEasing
-            ),
-            label = "scaleAnim"
-        )
-
-        if (scale > 0f) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Selected",
-                modifier = Modifier.scale(scale)
-            )
+        Box(Modifier.height(25.dp),
+            contentAlignment = Alignment.Center) {
+            Text(text = nativeName, style = MaterialTheme.typography.bodyLarge)
         }
+        CheckedIcon(isSelected)
     }
 }

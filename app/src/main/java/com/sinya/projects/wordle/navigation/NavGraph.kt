@@ -18,6 +18,7 @@ import com.sinya.projects.wordle.screen.statistic.StatisticScreen
 import com.sinya.projects.wordle.screen.login.LoginScreen
 import com.sinya.projects.wordle.screen.profile.ProfileScreen
 import com.sinya.projects.wordle.screen.register.RegisterScreen
+import com.sinya.projects.wordle.screen.settings.subscreens.KeyboardModeScreen
 import com.sinya.projects.wordle.screen.settings.subscreens.LanguageScreen
 import com.sinya.projects.wordle.screen.settings.subscreens.ThemeModeScreen
 import io.github.jan.supabase.auth.auth
@@ -29,6 +30,8 @@ fun NavGraph(
     navHostController: NavHostController,
     modifier: Modifier
 ) {
+    val supabase = SupabaseClientHolder.client
+
     NavHost(
         navController = navHostController,
         modifier = Modifier
@@ -38,7 +41,6 @@ fun NavGraph(
     ) {
         composable("home") { HomeScreen(navHostController) }
 
-        val supabase = SupabaseClientHolder.client
         composable("profile") {
             ProfileScreen(
                 navHostController,
@@ -96,6 +98,7 @@ fun NavGraph(
         composable("settingsII") { SettingsScreen(themeViewModel, localeViewModel, navHostController) }
         composable("language") { LanguageScreen(localeViewModel, navHostController) }
         composable("themeMode") { ThemeModeScreen(themeViewModel, navHostController) }
+        composable("keyboardMode") { KeyboardModeScreen(navHostController) }
 
         composable("statistic") { StatisticScreen(navHostController) }
         composable("achieves") { AchieveScreen(navHostController) }

@@ -15,8 +15,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -43,6 +45,8 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.datastore.LocaleViewModel
 import com.sinya.projects.wordle.domain.model.data.LangItem
 import com.sinya.projects.wordle.navigation.Header
+import com.sinya.projects.wordle.ui.components.AppLanguages
+import com.sinya.projects.wordle.ui.components.CheckedIcon
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import kotlinx.coroutines.delay
 
@@ -50,11 +54,7 @@ import kotlinx.coroutines.delay
 fun LanguageScreen(localeViewModel: LocaleViewModel, navController: NavController) {
     val context = LocalContext.current
     val lang by localeViewModel.language.collectAsState()
-
-    val supportedLanguages = listOf(
-        LangItem("en", "English", "English"),
-        LangItem("ru", "Русский", "Russian"),
-    )
+    val languages = AppLanguages.supported
 
     LaunchedEffect(Unit) {
         localeViewModel.languageChanged.collect {
@@ -71,14 +71,17 @@ fun LanguageScreen(localeViewModel: LocaleViewModel, navController: NavControlle
     ) {
         Header(stringResource(R.string.change_lang), false, navController)
         LazyColumn {
-            items(supportedLanguages.size) { index ->
+            items(languages.size) { index ->
+                if (index == 0) {
+                    Spacer(Modifier.height(20.dp))
+                }
                 LanguageItem(
-                    nativeName = supportedLanguages[index].nativeName,
-                    englishName = supportedLanguages[index].englishName,
-                    isSelected = supportedLanguages[index].code == lang,
-                    onClick = { localeViewModel.changeLanguage(supportedLanguages[index].code) }
+                    nativeName = languages[index].nativeName,
+                    englishName = languages[index].englishName,
+                    isSelected = languages[index].code == lang,
+                    onClick = { localeViewModel.changeLanguage(languages[index].code) }
                 )
-                if (index < supportedLanguages.lastIndex) {
+                if (index < languages.lastIndex) {
                     HorizontalDivider(modifier = Modifier.fillMaxWidth(0.82f), color = Color.LightGray, thickness = 1.dp)
                 }
             }
@@ -107,21 +110,6 @@ fun LanguageItem(
             Text(text = nativeName, style = MaterialTheme.typography.bodyLarge)
             Text(text = englishName, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
-        val scale by animateFloatAsState(
-            targetValue = if (isSelected) 1f else 0f,
-            animationSpec = tween(
-                durationMillis = 150,
-                easing = FastOutSlowInEasing
-            ),
-            label = "scaleAnim"
-        )
-
-        if (scale > 0f) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Selected",
-                modifier = Modifier.scale(scale)
-            )
-        }
+        CheckedIcon(isSelected)
     }
 }

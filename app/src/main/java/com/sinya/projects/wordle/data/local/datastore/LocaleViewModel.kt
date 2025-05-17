@@ -1,10 +1,7 @@
 package com.sinya.projects.wordle.data.local.datastore
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Application
-import android.content.Context
-import android.content.ContextWrapper
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +26,7 @@ class LocaleViewModel(application: Application) : AndroidViewModel(application) 
 
     init {
         viewModelScope.launch {
-            AppDataStore.languageFlow(context).collect {
+            AppDataStore.getLanguage(context).collect {
                 _language.value = it
             }
         }

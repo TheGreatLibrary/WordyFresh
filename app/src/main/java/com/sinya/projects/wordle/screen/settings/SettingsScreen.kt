@@ -46,9 +46,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.data.local.datastore.LocaleViewModel
 import com.sinya.projects.wordle.data.local.datastore.ThemeViewModel
+import com.sinya.projects.wordle.domain.model.data.LangItem
 import com.sinya.projects.wordle.navigation.Header
+import com.sinya.projects.wordle.screen.home.sendSupportEmail
+import com.sinya.projects.wordle.ui.components.AppKeyboards
+import com.sinya.projects.wordle.ui.components.AppLanguages
+import com.sinya.projects.wordle.ui.components.AppThemes
 import com.sinya.projects.wordle.ui.theme.WordleTypography
 import com.sinya.projects.wordle.ui.theme.gray200
 import com.sinya.projects.wordle.ui.theme.gray300
@@ -61,15 +67,14 @@ import com.sinya.projects.wordle.ui.theme.white
 @Composable
 fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewModel, navController: NavController) {
     val context = LocalContext.current
+
     val isDark by themeViewModel.isDarkMode.collectAsState()
     val lang by localeViewModel.language.collectAsState()
+    val codeKeyboard by AppDataStore.getKeyboardMode(context).collectAsState(initial = 0)
 
-    LaunchedEffect(Unit) {
-        themeViewModel.themeChanged.collect {
-            // После подтверждённой смены языка — перезапускаем
-            (context as? Activity)?.recreate()
-        }
-    }
+    val currentLang = AppLanguages.getByCode(lang)
+    val currentTheme = AppThemes.getByCode(isDark)
+    val currentKeyboard = AppKeyboards.getByCode(codeKeyboard)
 
     Column(
         Modifier
@@ -92,8 +97,8 @@ fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewMo
                     .padding(vertical = 16.dp, horizontal = 13.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                RowSettingLink("Язык", "Русский", R.drawable.icon_home) { navController.navigate("language") }
-                RowSettingLink("Темный режим", "Светлый", R.drawable.icon_home) { navController.navigate("themeMode") }
+                RowSettingLink("Язык", currentLang ?: "", R.drawable.icon_home) { navController.navigate("language") }
+                RowSettingLink("Темный режим", currentTheme?.let { stringResource(it.nameRes) } ?: "", R.drawable.icon_home) { navController.navigate("themeMode") }
                 RowSettingLink("Как играть", "Пройти", R.drawable.icon_home) {}
             }
         }
@@ -129,7 +134,7 @@ fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewMo
             ) {
                 RowSettingSwitch("Конфетти-анимация",  R.drawable.icon_home)
                 RowSettingSwitch("Взрослые слова",  R.drawable.icon_home)
-                RowSettingLink("Расположение DELETE", "Слева", R.drawable.icon_home) {}
+                RowSettingLink("Клавиатура", currentKeyboard?.let { stringResource(it.modeName) } ?: "", R.drawable.icon_home) { navController.navigate("keyboardMode") }
             }
         }
         Card(
@@ -141,7 +146,7 @@ fun SettingsScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewMo
             Row(
                 Modifier
                     .background(color = white)
-                    .fillMaxWidth()
+                    .fillMaxWidth().clickable { sendSupportEmail(context) }
                     .padding(horizontal = 13.dp, vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -266,31 +271,4 @@ fun AppVersionInfo() {
         packageInfo.versionCode
     }
     Text("Версия: $versionName ($versionCode)", fontSize = 14.sp, color = Color.White, style = WordleTypography.bodyMedium)
-}
-
-@Composable
-fun DropdownMenuLanguage(selectedLang: String, onSelect: (String) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    val languages = listOf("ru", "en")
-
-    Box {
-        Text(
-            text = selectedLang,
-            modifier = Modifier
-                .clickable { expanded = true }
-                .padding(8.dp)
-        )
-
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            languages.forEach { lang ->
-                DropdownMenuItem(
-                    onClick = {
-                        onSelect(lang)
-                        expanded = false
-                    },
-                    text = { Text(if (lang == "ru") "Русский" else "English") }
-                )
-            }
-        }
-    }
 }

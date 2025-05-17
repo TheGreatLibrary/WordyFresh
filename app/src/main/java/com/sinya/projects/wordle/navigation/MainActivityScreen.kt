@@ -80,13 +80,14 @@ fun MainActivityScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleVi
 //            }
 //        }
 //    }
+    val withOutImage = currentRoute == "language" || currentRoute == "themeMode" || currentRoute == "keyboardMode"
+
     val withOutBottomBar = currentRoute == "game/{mode}/{wordLength}/{lang}/{hiddenWord}" ||
         currentRoute == "settingsII" ||
         currentRoute == "profile" ||
         currentRoute == "login" ||
-        currentRoute == "register" || currentRoute == "language" || currentRoute == "themeMode"
+        currentRoute == "register" || withOutImage
 
-    val withOutImage = currentRoute == "language" || currentRoute == "themeMode"
 
     Scaffold(
         Modifier.background(color = WordleColor.colors.background),

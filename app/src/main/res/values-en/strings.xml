@@ -22,4 +22,9 @@
     <string name="light">Light</string>
     <string name="dark">Dark</string>
 
+    <string name="keyboard_classic">Classic</string>
+    <string name="keyboard_wordle">Wordle</string>
+    <string name="keyboard_reverse">Reverse</string>
+    <string name="keyboard_big_enter">Big Enter</string>
+    <string name="change_keyboard">Keyboard</string>
 </resources>

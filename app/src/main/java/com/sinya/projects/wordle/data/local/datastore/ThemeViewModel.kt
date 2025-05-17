@@ -25,7 +25,7 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            AppDataStore.isDarkMode(context).collect {
+            AppDataStore.getDarkMode(context).collect {
                 _isDarkMode.value = it
             }
         }
