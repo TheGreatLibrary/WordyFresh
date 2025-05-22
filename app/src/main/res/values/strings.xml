@@ -18,6 +18,7 @@
     <string name="login">Войти</string>
     <string name="sign_up">Зарегистрироваться</string>
     <string name="change_lang">Язык</string>
+    <string name="change_theme">Тема</string>
     <string name="light">Светлая</string>
     <string name="dark">Темная</string>
     <string name="keyboard_classic">Классика</string>
@@ -25,4 +26,24 @@
     <string name="keyboard_reverse">Отраженная</string>
     <string name="keyboard_big_enter">Большой Enter</string>
     <string name="change_keyboard">Клавиатура</string>
+    <string name="guide">Как играть</string>
+    <string name="start">Пройти</string>
+    <string name="music">Музыка</string>
+    <string name="sounds">Звуковые эффекты</string>
+    <string name="vibration">Вибрация</string>
+    <string name="confetti">Конфетти-анимация</string>
+    <string name="abuse_words">Взрослые слова</string>
+    <string name="send_to_support">Написать в поддержку</string>
+    <string name="version">Версия</string>
+
+
+    <string name="dictionary">Словарь</string>
+    <string name="put_text">Введите слово</string>
+    <string name="all_count_game">Всего игр</string>
+    <string name="now_serial">Текущая серия</string>
+    <string name="best_serial">Лучшая серия</string>
+    <string name="percent_win">Процент побед</string>
+    <string name="abs_time">Среднее время</string>
+    <string name="stat_progress_title">Распределение выигрышных попыток</string>
+    <string name="achievement">Достижения</string>
 </resources>

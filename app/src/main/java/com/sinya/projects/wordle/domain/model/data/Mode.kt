@@ -1,6 +1,6 @@
 package com.sinya.projects.wordle.domain.model.data
 
 data class Mode(
-    val name: String,
+    val name: Int,
     val uuid: String
 )

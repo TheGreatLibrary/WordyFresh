@@ -4,9 +4,9 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,7 +21,9 @@ import com.sinya.projects.wordle.data.local.dao.OfflineStatisticDao
 import com.sinya.projects.wordle.data.local.dao.WordDao
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.domain.model.data.Cell
+import com.sinya.projects.wordle.domain.model.data.GameSettings
 import com.sinya.projects.wordle.domain.model.data.Key
+import com.sinya.projects.wordle.domain.model.data.SavedGame
 import com.sinya.projects.wordle.domain.model.entity.OfflineDictionary
 import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
 import com.sinya.projects.wordle.ui.theme.gray150
@@ -31,7 +33,10 @@ import com.sinya.projects.wordle.ui.theme.white30
 import com.sinya.projects.wordle.ui.theme.yellow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,7 +60,7 @@ class GameViewModel(
 ) : ViewModel() {
     var mode by mutableIntStateOf(mode)
     var wordLength by mutableIntStateOf(wordLength)
-    val lang by mutableStateOf(lang)
+    var lang by mutableStateOf(lang)
     var hiddenWord by mutableStateOf(hiddenWord)
     var result by mutableStateOf("")
 
@@ -65,7 +70,11 @@ class GameViewModel(
     var keyboardState = mutableStateListOf<MutableList<Key>>()
     var focusedCell by mutableIntStateOf(0)
 
-    var totalSeconds by mutableIntStateOf(0)
+    var totalSeconds by mutableLongStateOf(0)
+
+    private var ratingWordsStatus by mutableStateOf(false)
+    private var confettiStatus by mutableStateOf(false)
+
 
     companion object {
         fun provideFactory(
@@ -95,46 +104,94 @@ class GameViewModel(
         }
     }
 
-    private fun readWordsFromFile(context: Context, fileName: String): List<String> {
-        return try {
-            val reader = BufferedReader(InputStreamReader(context.assets.open(fileName)))
-            reader.readLines().map { it.trim() }.filter { it.isNotEmpty() }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            emptyList()
-        }
-    }
-
-    private fun deleteWordsFromFile(context: Context, wordDao: WordDao, fileName: String) {
-        val wordsToDelete = readWordsFromFile(context, fileName)
-
-        if (wordsToDelete.isNotEmpty()) {
-            CoroutineScope(Dispatchers.IO).launch {
-                wordDao.deleteWords(wordsToDelete)
-            }
-        }
-    }
-
-    fun deleteWords(context: Context, fileName: String) {
-        deleteWordsFromFile(context, wordDao, fileName)
-    }
+//    private fun readWordsFromFile(context: Context, fileName: String): List<String> {
+//        return try {
+//            val reader = BufferedReader(InputStreamReader(context.assets.open(fileName)))
+//            reader.readLines().map { it.trim() }.filter { it.isNotEmpty() }
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//            emptyList()
+//        }
+//    }
+//
+//    private fun deleteWordsFromFile(context: Context, wordDao: WordDao, fileName: String) {
+//        val wordsToDelete = readWordsFromFile(context, fileName)
+//
+//        if (wordsToDelete.isNotEmpty()) {
+//            CoroutineScope(Dispatchers.IO).launch {
+//                wordDao.deleteWords(wordsToDelete)
+//            }
+//        }
+//    }
+//
+//    fun deleteWords(context: Context, fileName: String) {
+//        deleteWordsFromFile(context, wordDao, fileName)
+//    }
 
     init {
-        startNewGame()  // Инициализация при создании ViewModel
+        if (mode == -1) {
+            viewModelScope.launch {
+                val game = AppDataStore.loadGame(context)
+                if (game != null) {
+                    restoreGame(game)
+                } else dialogFinish.value = true
+            }
+        } else startNewGame()
+    }
+
+    private fun restoreGame(game: SavedGame) {
+        wordLength = game.length
+        lang = game.lang
+        hiddenWord = game.targetWord
+        ratingWordsStatus = game.settings.ratingStatus
+        confettiStatus = game.settings.confettiStatus
+
+        val firstEmptyIndex = game.board.indexOfFirst { it.backgroundColor == white30.value }
+        focusedCell = if (firstEmptyIndex != -1) firstEmptyIndex else 0
+
+        gridState = mutableStateListOf<Cell>().apply {
+            repeat(wordLength * 6) { index ->
+                add(game.board[index])
+            }
+        }
+
+        viewModelScope.launch {
+            keyboardState = game.keyboard
+                .map { row -> mutableStateListOf(*row.toTypedArray()) }
+                .toMutableStateList()
+        }
+
+        totalSeconds = game.totalSeconds
     }
 
     private fun startNewGame() {
+        viewModelScope.launch {
+            AppDataStore.getRatingWordMode(context).collect {
+                ratingWordsStatus = it
+            }
+        }
+
+        viewModelScope.launch {
+            AppDataStore.getConfettiMode(context).collect {
+                confettiStatus = it
+            }
+        }
+
         gridState = mutableStateListOf<Cell>().apply {
             repeat(wordLength * 6) { add(Cell()) }
         }
 
-        viewModelScope.launch { keyboardState = generateKeyboard() } // Инициализация клавиатуры в зависимости от языка
+        viewModelScope.launch {
+            keyboardState = generateKeyboard()
+        } // Инициализация клавиатуры в зависимости от языка
 
         viewModelScope.launch {
             if (hiddenWord.isEmpty()) {
-                hiddenWord = wordDao.getRandomWord(wordLength, lang, false)
+                hiddenWord = wordDao.getRandomWord(wordLength, lang, ratingWordsStatus)
             } // генерация слова
         }
+
+
     }
 
     fun reloadGame() {
@@ -143,11 +200,11 @@ class GameViewModel(
 
         gridState.forEach { cell ->
             cell.letter = ""
-            cell.backgroundColor = white30
+            cell.backgroundColor = white30.value
         }
 
         keyboardState.flatten().forEach { key ->
-            key.color = gray150
+            key.color = gray150.value
         }
 
         focusedCell = 0
@@ -160,8 +217,29 @@ class GameViewModel(
 
     }
 
-    suspend fun generateKeyboard(): SnapshotStateList<MutableList<Key>> {
-        val codeKeyboard = AppDataStore.getKeyboardMode(context).first() // ← блокирует, ждёт первый элемент
+    fun saveGame(context: Context) {
+        viewModelScope.launch {
+            if (result.isEmpty()) {
+                val game = SavedGame(
+                    targetWord = hiddenWord,
+                    length = wordLength,
+                    lang = lang,
+                    board = gridState.toList(),
+                    keyboard = keyboardState.toList(),
+                    totalSeconds = totalSeconds,
+                    settings = GameSettings(
+                        confettiStatus,
+                        ratingWordsStatus
+                    ),
+                )
+                AppDataStore.saveGame(context, game)
+            }
+        }
+    }
+
+    private suspend fun getKeyboardArray(): List<String> {
+        val codeKeyboard =
+            AppDataStore.getKeyboardMode(context).first() // ← блокирует, ждёт первый элемент
 
         return when (lang) {
             "ru" -> when (codeKeyboard) {
@@ -170,22 +248,26 @@ class GameViewModel(
                     "ФЫВАПРОЛДЖЭ",
                     "<ЯЧСМИТЬБЮ>"
                 )
+
                 1 -> listOf(
                     "ЙЦУКЕНГШЩЗХЪ",
                     "ФЫВАПРОЛДЖЭ<",
                     "ЯЧСМИТЬБЮ>"
                 )
+
                 2 -> listOf(
                     "ЙЦУКЕНГШЩЗХЪ",
                     "ФЫВАПРОЛДЖЭ",
                     ">ЯЧСМИТЬБЮ<"
                 )
+
                 3 -> listOf(
                     "ЙЦУКЕНГШЩЗХЪ",
                     "ФЫВАПРОЛДЖЭ",
                     "ЯЧСМИТЬБЮ<",
                     ">"
                 )
+
                 else -> listOf(
                     "ЙЦУКЕНГШЩЗХЪ",
                     "ФЫВАПРОЛДЖЭ",
@@ -199,35 +281,43 @@ class GameViewModel(
                     "ASDFGHJKL",
                     "<ZXCVBNM>"
                 )
+
                 1 -> listOf(
                     "QWERTYUIOP",
                     "ASDFGHJKL<",
                     "ZXCVBNM>"
                 )
+
                 2 -> listOf(
                     "QWERTYUIOP",
                     "ASDFGHJKL",
                     ">ZXCVBNM<"
                 )
+
                 3 -> listOf(
                     "QWERTYUIOP",
                     "ASDFGHJKL",
                     "ZXCVBNM<",
                     ">"
                 )
+
                 else -> listOf(
                     "QWERTYUIOP",
                     "ASDFGHJKL",
                     "<ZXCVBNM>"
                 )
             }
-        }.map { row -> mutableStateListOf(*row.map { Key(it) }.toTypedArray()) }
+        }
+    }
+
+    private suspend fun generateKeyboard(): SnapshotStateList<MutableList<Key>> {
+        return getKeyboardArray().map { row ->
+            mutableStateListOf(*row.map { Key(it) }.toTypedArray())
+        }
             .toMutableStateList()
     }
 
     fun keyboardControl(char: Char) {
-        val coroutineScope = CoroutineScope(Dispatchers.Main)
-
         val row = focusedCell / wordLength
         val col = focusedCell % wordLength
 
@@ -254,14 +344,28 @@ class GameViewModel(
                         }
                     } else if (enteredWord.length == wordLength) {
                         viewModelScope.launch {
-                            if (wordDao.findWord(enteredWord, lang, false) != null) {
-                                val tryResult = checkWord(enteredWord, row, coroutineScope)
+                            if (wordDao.findWord(enteredWord, lang, ratingWordsStatus) != null) {
+                                val tryResult = checkWord(enteredWord, row)
                                 if (result != "") {
-                                    ///  focusedCell = 999
+                                    AppDataStore.clearSavedGame(context)
                                     dialogFinish.value = true // Показываем диалог
 
                                 } else if (col < wordLength && row < 5 && tryResult) {
                                     setFocusedCellForRow(row + 1)
+                                    val game = SavedGame(
+                                        targetWord = hiddenWord,
+                                        length = wordLength,
+                                        lang = lang,
+                                        board = gridState.toList(),
+                                        keyboard = keyboardState.toList(),
+                                        totalSeconds = totalSeconds,
+                                        settings = GameSettings(
+                                            confettiStatus,
+                                            ratingWordsStatus
+                                        ),
+                                    )
+                                    Log.d("Пизда", "Данные то сохранились епта?")
+                                    AppDataStore.saveGame(context, game) // твой метод сохранения
                                 }
                             }
                         }
@@ -283,39 +387,32 @@ class GameViewModel(
         }
     }
 
-    private fun getWordFromRow(row: Int/*, gridState: SnapshotStateList<Cell>*/): String {
+    private fun getWordFromRow(row: Int): String {
         val rowStartIndex = row * wordLength
         val rowEndIndex = rowStartIndex + wordLength
         return gridState.subList(rowStartIndex, rowEndIndex)
             .joinToString("") { it.letter }
     }
 
-    private fun updateKeyColor(
-        char: Char,
-        color: Color/*, keyboardState: SnapshotStateList<MutableList<Key>>*/
-    ) {
+    private fun updateKeyColor(char: Char, color: Color) {
         keyboardState.forEachIndexed { rowIndex, row ->
             val index = row.indexOfFirst { it.char == char }
             if (index != -1) {
-                row[index] = row[index].copy(color = color) // Меняем цвет у кнопки
+                row[index] = row[index].copy(color = color.value) // Меняем цвет у кнопки
             }
         }
     }
 
-    private fun updateCellText(
-        row: Int,
-        col: Int,
-        text: String/*, gridState: SnapshotStateList<Cell>*/
-    ) {
+    private fun updateCellText(row: Int, col: Int, text: String) {
         val index = row * wordLength + col // Вычисляем индекс в одномерном списке
         if (index in gridState.indices) {
             gridState[index] = gridState[index].copy(letter = text)
         }
     }
 
-    private fun updateCellColor(/*gridState: SnapshotStateList<Cell>,*/ index: Int, color: Color) {
+    private fun updateCellColor(index: Int, color: Color) {
         if (index in gridState.indices) {
-            gridState[index] = gridState[index].copy(backgroundColor = color)
+            gridState[index] = gridState[index].copy(backgroundColor = color.value)
         }
     }
 
@@ -366,12 +463,11 @@ class GameViewModel(
         return colors
     }
 
-    private suspend fun checkWord(enteredWord: String, row: Int, scope: CoroutineScope): Boolean {
+    private suspend fun checkWord(enteredWord: String, row: Int): Boolean = coroutineScope {
         val countRowBox = hiddenWord.length
 
-        // Проверка "Сложного режима"
         if (mode == 1 && row > 0) {
-            val previousWord = getWordFromRow(row - 1) // ты реализуешь сам
+            val previousWord = getWordFromRow(row - 1)
             val lastColorArr = getColorsByWord(previousWord, row - 1)
             val requiredLetters = mutableSetOf<Char>()
 
@@ -382,11 +478,9 @@ class GameViewModel(
                 if (lastColor == green800 && enteredWord[i] != prevChar) {
                     Log.d(
                         "ошибка1",
-                        "Сложный режим: буква '${prevChar}' должна быть на позиции ${i + 1}"
+                        "Сложный режим: буква '$prevChar' должна быть на позиции ${i + 1}"
                     )
-
-                    //    showNotFoundWordDialog("Сложный режим: буква '${prevChar}' должна быть на позиции ${i + 1}")
-                    return false
+                    return@coroutineScope false
                 }
 
                 if (lastColor == green800 || lastColor == yellow) {
@@ -397,15 +491,13 @@ class GameViewModel(
             for (char in requiredLetters) {
                 if (!enteredWord.contains(char)) {
                     Log.d("ошибка2", "Сложный режим: слово должно содержать букву '$char'")
-                    //      showNotFoundWordDialog("Сложный режим: слово должно содержать букву '$char'")
-                    return false
+                    return@coroutineScope false
                 }
             }
         }
 
-        val colors = getColorsByWord(enteredWord, row) // получаем раскраску
+        val colors = getColorsByWord(enteredWord, row)
 
-        // Проверка результата (победа/поражение)
         if (enteredWord == hiddenWord) {
             result = "Победа!"
         } else if (row == 5) {
@@ -413,43 +505,40 @@ class GameViewModel(
         }
 
         if (result.isNotEmpty()) {
-            val row = focusedCell / wordLength
-            Log.d("ПИЗДЕЦ", row.toString())
+          //  val row = focusedCell / wordLength
             addStatisticData(result)
             addWordDictionary(hiddenWord)
         }
 
-        // Запуск UI-обновлений
-        scope.launch {
-            // Обновляем ячейки
-            launch {
-                for (i in 0 until countRowBox) {
-                    val index = row * countRowBox + i
-                    updateCellColor(index, colors[i])
-                    delay(150L)
-                }
-            }
-
-            // Обновляем клавиши
-            launch {
-                for (i in 0 until countRowBox) {
-                    val char = enteredWord[i]
-                    val newColor = colors[i]
-
-                    val currentColor =
-                        keyboardState.flatten().find { it.char == char }?.color ?: gray250
-                    val finalColor = when {
-                        currentColor == green800 -> green800
-                        currentColor == yellow && newColor == gray250 -> yellow
-                        else -> newColor
-                    }
-                    updateKeyColor(char, finalColor)
-                    delay(150L)
-                }
+        // === Параллельно: покраска cell и key ===
+        launch {
+            for (i in 0 until countRowBox) {
+                val index = row * countRowBox + i
+                updateCellColor(index, colors[i])
+                delay(150L)
             }
         }
 
-        return true
+        launch {
+            for (i in 0 until countRowBox) {
+                val char = enteredWord[i]
+                val newColor = colors[i]
+
+                val nowColor = keyboardState.flatten().find { it.char == char }?.color
+                val currentColor =
+                    if (nowColor != null) Color(nowColor) else gray250
+                val finalColor = when {
+                    currentColor == green800 -> green800
+                    currentColor == yellow && newColor == gray250 -> yellow
+                    else -> newColor
+                }
+
+                updateKeyColor(char, finalColor)
+                delay(150L)
+            }
+        }
+
+        return@coroutineScope true
     }
 
     suspend fun addStatisticData(result: String) {

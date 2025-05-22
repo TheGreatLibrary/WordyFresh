@@ -1,24 +1,32 @@
 package com.sinya.projects.wordle.data.local.datastore
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.sinya.projects.wordle.AppSettings
+import com.sinya.projects.wordle.domain.model.data.SavedGame
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 
 
 val Context.dataStore by preferencesDataStore(name = "settings")
 
 object AppDataStore {
 
+    private val RATING_WORDS_KEY = booleanPreferencesKey("rating_words")
+    private val CONFETTI_KEY = booleanPreferencesKey("confetti")
     private val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
-    private val LANGUAGE_KEY = stringPreferencesKey("language")
+
     private val KEYBOARD_MODE_KEY = intPreferencesKey("keyboard_mode")
+
+    private val LANGUAGE_KEY = stringPreferencesKey("language")
     private val LAST_GAME_STATE_KEY = stringPreferencesKey("last_game_state")
 
 
@@ -31,6 +39,24 @@ object AppDataStore {
         context.dataStore.data.map { it[DARK_MODE_KEY] ?: false }
 
 
+    // Взрослые слова
+    suspend fun setRatingWordMode(context: Context, isRating: Boolean) {
+        context.dataStore.edit { it[RATING_WORDS_KEY] = isRating }
+    }
+
+    fun getRatingWordMode(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { it[RATING_WORDS_KEY] ?: false }
+
+
+    // Конфетти
+    suspend fun setConfettiMode(context: Context, isConfetti: Boolean) {
+        context.dataStore.edit { it[CONFETTI_KEY] = isConfetti }
+    }
+
+    fun getConfettiMode(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { it[CONFETTI_KEY] ?: false }
+
+
     // 🌐 Язык
     suspend fun setLanguage(context: Context, lang: String) {
         context.dataStore.edit { it[LANGUAGE_KEY] = lang }
@@ -41,12 +67,31 @@ object AppDataStore {
 
 
     // 🎮 Состояние игры
-    suspend fun setGameState(context: Context, stateJson: String) {
-        context.dataStore.edit { it[LAST_GAME_STATE_KEY] = stateJson }
+    suspend fun saveGame(context: Context, game: SavedGame) {
+        val json = Json.encodeToString(game)
+        context.dataStore.edit  { it[LAST_GAME_STATE_KEY] = json
+        }
     }
 
-    fun getGameState(context: Context): Flow<String?> =
-        context.dataStore.data.map { it[LAST_GAME_STATE_KEY] }
+    suspend fun clearSavedGame(context: Context) {
+        context.dataStore.edit  { it.remove(LAST_GAME_STATE_KEY)
+        }
+    }
+
+    suspend fun loadGame(context: Context): SavedGame? {
+        val json = context.dataStore.data
+            .map { it[LAST_GAME_STATE_KEY] }
+            .firstOrNull()
+
+        return json?.let {
+            try {
+                Json.decodeFromString<SavedGame>(it)
+            } catch (e: Exception) {
+                Log.d("Пизда", "ошибка $e")
+                null
+            }
+        }
+    }
 
 
     // Положение клавиатуры

@@ -2,7 +2,6 @@ package com.sinya.projects.wordle.ui.components
 
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.domain.model.data.KeyboardItem
-import com.sinya.projects.wordle.domain.model.data.LangItem
 
 object AppKeyboards {
     val supported = listOf(

@@ -206,9 +206,9 @@ fun WithAccount(viewModel: ProfileViewModel) {
                 .padding(vertical = 16.dp, horizontal = 13.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            RowSettingLink("Редактировать профиль", "", R.drawable.enter) {}
-            RowSettingLink("Друзья", "", R.drawable.ic_serch_dict) {}
-            RowSettingLink("Уведомления", "", R.drawable.ic_trash) {}
+            RowSettingLink("Редактировать профиль", "", R.drawable.enter, R.drawable.arrow) {}
+            RowSettingLink("Друзья", "", R.drawable.ic_serch_dict, R.drawable.arrow) {}
+            RowSettingLink("Уведомления", "", R.drawable.ic_trash, R.drawable.arrow) {}
         }
     }
     Card(
@@ -224,9 +224,9 @@ fun WithAccount(viewModel: ProfileViewModel) {
                 .padding(vertical = 16.dp, horizontal = 13.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            RowSettingLink("О приложении", "", R.drawable.enter) {}
-            RowSettingLink("Политика конфиденциальности", "", R.drawable.ic_serch_dict) {}
-            RowSettingLink("Условия использования", "", R.drawable.ic_trash) {}
+            RowSettingLink("О приложении", "", R.drawable.enter, R.drawable.arrow) {}
+            RowSettingLink("Политика конфиденциальности", "", R.drawable.ic_serch_dict, R.drawable.arrow) {}
+            RowSettingLink("Условия использования", "", R.drawable.ic_trash, R.drawable.arrow) {}
         }
     }
     Row(

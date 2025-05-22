@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.screen.home
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -27,11 +28,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,10 +50,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.dialog.BottomSheetDialog
 import com.sinya.projects.wordle.dialog.friend_dialog.FriendModeDialog
+import com.sinya.projects.wordle.domain.model.data.SavedGame
+import com.sinya.projects.wordle.screen.game.GameViewModel
 import com.sinya.projects.wordle.ui.components.ImageButton
 import com.sinya.projects.wordle.ui.components.RoundedButton
 import com.sinya.projects.wordle.ui.theme.Montserrat
@@ -61,7 +69,10 @@ import com.sinya.projects.wordle.ui.theme.gray800
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.red
 import com.sinya.projects.wordle.ui.theme.yellow
+import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val showBottomSheet = remember { mutableStateOf(false) }
@@ -72,6 +83,15 @@ fun HomeScreen(navController: NavHostController) {
             onDismissRequest = { showBottomSheet.value = false },
             modeGame.intValue
         )
+    }
+    val context = LocalContext.current
+    val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.provideFactory())
+
+
+    var hasSavedGame by remember { mutableStateOf<SavedGame?>(null) }
+
+    LaunchedEffect(Unit) {
+        hasSavedGame = AppDataStore.loadGame(context)
     }
 
     Column(
@@ -88,37 +108,39 @@ fun HomeScreen(navController: NavHostController) {
         }
         Box(contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                RoundedButton(
-                    modifier = Modifier
-                        .fillMaxWidth(0.7f)
-                        .shadow(8.dp, spotColor = gray800),
-                    ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundBtnMkIII),
-                    { navController.navigate("game/2/6/ru/МЕУЛОН") })
-                     {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            stringResource(R.string.continue_text),
-                            fontSize = 16.sp,
-                            color = WordleColor.colors.textColorMkII,
-                            style = TextStyle(
-                                lineHeight = 16.sp,
-                                fontFamily = Montserrat,
-                                fontWeight = FontWeight.Medium
+                if (hasSavedGame!=null) {
+                    RoundedButton(
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f)
+                            .shadow(8.dp, spotColor = gray800),
+                        ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundBtnMkIII),
+                        { navController.navigate("game/-1/${hasSavedGame?.length}/${hasSavedGame?.lang}/${hasSavedGame?.targetWord}") })
+                    {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                stringResource(R.string.continue_text),
+                                fontSize = 16.sp,
+                                color = WordleColor.colors.textColorMkII,
+                                style = TextStyle(
+                                    lineHeight = 16.sp,
+                                    fontFamily = Montserrat,
+                                    fontWeight = FontWeight.Medium
+                                )
                             )
-                        )
-                        Text(
-                            "11 букв - 04:12",
-                            fontSize = 12.sp,
-                            color = WordleColor.colors.textColorMkII,
-                            style = TextStyle(
-                                lineHeight = 12.sp,
-                                fontFamily = Montserrat,
-                                fontWeight = FontWeight.Medium
+                            Text(
+                                "${hasSavedGame?.length} букв - ${String.format("%02d:%02d", TimeUnit.SECONDS.toMinutes(hasSavedGame?.totalSeconds?: 0L).toInt(), (hasSavedGame?.totalSeconds?:0L) % 60)}",
+                                fontSize = 12.sp,
+                                color = WordleColor.colors.textColorMkII,
+                                style = TextStyle(
+                                    lineHeight = 12.sp,
+                                    fontFamily = Montserrat,
+                                    fontWeight = FontWeight.Medium
+                                )
                             )
-                        )
+                        }
                     }
                 }
-                RoundedButton (
+                RoundedButton(
                     modifier = Modifier
                         .fillMaxWidth(0.7f)
                         .shadow(8.dp, spotColor = gray800),
@@ -149,8 +171,17 @@ fun MainHeader(navController: NavHostController) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ImageButton(R.drawable.avatar, modifier = Modifier.size(42.dp).border(2.dp, color = WordleColor.colors.primary, WordleShapes.extraLarge)) { navController.navigate("profile") }
-        ImageButton(R.drawable.icon_mail, modifier = Modifier.size(32.dp)) { sendSupportEmail(context) }
+        ImageButton(
+            R.drawable.avatar,
+            modifier = Modifier
+                .size(42.dp)
+                .border(2.dp, color = WordleColor.colors.primary, WordleShapes.extraLarge)
+        ) { navController.navigate("profile") }
+        ImageButton(R.drawable.icon_mail, modifier = Modifier.size(32.dp)) {
+            sendSupportEmail(
+                context
+            )
+        }
     }
 }
 
@@ -165,7 +196,11 @@ fun sendSupportEmail(context: Context) {
 }
 
 @Composable
-fun MainContainers(navController: NavHostController, showBottomSheet: MutableState<Boolean>, modeGame: MutableState<Int>) {
+fun MainContainers(
+    navController: NavHostController,
+    showBottomSheet: MutableState<Boolean>,
+    modeGame: MutableState<Int>
+) {
     var showFriendDialog by remember { mutableStateOf(false) }
 
     Row(
@@ -185,8 +220,10 @@ fun MainContainers(navController: NavHostController, showBottomSheet: MutableSta
             red,
             Modifier.weight(1f),
             stringResource(R.string.hard_mode)
-        ) { showBottomSheet.value = true
-            modeGame.value = 1}
+        ) {
+            showBottomSheet.value = true
+            modeGame.value = 1
+        }
         MainContainer(
             R.drawable.ic_mode_random,
             yellow,
@@ -205,7 +242,13 @@ fun MainContainers(navController: NavHostController, showBottomSheet: MutableSta
 }
 
 @Composable
-fun MainContainer(image: Int, color: Color, modifier: Modifier, title: String, onClick: () -> Unit) {
+fun MainContainer(
+    image: Int,
+    color: Color,
+    modifier: Modifier,
+    title: String,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth(0.3f)

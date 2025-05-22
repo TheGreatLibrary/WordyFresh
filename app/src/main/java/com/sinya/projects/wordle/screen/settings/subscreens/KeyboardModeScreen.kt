@@ -53,10 +53,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun KeyboardModeScreen(navController: NavController) {
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
     val codeKeyboard by AppDataStore.getKeyboardMode(context).collectAsState(initial = 0)
     val keyboardItemList = AppKeyboards.supported
-    val coroutineScope = rememberCoroutineScope()
 
     Column(
         Modifier
@@ -83,30 +84,6 @@ fun KeyboardModeScreen(navController: NavController) {
 }
 
 @Composable
-fun KeyboardItem(
-    name: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
-            Modifier.height(25.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = name, style = MaterialTheme.typography.bodyLarge)
-        }
-        CheckedIcon(isSelected)
-    }
-}
-
-@Composable
 fun KeyboardModeItem(
     mode: KeyboardItem,
     isSelected: Boolean,
@@ -122,8 +99,7 @@ fun KeyboardModeItem(
             .clip(RoundedCornerShape(12.dp))
             .clickable { onSelect() },
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(12.dp),
-    //    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -151,7 +127,6 @@ fun KeyboardModeItem(
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .fillMaxWidth()
-//                    .heightIn(min = 120.dp, max = 200.dp)
                     .clip(RoundedCornerShape(8.dp))
             )
         }

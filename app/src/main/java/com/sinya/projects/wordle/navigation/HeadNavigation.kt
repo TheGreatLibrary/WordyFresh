@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -28,7 +29,7 @@ fun Header(name: String, trashVisible: Boolean, navController: NavController) {
         Text(name, fontSize = 24.sp, color = white, style = WordleTypography.titleLarge)
         Box(Modifier.size(32.dp)) {
             if (trashVisible) {
-                ImageButton(R.drawable.ic_trash, modifier = Modifier.size(32.dp)) { }
+                ImageButton(R.drawable.ic_trash, modifier = Modifier.size(32.dp).scale(0.9f)) { }
             }
         }
     }

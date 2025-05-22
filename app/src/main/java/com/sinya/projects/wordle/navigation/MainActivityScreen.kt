@@ -86,6 +86,7 @@ fun MainActivityScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleVi
         currentRoute == "settingsII" ||
         currentRoute == "profile" ||
         currentRoute == "login" ||
+        currentRoute == "achieves" ||
         currentRoute == "register" || withOutImage
 
 

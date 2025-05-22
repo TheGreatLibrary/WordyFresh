@@ -61,7 +61,7 @@ fun ThemeModeScreen(themeViewModel: ThemeViewModel, navController: NavController
             .background(color = WordleColor.colors.background)
             .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 7.dp)
     ) {
-        Header(stringResource(R.string.change_lang), false, navController)
+        Header(stringResource(R.string.change_theme), false, navController)
         LazyColumn {
             items(themes.size) { index ->
                 if (index == 0) {

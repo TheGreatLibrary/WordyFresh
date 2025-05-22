@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,8 +30,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColor
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
@@ -39,6 +45,8 @@ import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.dialog.FinishGameDialog
 import com.sinya.projects.wordle.domain.model.data.Cell
 import com.sinya.projects.wordle.domain.model.data.Key
+import com.sinya.projects.wordle.ui.components.ConfettiComposable
+import com.sinya.projects.wordle.ui.components.ConfettiViewCompose
 import com.sinya.projects.wordle.ui.components.ImageButton
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
@@ -48,6 +56,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+
 
 @Composable
 fun GameScreen(mode: Int, wordLength: Int, lang: String, hiddenWord: String, navController: NavController) {
@@ -60,6 +69,31 @@ fun GameScreen(mode: Int, wordLength: Int, lang: String, hiddenWord: String, nav
     val viewModel: GameViewModel = viewModel(
         factory = GameViewModel.provideFactory(mode, wordLength, lang, hiddenWord,  context, wordDao, offlineDictionaryDao, offlineStatisticDao)
     )
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                viewModel.saveGame(context)
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    ConfettiViewCompose(
+        start = true,
+        heightPercentage = 0.3f
+    )
+//    ConfettiComposable(
+//        modifier = Modifier.fillMaxSize(),
+//        isRunning = true
+//    )
 
     Column(
         Modifier
@@ -104,7 +138,7 @@ fun GamePlace(viewModel: GameViewModel) {
 @Composable
 fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val animatedColor by animateColorAsState(
-        targetValue = cell.backgroundColor,
+        targetValue = Color(cell.backgroundColor),
         animationSpec = tween(durationMillis = 150) // Плавное изменение цвета за 300 мс
     )
 
@@ -189,7 +223,7 @@ fun CustomKeyboard(viewModel: GameViewModel) {
 @Composable
 fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val animatedColor by animateColorAsState(
-        targetValue = key.color,
+        targetValue = Color(key.color),
         animationSpec = tween(durationMillis = 250) // Плавное изменение цвета за 300 мс
     )
 
@@ -228,6 +262,7 @@ fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 fun GameHeaderBar(navController: NavController, viewModel: GameViewModel) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -239,6 +274,7 @@ fun GameHeaderBar(navController: NavController, viewModel: GameViewModel) {
             ImageButton(R.drawable.ic_loos, modifier = Modifier.size(32.dp)) {
                 coroutineScope.launch {
                     viewModel.result = "Поражение"
+                    AppDataStore.clearSavedGame(context)
                     viewModel.addStatisticData(viewModel.result)
                     viewModel.addWordDictionary(viewModel.hiddenWord) // Теперь можно вызывать suspend метод
                     viewModel.dialogFinish.value = true
@@ -263,8 +299,8 @@ fun GameHeaderBar(navController: NavController, viewModel: GameViewModel) {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TimerDisplay(totalSeconds: Int) {
-    val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds.toLong()).toInt()
+fun TimerDisplay(totalSeconds: Long) {
+    val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds).toInt()
     val seconds = totalSeconds % 60
     val timeText = String.format("%02d:%02d", minutes, seconds)
 

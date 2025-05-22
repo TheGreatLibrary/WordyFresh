@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.domain.model.data.DictionaryItem
-import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

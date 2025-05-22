@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Wordy Rare</string>
     <string name="play">Play</string>
-    <string name="friend_mode">Friendly mode</string>
-    <string name="hard_mode">Hard mode</string>
-    <string name="random_mode">Randomode</string>
-    <string name="continue_text">Продолжить</string>
-    <string name="new_game">New game</string>
-    <string name="statistic_screen">Statistics</string>
-    <string name="all_modes">All modes</string>
+    <string name="friend_mode">Friendly Challenge</string>
+    <string name="hard_mode">Hard Mode</string>
+    <string name="random_mode">Random Mode</string>
+    <string name="continue_text">Continue</string>
+    <string name="new_game">New Game</string>
+    <string name="statistic_screen">Stats</string>
+    <string name="all_modes">All Modes</string>
     <string name="classic_mode">Classic</string>
     <string name="hard_m">Hard</string>
     <string name="random_m">Random</string>
@@ -15,16 +16,35 @@
     <string name="settings_screen">Settings</string>
     <string name="achievements">Achievements</string>
     <string name="profile_screen">Profile</string>
-    <string name="login">Sign in</string>
-    <string name="sign_up">Sign up</string>
-
+    <string name="login">Log In</string>
+    <string name="sign_up">Sign Up</string>
     <string name="change_lang">Language</string>
+    <string name="change_theme">Theme</string>
     <string name="light">Light</string>
     <string name="dark">Dark</string>
-
     <string name="keyboard_classic">Classic</string>
     <string name="keyboard_wordle">Wordle</string>
-    <string name="keyboard_reverse">Reverse</string>
+    <string name="keyboard_reverse">Mirrored</string>
     <string name="keyboard_big_enter">Big Enter</string>
     <string name="change_keyboard">Keyboard</string>
+    <string name="guide">How to Play</string>
+    <string name="start">Start</string>
+    <string name="music">Music</string>
+    <string name="sounds">Sound Effects</string>
+    <string name="vibration">Vibration</string>
+    <string name="confetti">Confetti Animation</string>
+    <string name="abuse_words">Explicit Words</string>
+    <string name="send_to_support">Contact Support</string>
+    <string name="version">Version</string>
+
+
+    <string name="dictionary">Dictionary</string>
+    <string name="put_text">Enter a word</string>
+    <string name="all_count_game">Games played</string>
+    <string name="now_serial">Current streak</string>
+    <string name="best_serial">Best streak</string>
+    <string name="percent_win">Win rate</string>
+    <string name="abs_time">Avg. time</string>
+    <string name="stat_progress_title">Win guess distribution</string>
+    <string name="achievement">Achievements</string>
 </resources>
