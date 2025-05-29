@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -136,7 +137,7 @@ fun SettingsScreen(
                 stringResource(R.string.send_to_support),
                 "",
                 R.drawable.set_support,
-                R.drawable.diagonal_arrow
+                R.drawable.arrow_diagonal
             ) { sendSupportEmail(context) }
         }
         AppVersionInfo()
@@ -160,6 +161,7 @@ fun RowSettingLink(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
+            Modifier.weight(0.7f),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -173,7 +175,14 @@ fun RowSettingLink(
                     .scale(0.75f),
                 colorFilter = ColorFilter.tint(white)
             )
-            Text(title, fontSize = 15.sp, color = gray600, style = WordleTypography.bodyMedium)
+            Text(
+                title,
+                fontSize = 15.sp,
+                color = gray600,
+                style = WordleTypography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically

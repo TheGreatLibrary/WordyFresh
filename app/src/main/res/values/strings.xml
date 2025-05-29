@@ -35,8 +35,6 @@
     <string name="abuse_words">Взрослые слова</string>
     <string name="send_to_support">Написать в поддержку</string>
     <string name="version">Версия</string>
-
-
     <string name="dictionary">Словарь</string>
     <string name="put_text">Введите слово</string>
     <string name="all_count_game">Всего игр</string>
@@ -46,4 +44,43 @@
     <string name="abs_time">Среднее время</string>
     <string name="stat_progress_title">Распределение выигрышных попыток</string>
     <string name="achievement">Достижения</string>
+    <string name="percent_lose">Процент поражений</string>
+    <string name="confirm_delete">Подтвердите удаление</string>
+    <string name="text_dialog_delete_stat">Вы действительно хотите очистить статистику? Вся локальная и синхронизированная статистика будет утрачена.</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="home">Главная</string>
+    <plurals name="letters_count">
+        <item quantity="one">%d буква</item>
+        <item quantity="few">%d буквы</item>
+        <item quantity="many">%d букв</item>
+    </plurals>
+    <string name="rewrite_screen">Редактировать профиль</string>
+    <string name="friends_screen">Друзья</string>
+    <string name="notification_screen">Уведомления</string>
+    <string name="about_app_screen">О приложении</string>
+    <string name="policy_privacy">Политика конфиденциальности</string>
+    <string name="terms_of_use">Условия использования</string>
+    <string name="exit">Выйти из аккаунта</string>
+    <string name="sign_in">Войти</string>
+    <string name="sync_to_save_stat">Синхронизируйся, чтобы сохранять статистику.</string>
+    <string name="play_with_friends">Играй с друзьями и загадывай им слова прямо из приложения!</string>
+    <string name="login_in_wordy">Вход в Wordy</string>
+    <string name="welcome">С возвращением! Мы тебя ждали!</string>
+    <string name="password">Пароль</string>
+    <string name="forgot_password">Забыл пароль?</string>
+    <string name="or_login_with">Или войди с</string>
+    <string name="no_account">Нет аккаунта?</string>
+    <string name="sign_up_1">Зарегистрируй!</string>
+    <string name="create_account">Создание аккаунта</string>
+    <string name="put_string_and_play">Заполни поля и погрузись в игру!</string>
+    <string name="name">Имя</string>
+    <string name="scary_bober">Страшный бобер</string>
+    <string name="or_sign_up_with">Или зарегистрируся с</string>
+    <string name="already_have_account">Уже есть аккаунт?</string>
+    <string name="sing_in_1">Входи!</string>
+
+    <string name="terms_and_privacy">Я принимаю %1$s и %2$s</string>
+    <string name="terms_of_use_clickable">условия использования</string>
+    <string name="privacy_policy_clickable">политику конфиденциальности</string>
 </resources>

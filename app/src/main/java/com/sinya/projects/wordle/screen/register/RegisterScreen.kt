@@ -90,16 +90,19 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Создание аккаунта", style = WordleTypography.titleLarge, fontSize = 25.sp)
-            RoundedBackgroundText("Заполни поля и погрузись в игру!")
+            Text(stringResource(R.string.create_account), style = WordleTypography.titleLarge, fontSize = 25.sp)
+            RoundedBackgroundText(stringResource(R.string.put_string_and_play))
         }
 
         Column {
             CustomTextFieldWithLabel("Email", viewModel.emailValue, "examle@gmail.com", modifier, isError = viewModel.isEmailError, "Почта говно")
             Spacer(Modifier.height(15.dp))
-            CustomTextFieldWithLabel("Пароль", viewModel.passwordValue, "f92F37fAX01Gef1", modifier, isError = viewModel.isPasswordError, "Пароль говно")
+            CustomTextFieldWithLabel(stringResource(R.string.password), viewModel.passwordValue, "f92F37fAX01Gef1", modifier, isError = viewModel.isPasswordError, "Пароль говно")
             Spacer(Modifier.height(15.dp))
-            CustomTextFieldWithLabel("Имя", viewModel.nicknameValue, "Страшный бобер", modifier, isError = viewModel.isNickNameError, "Ник говно")
+            CustomTextFieldWithLabel(stringResource(R.string.name), viewModel.nicknameValue,
+                stringResource(
+                    R.string.scary_bober
+                ), modifier, isError = viewModel.isNickNameError, "Ник говно")
             Spacer(Modifier.height(15.dp))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
@@ -108,9 +111,11 @@ fun RegisterScreen(
                 Image(
                     if (viewModel.status.value) painterResource(R.drawable.checkbox_on) else painterResource(R.drawable.checkbox_off),
                     null,
-                    modifier = Modifier.size(28.dp).clickable {
-                        viewModel.status.value = !viewModel.status.value
-                    },
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clickable {
+                            viewModel.status.value = !viewModel.status.value
+                        },
                     colorFilter = ColorFilter.tint(color = if (!viewModel.isStatusError.value || viewModel.status.value) Color(
                         0xFF000000
                     ) else Color(0xFFFF0000), blendMode = BlendMode.SrcIn)
@@ -166,7 +171,7 @@ fun RegisterScreen(
                     .height(1.dp)
                     .background(color = Color.White)
             )
-            Text("Или зарегистрируся с")
+            Text(stringResource(R.string.or_sign_up_with))
             Spacer(
                 Modifier
                     .width(58.dp)
@@ -198,82 +203,76 @@ fun RegisterScreen(
                 alignment = Alignment.CenterHorizontally
             ),
         ) {
-            Text("Уже есть аккаунт?")
-            Text(text = "Входи!",   modifier = Modifier.clickable { navController.navigate("login") }, style = TextStyle(
-                color = Color(0xFF54A7A4),
-                fontSize = 14.sp,
-                fontFamily = WordleTypography.bodyLarge.fontFamily,
-                fontWeight = FontWeight.W600,
-                textDecoration = TextDecoration.Underline,
-            ),)
+            Text(stringResource(R.string.already_have_account))
+            Text(
+                text = stringResource(R.string.sing_in_1),
+                modifier = Modifier.clickable { navController.navigate("login") },
+                style = TextStyle(
+                    color = Color(0xFF54A7A4),
+                    fontSize = 14.sp,
+                    fontFamily = WordleTypography.bodyLarge.fontFamily,
+                    fontWeight = FontWeight.W600,
+                    textDecoration = TextDecoration.Underline,
+                ),
+            )
         }
     }
 }
 
 @Composable
 fun TermsText(onTermsClick: () -> Unit, onPrivacyClick: () -> Unit) {
+    val termsText = stringResource(id = R.string.terms_of_use_clickable)
+    val privacyText = stringResource(id = R.string.privacy_policy_clickable)
+    val baseText = stringResource(id = R.string.terms_and_privacy, termsText, privacyText)
+
     val annotatedText = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(
-                color = Color.White,
-                fontSize = 14.sp,
-                fontFamily = WordleTypography.bodyMedium.fontFamily,
-                fontWeight = FontWeight.W500,
-            )
-        ) {
-            append("Я принимаю ")
-        }
+        val termsStart = baseText.indexOf(termsText)
+        val privacyStart = baseText.indexOf(privacyText)
 
-        pushStringAnnotation(tag = "TERMS", annotation = "terms")
-        withStyle(
+        append(baseText)
+
+        addStyle(
             style = SpanStyle(
                 color = Color(0xFF54A7A4),
-                fontSize = 14.sp,
-                fontFamily = WordleTypography.bodyLarge.fontFamily,
-                fontWeight = FontWeight.W600,
                 textDecoration = TextDecoration.Underline,
-            )
-        ) {
-            append("условия использования")
-        }
-        pop()
-
-        withStyle(
-            style = SpanStyle(
-                color = Color.White,
+                fontWeight = FontWeight.W600,
                 fontSize = 14.sp,
-                fontFamily = WordleTypography.bodyMedium.fontFamily,
-                fontWeight = FontWeight.W500,
-            )
-        ) {
-            append(" и ")
-        }
+                fontFamily = WordleTypography.bodyLarge.fontFamily
+            ),
+            start = termsStart,
+            end = termsStart + termsText.length
+        )
+        addStringAnnotation("TERMS", "terms", termsStart, termsStart + termsText.length)
 
-        pushStringAnnotation(tag = "PRIVACY", annotation = "privacy")
-        withStyle(
+        addStyle(
             style = SpanStyle(
                 color = Color(0xFF54A7A4),
-                fontSize = 14.sp,
-                fontFamily = WordleTypography.bodyLarge.fontFamily,
-                fontWeight = FontWeight.W600,
                 textDecoration = TextDecoration.Underline,
-            )
-        ) {
-            append("политику конфиденциальности")
-        }
-        pop()
+                fontWeight = FontWeight.W600,
+                fontSize = 14.sp,
+                fontFamily = WordleTypography.bodyLarge.fontFamily
+            ),
+            start = privacyStart,
+            end = privacyStart + privacyText.length
+        )
+        addStringAnnotation("PRIVACY", "privacy", privacyStart, privacyStart + privacyText.length)
     }
 
     ClickableText(
         text = annotatedText,
-        onClick = { offset ->
-            annotatedText.getStringAnnotations(start = offset, end = offset)
-                .firstOrNull()?.let {
-                    when (it.tag) {
-                        "TERMS" -> onTermsClick()
-                        "PRIVACY" -> onPrivacyClick()
-                    }
-                }
-        }
-    )
+        style = TextStyle(
+            color = Color.White,
+            fontSize = 14.sp,
+            fontFamily = WordleTypography.bodyMedium.fontFamily,
+            fontWeight = FontWeight.W500
+        )
+    ) { offset ->
+        annotatedText.getStringAnnotations(tag = "TERMS", start = offset, end = offset)
+            .firstOrNull()?.let { onTermsClick() }
+
+        annotatedText.getStringAnnotations(tag = "PRIVACY", start = offset, end = offset)
+            .firstOrNull()?.let { onPrivacyClick() }
+    }
+
 }
+

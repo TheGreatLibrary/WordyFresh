@@ -74,10 +74,8 @@ import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.navigation.Header
 import com.sinya.projects.wordle.ui.components.CustomTextField
 import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.ui.theme.gray100
 import com.sinya.projects.wordle.ui.theme.gray600
 import com.sinya.projects.wordle.ui.theme.gray800
-import com.sinya.projects.wordle.ui.theme.green400
 import com.sinya.projects.wordle.ui.theme.green600
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.red
@@ -178,7 +176,7 @@ fun SearchContainer(viewModel: DictionaryViewModel) {
             ) {
                 Image(
                     modifier = Modifier.size(24.dp),
-                    painter = painterResource(R.drawable.ic_search),
+                    painter = painterResource(R.drawable.dict_search_glass),
                     contentDescription = "iconCont",
                 )
                 CustomTextField(
@@ -260,7 +258,7 @@ fun VoiceInputButton(onVoiceInput: (String) -> Unit) {
     ) {
         Image(
             modifier = Modifier.size(24.dp),
-            painter = painterResource(R.drawable.ic_micro),
+            painter = painterResource(R.drawable.dict_micro),
             contentDescription = "Voice Input"
         )
     }
@@ -334,12 +332,12 @@ fun DictionaryCard(title: String, description: String, viewModel: DictionaryView
                         Modifier.padding(top = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        DictionaryImageButton(R.drawable.ic_serch_dict) {
+                        DictionaryImageButton(R.drawable.dict_search) {
                             val url = "https://academic.ru/searchall.php?SWord=$title"
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                             context.startActivity(intent)
                         }
-                        DictionaryImageButton(R.drawable.ic_share) {
+                        DictionaryImageButton(R.drawable.dict_share) {
                             val textToShare =
                                 "Что такое $title? " + if (description.isEmpty()) "" else {
                                     "$description. "
@@ -357,7 +355,7 @@ fun DictionaryCard(title: String, description: String, viewModel: DictionaryView
                                 )
                             )
                         }
-                        DictionaryImageButton(R.drawable.ic_reload) {
+                        DictionaryImageButton(R.drawable.dict_reload) {
                             coroutineScope.launch {
                                 viewModel.reloadDescription(title)
                             }

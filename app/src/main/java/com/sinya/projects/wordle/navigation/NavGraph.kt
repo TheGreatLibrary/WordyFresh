@@ -39,7 +39,7 @@ fun NavGraph(
             .then(modifier),
         startDestination = "home",
     ) {
-        composable("home") { HomeScreen(navHostController) }
+        composable("home") { HomeScreen(navHostController, supabase = SupabaseClientHolder.client) }
 
         composable("profile") {
             ProfileScreen(

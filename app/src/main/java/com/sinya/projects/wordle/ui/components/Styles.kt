@@ -23,6 +23,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.ui.theme.Montserrat
+import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.gray400
 import com.sinya.projects.wordle.ui.theme.green400
 import com.sinya.projects.wordle.ui.theme.green800
@@ -109,12 +111,13 @@ fun CustomTextField(
 }
 
 @Composable
-fun ImageButton(image: Int, modifier: Modifier, onClick: () -> Unit) {
+fun ImageButton(image: Int, modifier: Modifier, colorFilter: ColorFilter? = null, onClick: () -> Unit) {
     IconButton(onClick = onClick) {
         Image(
             painter = painterResource(image),
             contentDescription = null,
             modifier,
+            colorFilter = colorFilter
         )
     }
 }

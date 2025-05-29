@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SavedGame(
     val targetWord: String,
+    val mode: Int,
     val lang: String,
     val length: Int,
     val totalSeconds: Long,

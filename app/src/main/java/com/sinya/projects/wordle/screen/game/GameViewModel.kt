@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
@@ -31,19 +32,13 @@ import com.sinya.projects.wordle.ui.theme.gray250
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.white30
 import com.sinya.projects.wordle.ui.theme.yellow
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
 import java.net.URL
 import java.net.URLEncoder
 
@@ -64,6 +59,8 @@ class GameViewModel(
     var hiddenWord by mutableStateOf(hiddenWord)
     var result by mutableStateOf("")
 
+    var notFoundTrigger = mutableStateOf(false)
+    var hardModeTrigger = mutableStateOf<String?>(null)
     var dialogFinish = mutableStateOf(false)
 
     var gridState = mutableStateListOf<Cell>()
@@ -140,6 +137,7 @@ class GameViewModel(
     }
 
     private fun restoreGame(game: SavedGame) {
+        mode = game.mode
         wordLength = game.length
         lang = game.lang
         hiddenWord = game.targetWord
@@ -221,6 +219,7 @@ class GameViewModel(
         viewModelScope.launch {
             if (result.isEmpty()) {
                 val game = SavedGame(
+                    mode = mode,
                     targetWord = hiddenWord,
                     length = wordLength,
                     lang = lang,
@@ -353,6 +352,7 @@ class GameViewModel(
                                 } else if (col < wordLength && row < 5 && tryResult) {
                                     setFocusedCellForRow(row + 1)
                                     val game = SavedGame(
+                                        mode = mode,
                                         targetWord = hiddenWord,
                                         length = wordLength,
                                         lang = lang,
@@ -368,6 +368,7 @@ class GameViewModel(
                                     AppDataStore.saveGame(context, game) // твой метод сохранения
                                 }
                             }
+                            else notFoundTrigger.value = true
                         }
                     }
                 } // если игра еще не окончена
@@ -467,6 +468,8 @@ class GameViewModel(
         val countRowBox = hiddenWord.length
 
         if (mode == 1 && row > 0) {
+//            var stringError = ""
+
             val previousWord = getWordFromRow(row - 1)
             val lastColorArr = getColorsByWord(previousWord, row - 1)
             val requiredLetters = mutableSetOf<Char>()
@@ -480,6 +483,7 @@ class GameViewModel(
                         "ошибка1",
                         "Сложный режим: буква '$prevChar' должна быть на позиции ${i + 1}"
                     )
+                    hardModeTrigger.value = "Буква $prevChar должна быть на позиции ${i + 1}"
                     return@coroutineScope false
                 }
 
@@ -490,7 +494,9 @@ class GameViewModel(
 
             for (char in requiredLetters) {
                 if (!enteredWord.contains(char)) {
-                    Log.d("ошибка2", "Сложный режим: слово должно содержать букву '$char'")
+                    hardModeTrigger.value = "Слово должно содержать букву $char"
+
+                    Log.d("ошибка2", "Слово должно содержать букву $char")
                     return@coroutineScope false
                 }
             }
@@ -505,7 +511,7 @@ class GameViewModel(
         }
 
         if (result.isNotEmpty()) {
-          //  val row = focusedCell / wordLength
+            //  val row = focusedCell / wordLength
             addStatisticData(result)
             addWordDictionary(hiddenWord)
         }

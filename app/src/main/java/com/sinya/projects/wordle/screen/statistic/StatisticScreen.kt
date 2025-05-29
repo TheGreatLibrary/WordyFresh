@@ -1,6 +1,8 @@
 package com.sinya.projects.wordle.screen.statistic
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -91,8 +93,46 @@ fun StatisticScreen(navController: NavController) {
     ) {
         Header(stringResource(R.string.statistic_screen), true, navController)
         ScrollHorizontalModes(viewModel)
-        StatContainers(viewModel) {
-            navController.navigate("achieves")
+        StatContainers(viewModel)
+        Card(
+            Modifier
+                .shadow(elevation = 5.dp, spotColor = gray800, shape = RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .clickable { navController.navigate("achieves") },
+            colors = CardDefaults.cardColors(containerColor = white),
+        ) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 25.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.stat_achieve),
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(color = green600)
+                        .border(2.dp, green800, CircleShape)
+                        .size(59.dp)
+                        .scale(0.85f),
+                    contentDescription = "achieve",
+                    colorFilter = ColorFilter.tint(white)
+                )
+                Text(
+                    stringResource(R.string.achievement),
+                    fontSize = 18.sp,
+                    color = WordleColor.colors.textColorMkI,
+                    modifier = Modifier.fillMaxWidth(0.7f),
+                    style = WordleTypography.bodyLarge
+                )
+                Image(
+                    painter = painterResource(R.drawable.arrow),
+                    modifier = Modifier.size(20.dp),
+                    contentDescription = "Перейти",
+                    colorFilter = ColorFilter.tint(green800)
+                )
+            }
         }
     }
 }
@@ -130,7 +170,7 @@ fun ScrollHorizontalModes(viewModel: StatisticViewModel) {
 }
 
 @Composable
-fun StatContainers(viewModel: StatisticViewModel, onClick: () -> Unit) {
+fun StatContainers(viewModel: StatisticViewModel) {
     when (val state = viewModel.statisticState.value) {
         is StatisticState.Loading -> {
             CircularProgressIndicator()
@@ -163,6 +203,15 @@ fun StatContainers(viewModel: StatisticViewModel, onClick: () -> Unit) {
                 state.data.firstOrNull { it.modeId == uuid } ?: error("No stats for selected mode")
             }
 
+            val animatedTime by animateIntAsState(
+                targetValue = statisticByMode.sumTime.toInt(),
+                animationSpec = tween(500)
+            )
+            val animatedCount by animateFloatAsState(
+                targetValue = (if (statisticByMode.countGame !=0) (statisticByMode.winGame.toDouble() / statisticByMode.countGame).toFloat() else (statisticByMode.winGame.toDouble() / 1).toFloat()), // где 0f..1f
+                animationSpec = tween(500)
+            )
+
             Row(
                 Modifier
                     .padding(top = 15.dp)
@@ -170,15 +219,16 @@ fun StatContainers(viewModel: StatisticViewModel, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 StatContainer(
-                    statisticByMode.countGame.toString(),
+                    statisticByMode.countGame,
                     stringResource(R.string.all_count_game),
                     50.sp,
                     14.sp,
                     Modifier.weight(1f)
                 )
+
                 StatPercentContainer(
+                    animatedCount,
                     statisticByMode,
-                    stringResource(R.string.percent_win),
                     20.sp,
                     14.sp,
                     Modifier.weight(1f)
@@ -192,22 +242,22 @@ fun StatContainers(viewModel: StatisticViewModel, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 StatContainer(
-                    statisticByMode.currentStreak.toString(),
+                    statisticByMode.currentStreak,
                     stringResource(R.string.now_serial),
                     26.sp,
                     11.sp,
                     Modifier.weight(1f)
                 )
                 StatContainer(
-                    statisticByMode.bestStreak.toString(),
+                    statisticByMode.bestStreak,
                     stringResource(R.string.best_serial),
                     26.sp,
                     11.sp,
                     Modifier.weight(1f)
                 )
-                StatContainer(
-                    if (statisticByMode.sumTime == 0.toLong()) "--"
-                    else viewModel.absTime(statisticByMode.sumTime, statisticByMode.countGame),
+                StatTimeContainer(
+                    if (statisticByMode.countGame == 0) "--"
+                    else viewModel.absTime(animatedTime.toLong(), statisticByMode.countGame),
                     stringResource(R.string.abs_time),
                     26.sp,
                     11.sp,
@@ -270,54 +320,64 @@ fun StatContainers(viewModel: StatisticViewModel, onClick: () -> Unit) {
                     )
                 }
             }
-            Card(
-                Modifier
-                    .shadow(elevation = 5.dp, spotColor = gray800, shape = RoundedCornerShape(8.dp))
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable { onClick() },
-                colors = CardDefaults.cardColors(containerColor = white),
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 25.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.cup),
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(color = green600)
-                            .border(2.dp, gray800, CircleShape)
-                            .size(59.dp)
-                            .scale(0.85f),
-                        contentDescription = "achieve",
-                        colorFilter = ColorFilter.tint(white)
-
-                    )
-                    Text(
-                        stringResource(R.string.achievement),
-                        fontSize = 18.sp,
-                        color = WordleColor.colors.textColorMkI,
-                        modifier = Modifier.fillMaxWidth(0.7f),
-                        style = WordleTypography.bodyLarge
-                    )
-                    Image(
-                        painter = painterResource(R.drawable.arrow),
-                        modifier = Modifier.size(20.dp),
-                        contentDescription = "Перейти",
-                        colorFilter = ColorFilter.tint(gray800)
-                    )
-                }
-            }
         }
     }
 }
 
 @Composable
 fun StatContainer(
-    count: String,
+    count: Int,
+    description: String,
+    fontSize: TextUnit,
+    fontSize2: TextUnit,
+    modifier: Modifier
+) {
+    Card(
+        Modifier
+            .fillMaxHeight()
+            .shadow(elevation = 5.dp, spotColor = gray800, shape = RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .then(modifier),
+        colors = CardDefaults.cardColors(containerColor = white)
+    ) {
+        val animCount by animateIntAsState(
+            targetValue = count, // где 0f..1f
+            animationSpec = tween(500)
+        )
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(color = white)
+                .padding(horizontal = 12.dp, vertical = 15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                animCount.toString(),
+                fontSize = fontSize,
+                color = gray600,
+                style = WordleTypography.bodyLarge,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                description,
+                fontSize = fontSize2,
+                color = gray600,
+                style = WordleTypography.bodyMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+
+        }
+    }
+}
+
+@Composable
+fun StatTimeContainer(
+    time: String,
     description: String,
     fontSize: TextUnit,
     fontSize2: TextUnit,
@@ -340,7 +400,7 @@ fun StatContainer(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                count,
+                time,
                 fontSize = fontSize,
                 color = gray600,
                 style = WordleTypography.bodyLarge,
@@ -349,45 +409,35 @@ fun StatContainer(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                    description,
-                    fontSize = fontSize2,
-                    color = gray600,
-                    style = WordleTypography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                description,
+                fontSize = fontSize2,
+                color = gray600,
+                style = WordleTypography.bodyMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
 
         }
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun StatPercentContainer(
+    count: Float,
     statisticByMode: OfflineStatistic,
-    description: String,
     fontSize: TextUnit,
     fontSize2: TextUnit,
     modifier: Modifier
 ) {
     var percentMode by remember { mutableStateOf(false) }
 
-
-    val count = if (statisticByMode.countGame == 0) "--"
-    else "${(if (!percentMode) statisticByMode.winGame.toDouble() / statisticByMode.countGame * 100 
-            else (1 -statisticByMode.winGame.toDouble() / statisticByMode.countGame) * 100).toInt()}%"
-
-    var targetThickerStroke by remember { mutableStateOf(40f) }
-    val thickerStroke by animateFloatAsState(
-        targetValue = targetThickerStroke,
-        animationSpec = tween(durationMillis = 400)
-    )
-
-    var targetThinnerStroke by remember { mutableStateOf(26f) }
-    val thinnerStroke by animateFloatAsState(
-        targetValue = targetThinnerStroke,
-        animationSpec = tween(durationMillis = 400)
-    )
+    val progress = if (statisticByMode.countGame == 0) "--"
+    else "${
+        (if (!percentMode) count * 100
+        else (1 - count) * 100).toInt()
+    }%"
 
     Card(
         Modifier
@@ -398,83 +448,56 @@ fun StatPercentContainer(
         colors = CardDefaults.cardColors(containerColor = white)
     ) {
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 15.dp),
+            Modifier
+                .fillMaxSize()
+                .clickable {
+                    percentMode = !percentMode
+                }
+                .padding(horizontal = 12.dp, vertical = 15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Box(
-                modifier = Modifier.height(IntrinsicSize.Min).
-                   clickable {
-                        percentMode = !percentMode
-                        when(percentMode) {
-                            true -> {
-                                targetThickerStroke = 26f
-                                targetThinnerStroke = 40f
-                            } else -> {
-                                targetThickerStroke = 40f
-                                targetThinnerStroke = 26f
-                            }
+                modifier = Modifier
+                    .height(IntrinsicSize.Min)
 
-                        }
-                    }.padding(horizontal = 15.dp),
+                    .padding(horizontal = 15.dp),
                 contentAlignment = Alignment.Center
             ) {
 
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val diameter = size.width
-                    val center = Offset(size.width / 2, size.height / 2)
+                    val center = Offset(diameter / 2, diameter / 2)
 
-                    val strokeDiff = (thickerStroke - thinnerStroke) / 2f
-                    val size = Size(diameter - 2f * strokeDiff, diameter - 2f * strokeDiff)
-
-                    if (!percentMode) {
                         drawArc(
-                            color = red,
-                            startAngle = 180f+275f * (statisticByMode.winGame.toFloat() / statisticByMode.countGame),
-                            sweepAngle = 175f* (1-statisticByMode.winGame.toFloat() / statisticByMode.countGame),
-                            useCenter = false,
-                            style = Stroke(width = thinnerStroke, cap = StrokeCap.Square),
-                            size = Size(diameter, diameter),
-                            topLeft = Offset(center.x - diameter / 2, center.y - diameter / 2+75)
-                        )
-                        drawArc(
-                            color = green800,
+                            color = gray100,
                             startAngle = 180f,
-                            sweepAngle = 180f * (statisticByMode.winGame.toFloat() / statisticByMode.countGame),
+                            sweepAngle = 180f,
                             useCenter = false,
-                            style = Stroke(width = thickerStroke, cap = StrokeCap.Square),
-                            size = size,
-                            topLeft = Offset(center.x - diameter / 2, center.y - diameter / 2+75)
-                        )
-                    } else {
-                        drawArc(
-                            color = green800,
-                            startAngle = 180f,
-                            sweepAngle = 180f * (statisticByMode.winGame.toFloat() / statisticByMode.countGame),
-                            useCenter = false,
-                            style = Stroke(width = thickerStroke, cap = StrokeCap.Square),
-                            size = size,
-                            topLeft = Offset(center.x - diameter / 2, center.y - diameter / 2+75)
-                        )
-                        drawArc(
-                            color = red,
-                            startAngle = 180f+275f * (statisticByMode.winGame.toFloat() / statisticByMode.countGame),
-                            sweepAngle = 175f* (1-statisticByMode.winGame.toFloat() / statisticByMode.countGame),
-                            useCenter = false,
-                            style = Stroke(width = thinnerStroke, cap = StrokeCap.Square),
+                            style = Stroke(width = 26f, cap = StrokeCap.Square),
                             size = Size(diameter, diameter),
-                            topLeft = Offset(center.x - diameter / 2, center.y - diameter / 2+75)
+                            topLeft = Offset(center.x - diameter / 2, center.y - diameter / 2)
                         )
-                    }
-
+                        if (statisticByMode.countGame != 0) {
+                            drawArc(
+                                color =  if (!percentMode) green800 else red,
+                                startAngle = if (!percentMode) 180f else 180f + 180f * (count),
+                                sweepAngle = if (!percentMode) 180f * (count) else 180f * (1 -count),
+                                useCenter = false,
+                                style = Stroke(width = 26f, cap = StrokeCap.Square),
+                                size = Size(diameter, diameter),
+                                topLeft = Offset(center.x - diameter / 2, center.y - diameter / 2)
+                            )
+                        }
                 }
 
-                Column(Modifier.padding(top = 10.dp),
+                Column(
+                    Modifier.padding(top = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom
                 ) {
                     Text(
-                        count,
+                        progress,
                         fontSize = fontSize,
                         color = gray600,
                         style = WordleTypography.bodyLarge,
@@ -492,11 +515,14 @@ fun StatPercentContainer(
             }
 
             Text(
-                description,
+                if (!percentMode) stringResource(R.string.percent_win)
+                else stringResource(R.string.percent_lose),
                 fontSize = fontSize2,
                 color = gray600,
                 style = WordleTypography.bodyMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -505,6 +531,10 @@ fun StatPercentContainer(
 
 @Composable
 fun HorizontalProgressBar(number: String, count: String, percent: Float) {
+    val animPercent by animateFloatAsState(
+        targetValue = percent, // где 0f..1f
+        animationSpec = tween(500)
+    )
     var greenWidth by remember { mutableIntStateOf(0) }
 
     Row(
@@ -521,7 +551,7 @@ fun HorizontalProgressBar(number: String, count: String, percent: Float) {
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(percent)
+                    .fillMaxWidth(animPercent)
                     .fillMaxHeight()
                     .background(green800)
                     .onGloballyPositioned { coordinates ->
@@ -536,7 +566,7 @@ fun HorizontalProgressBar(number: String, count: String, percent: Float) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "${round(percent * 100).toInt()}%",
+                            text = "${round(animPercent * 100).toInt()}%",
                             color = white,
                             modifier = Modifier.padding(end = 3.dp),
                             fontSize = 11.sp,

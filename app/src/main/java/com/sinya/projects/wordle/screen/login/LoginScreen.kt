@@ -100,16 +100,18 @@ fun LoginScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Вход в Wordy", style = WordleTypography.titleLarge, fontSize = 25.sp)
-            RoundedBackgroundText("С возвращением! Мы тебя ждали!")
+            Text(stringResource(R.string.login_in_wordy), style = WordleTypography.titleLarge, fontSize = 25.sp)
+            RoundedBackgroundText(stringResource(R.string.welcome))
         }
 
         Column {
             CustomTextFieldWithLabel("Email", viewModel.emailValue, "examle@gmail.com", modifier, isError = viewModel.isEmailError, "Почта говно")
             Spacer(Modifier.height(15.dp))
-            CustomTextFieldWithLabel("Пароль", viewModel.passwordValue, "f92F37fAX01Gef1", modifier, isError = viewModel.isPasswordError, "Пароль говно")
+            CustomTextFieldWithLabel(stringResource(R.string.password), viewModel.passwordValue, "f92F37fAX01Gef1", modifier, isError = viewModel.isPasswordError, "Пароль говно")
             Spacer(Modifier.height(15.dp))
-            Text(text = "Забыл пароль?",   modifier = Modifier.fillMaxWidth().clickable { navController.navigate("register") }, textAlign = TextAlign.End, style = TextStyle(
+            Text(text = stringResource(R.string.forgot_password),   modifier = Modifier
+                .fillMaxWidth()
+                .clickable { navController.navigate("register") }, textAlign = TextAlign.End, style = TextStyle(
                 color = Color(0xFF54A7A4),
                 fontSize = 14.sp,
                 fontFamily = WordleTypography.bodyLarge.fontFamily,
@@ -141,7 +143,7 @@ fun LoginScreen(
                     }
                 ) {
                     Text(
-                        stringResource(R.string.sign_up),
+                        stringResource(R.string.sign_in),
                         fontSize = 18.sp,
                         color = WordleColor.colors.textColorMkII,
                         style = WordleTypography.bodyMedium
@@ -165,7 +167,7 @@ fun LoginScreen(
                     .height(1.dp)
                     .background(color = Color.White)
             )
-            Text("Или войди с")
+            Text(stringResource(R.string.or_login_with))
             Spacer(
                 Modifier
                     .width(58.dp)
@@ -196,14 +198,18 @@ fun LoginScreen(
                 alignment = Alignment.CenterHorizontally
             ),
         ) {
-            Text("Нет аккаунта?")
-            Text(text = "Зарегистрируй!",   modifier = Modifier.clickable { navController.navigate("register") }, style = TextStyle(
-                color = Color(0xFF54A7A4),
-                fontSize = 14.sp,
-                fontFamily = WordleTypography.bodyLarge.fontFamily,
-                fontWeight = FontWeight.W600,
-                textDecoration = TextDecoration.Underline,
-            ),)
+            Text(stringResource(R.string.no_account))
+            Text(
+                text = stringResource(R.string.sign_up_1),
+                modifier = Modifier.clickable { navController.navigate("register") },
+                style = TextStyle(
+                    color = Color(0xFF54A7A4),
+                    fontSize = 14.sp,
+                    fontFamily = WordleTypography.bodyLarge.fontFamily,
+                    fontWeight = FontWeight.W600,
+                    textDecoration = TextDecoration.Underline,
+                ),
+            )
         }
     }
 }

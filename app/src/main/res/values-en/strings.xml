@@ -3,7 +3,7 @@
     <string name="app_name">Wordy Rare</string>
     <string name="play">Play</string>
     <string name="friend_mode">Friendly Challenge</string>
-    <string name="hard_mode">Hard Mode</string>
+    <string name="hard_mode">Hard\nMode</string>
     <string name="random_mode">Random Mode</string>
     <string name="continue_text">Continue</string>
     <string name="new_game">New Game</string>
@@ -36,15 +36,51 @@
     <string name="abuse_words">Explicit Words</string>
     <string name="send_to_support">Contact Support</string>
     <string name="version">Version</string>
-
-
     <string name="dictionary">Dictionary</string>
     <string name="put_text">Enter a word</string>
     <string name="all_count_game">Games played</string>
     <string name="now_serial">Current streak</string>
     <string name="best_serial">Best streak</string>
     <string name="percent_win">Win rate</string>
+    <string name="percent_lose">Lose rate</string>
+    <string name="home">Home</string>
     <string name="abs_time">Avg. time</string>
     <string name="stat_progress_title">Win guess distribution</string>
     <string name="achievement">Achievements</string>
+    <string name="confirm_delete">Confirm Deletion</string>
+    <string name="text_dialog_delete_stat">Are you sure you want to clear the statistics? All local and synchronized data will be lost.</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <plurals name="letters_count">
+        <item quantity="one">%d letter</item>
+        <item quantity="other">%d letters</item>
+    </plurals>
+    <string name="rewrite_screen">Edit Profile</string>
+    <string name="friends_screen">Friends</string>
+    <string name="notification_screen">Notifications</string>
+    <string name="about_app_screen">About the App</string>
+    <string name="policy_privacy">Privacy Policy</string>
+    <string name="terms_of_use">Terms of Use</string>
+    <string name="exit">Log Out</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sync_to_save_stat">Sync to save your statistics.</string>
+    <string name="play_with_friends">Play with friends and send them words right from the app!</string>
+    <string name="login_in_wordy">Log in to Wordy</string>
+    <string name="welcome">Welcome back! We\'ve been waiting for you!</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot your password?</string>
+    <string name="or_login_with">Or sign in with</string>
+    <string name="no_account">Don’t have an account?</string>
+    <string name="sign_up_1">Sign up!</string>
+    <string name="create_account">Create an Account</string>
+    <string name="put_string_and_play">Fill in the fields and dive into the game!</string>
+    <string name="name">Name</string>
+    <string name="scary_bober">Scary Beaver</string>
+    <string name="or_sign_up_with">Or sign up with</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sing_in_1">Sign in!</string>
+
+    <string name="terms_and_privacy">I accept the %1$s and %2$s</string>
+    <string name="terms_of_use_clickable">Terms of Use</string>
+    <string name="privacy_policy_clickable">Privacy Policy</string>
 </resources>

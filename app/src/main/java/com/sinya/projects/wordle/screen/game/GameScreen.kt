@@ -2,6 +2,11 @@ package com.sinya.projects.wordle.screen.game
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,20 +25,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColor
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -45,9 +50,8 @@ import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.dialog.FinishGameDialog
 import com.sinya.projects.wordle.domain.model.data.Cell
 import com.sinya.projects.wordle.domain.model.data.Key
-import com.sinya.projects.wordle.ui.components.ConfettiComposable
-import com.sinya.projects.wordle.ui.components.ConfettiViewCompose
 import com.sinya.projects.wordle.ui.components.ImageButton
+import com.sinya.projects.wordle.dialog.NotFoundWordDialog
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
 import com.sinya.projects.wordle.ui.theme.green800
@@ -60,6 +64,8 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 fun GameScreen(mode: Int, wordLength: Int, lang: String, hiddenWord: String, navController: NavController) {
+    val coroutineScope = rememberCoroutineScope()
+
     val context = LocalContext.current
     val db = remember { AppDatabase.getInstance(context) } // Запоминаем БД, чтобы не пересоздавалась
     val wordDao = db.wordDao()
@@ -86,14 +92,31 @@ fun GameScreen(mode: Int, wordLength: Int, lang: String, hiddenWord: String, nav
         }
     }
 
-    ConfettiViewCompose(
-        start = true,
-        heightPercentage = 0.3f
-    )
+//    ConfettiViewCompose(
+//        start = true,
+//        heightPercentage = 0.3f
+//    )
 //    ConfettiComposable(
 //        modifier = Modifier.fillMaxSize(),
 //        isRunning = true
 //    )
+
+    // Когда слово не найдено, вызываем:
+    LaunchedEffect(viewModel.notFoundTrigger.value) {
+        if (viewModel.notFoundTrigger.value) {
+            // авто-скрытие через 1.5 сек
+            delay(1500)
+            viewModel.notFoundTrigger.value = false
+        }
+    }
+
+    LaunchedEffect(viewModel.hardModeTrigger.value) {
+        if (viewModel.hardModeTrigger.value != null) {
+            // авто-скрытие через 1.5 сек
+            delay(1500)
+            viewModel.hardModeTrigger.value = null
+        }
+    }
 
     Column(
         Modifier
@@ -104,6 +127,11 @@ fun GameScreen(mode: Int, wordLength: Int, lang: String, hiddenWord: String, nav
         TextResult(viewModel)
         CustomKeyboard(viewModel)
     }
+    if (viewModel.notFoundTrigger.value) NotFoundWordDialog("Слово не найдено")
+    else if (viewModel.hardModeTrigger.value != null) NotFoundWordDialog(viewModel.hardModeTrigger.value!!)
+
+
+
 
     if (viewModel.dialogFinish.value) {
         FinishGameDialog(viewModel, viewModel.dialogFinish) { viewModel.dialogFinish.value = false  }
@@ -137,21 +165,61 @@ fun GamePlace(viewModel: GameViewModel) {
 
 @Composable
 fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val animatedColor by animateColorAsState(
-        targetValue = Color(cell.backgroundColor),
-        animationSpec = tween(durationMillis = 150) // Плавное изменение цвета за 300 мс
+    // —————————————————————————————————————————
+    // Существующая логика поворота флипа:
+    var prevColor by remember { mutableStateOf(cell.backgroundColor) }
+    val isFlipping = prevColor != cell.backgroundColor
+
+    val rotationY by animateFloatAsState(
+        targetValue = if (isFlipping) 180f else 0f,
+        animationSpec = tween(durationMillis = 300, easing = LinearEasing),
+        finishedListener = {
+            if (isFlipping) prevColor = cell.backgroundColor
+        }
     )
+    val showingFront = rotationY <= 90f
+    // —————————————————————————————————————————
+
+    // 1) Animatable для масштаба:
+    val scale = remember { Animatable(1f) }
+    // 2) Триггерим на каждую смену буквы:
+    LaunchedEffect(cell.letter) {
+        // резкий «щелчок» в 0.9
+        scale.snapTo(0.95f)
+        // затем плавно «отскок» обратно к 1f
+        scale.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        )
+    }
 
     Box(
         modifier = modifier
-            .background(animatedColor, RoundedCornerShape(7.dp))
+            .graphicsLayer {
+                this.rotationY = rotationY
+                scaleX = scale.value
+                scaleY = scale.value
+//                cameraDistance = 8 * density
+            }
+            .background(
+                color = if (showingFront) Color(prevColor) else Color(cell.backgroundColor),
+                shape = RoundedCornerShape(7.dp)
+            )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = cell.letter,
             fontSize = 35.sp,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+            modifier = Modifier
+                .graphicsLayer {
+                    // когда рисуем оборот, поворачиваем текст ещё на 180
+                    if (!showingFront) this.rotationY = 180f
+                }
+                .padding(horizontal = 4.dp, vertical = 8.dp),
             color = Color.White,
             style = WordleTypography.bodyLarge
         )
@@ -200,13 +268,13 @@ fun CustomKeyboard(viewModel: GameViewModel) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // Перебираем строки клавиатуры
-        viewModel.keyboardState.forEachIndexed { rowIndex, row ->
+        viewModel.keyboardState.forEachIndexed { _, row ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(if (viewModel.lang == "ru") 4.dp else 6.dp)
             ) {
                 // Перебираем клавиши в строке
-                row.forEachIndexed { colIndex, key ->
+                row.forEachIndexed { _, key ->
                     KeyboardKey(
                         key = key,
                         onClick = {
@@ -222,6 +290,12 @@ fun CustomKeyboard(viewModel: GameViewModel) {
 
 @Composable
 fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    // 1) Animatable для масштаба
+    val scale = remember { Animatable(1f) }
+    // 2) CoroutineScope для запуска анимаций
+    val scope = rememberCoroutineScope()
+
+
     val animatedColor by animateColorAsState(
         targetValue = Color(key.color),
         animationSpec = tween(durationMillis = 250) // Плавное изменение цвета за 300 мс
@@ -229,22 +303,37 @@ fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
 
     Box(
         modifier = modifier
+            .graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
+            }
             .background(animatedColor, RoundedCornerShape(6.dp))
-            .clickable { onClick() }
+            .clickable {
+                scope.launch {
+                    scale.snapTo(0.95f)  // мгновенно уменьшаем
+                    scale.animateTo(1f,  // потом «отскок» обратно
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    )
+                }
+                onClick()
+            }
             .padding(vertical = 9.dp),
         contentAlignment = Alignment.Center
     ) {
         when (key.char) {
             '<' -> {
                 Image(
-                    painterResource(R.drawable.backspace), // Иконка для Delete
+                    painterResource(R.drawable.game_backspace), // Иконка для Delete
                     contentDescription = "Delete",
                     modifier = Modifier.size(24.dp)
                 )
             }
             '>' -> {
                 Image(
-                    painterResource(R.drawable.enter), // Иконка для Delete
+                    painterResource(R.drawable.game_enter), // Иконка для Delete
                     contentDescription = "Enter",
                     modifier = Modifier.size(24.dp)
                 )
@@ -271,7 +360,7 @@ fun GameHeaderBar(navController: NavController, viewModel: GameViewModel) {
     ) {
         Row(Modifier.weight(1f)) {
             ImageButton(R.drawable.arrow_back, modifier = Modifier.size(32.dp)) { navController.popBackStack() }
-            ImageButton(R.drawable.ic_loos, modifier = Modifier.size(32.dp)) {
+            ImageButton(R.drawable.game_lose, modifier = Modifier.size(32.dp)) {
                 coroutineScope.launch {
                     viewModel.result = "Поражение"
                     AppDataStore.clearSavedGame(context)
@@ -289,7 +378,7 @@ fun GameHeaderBar(navController: NavController, viewModel: GameViewModel) {
         Box(Modifier.weight(1f),
             contentAlignment = Alignment.CenterEnd) {
             ImageButton(
-                R.drawable.icon_sett,
+                R.drawable.nav_set,
                 modifier = Modifier.size(32.dp)
             ) { navController.navigate("settingsII") }
 
