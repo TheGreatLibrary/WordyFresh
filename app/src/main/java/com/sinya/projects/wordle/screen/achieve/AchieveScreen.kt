@@ -2,21 +2,15 @@ package com.sinya.projects.wordle.screen.achieve
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -33,15 +27,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.navigation.Header
-import com.sinya.projects.wordle.screen.dictionary.DictionaryCard
-import com.sinya.projects.wordle.screen.dictionary.SearchContainer
-import com.sinya.projects.wordle.screen.game.WordCell
+import com.sinya.projects.wordle.ui.features.Header
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AchieveScreen(navController: NavController) {
+fun AchieveScreen(    navigateToBackStack: () -> Unit,
+) {
     val pullToRefreshState = rememberPullToRefreshState()
     if (pullToRefreshState.isRefreshing) {
         LaunchedEffect(true) {
@@ -79,7 +71,7 @@ fun AchieveScreen(navController: NavController) {
                         .alpha(alpha)
                         .padding(top = 50.dp)
                 ) {
-                    Header(stringResource(R.string.dictionary), false, navController)
+                    Header(stringResource(R.string.dictionary), false, navigateToBackStack)
                     Spacer(Modifier.height(21.dp))
                 }
             }

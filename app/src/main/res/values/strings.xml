@@ -83,4 +83,10 @@
     <string name="terms_and_privacy">Я принимаю %1$s и %2$s</string>
     <string name="terms_of_use_clickable">условия использования</string>
     <string name="privacy_policy_clickable">политику конфиденциальности</string>
+
+    <string name="share_text">Что такое %1$s? %2$s. Я узнал об этом в Wordy Fresh, которую можно найти тут: %3$s</string>
+    <string name="no_description">В словаре нет определения, нажмите на 1 кнопку для поиска в Интернете</string>
+    <string name="shared_to">Поделиться через</string>
+    <string name="no_internet_error">Ошибка: нет подключения к интернету</string>
+    <string name="definition_not_found">Определение не найдено</string>
 </resources>

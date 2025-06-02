@@ -1,42 +1,20 @@
 package com.sinya.projects.wordle.screen.game
 
-import android.annotation.SuppressLint
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -44,36 +22,37 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.dialog.FinishGameDialog
-import com.sinya.projects.wordle.domain.model.data.Cell
-import com.sinya.projects.wordle.domain.model.data.Key
-import com.sinya.projects.wordle.ui.components.ImageButton
-import com.sinya.projects.wordle.dialog.NotFoundWordDialog
+import com.sinya.projects.wordle.dialog.NotRightWordDialog
+import com.sinya.projects.wordle.screen.game.components.CustomKeyboard
+import com.sinya.projects.wordle.screen.game.components.GameHeader
+import com.sinya.projects.wordle.screen.game.components.GamePlace
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.white
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 
 @Composable
-fun GameScreen(mode: Int, wordLength: Int, lang: String, hiddenWord: String, navController: NavController) {
-    val coroutineScope = rememberCoroutineScope()
+fun GameScreen(
+    mode: Int,
+    wordLength: Int,
+    lang: String,
+    hiddenWord: String,
+    navController: NavController
+) {
 
     val context = LocalContext.current
-    val db = remember { AppDatabase.getInstance(context) } // Запоминаем БД, чтобы не пересоздавалась
-    val wordDao = db.wordDao()
-    val offlineDictionaryDao = db.offlineDictionaryDao()
-    val offlineStatisticDao = db.offlineStatisticDao()
-
     val viewModel: GameViewModel = viewModel(
-        factory = GameViewModel.provideFactory(mode, wordLength, lang, hiddenWord,  context, wordDao, offlineDictionaryDao, offlineStatisticDao)
+        factory = GameViewModel.provideFactory(
+            mode = mode,
+            wordLength = wordLength,
+            lang = lang,
+            hiddenWord,
+            context,
+            AppDatabase.getInstance(LocalContext.current)
+        )
     )
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -118,126 +97,33 @@ fun GameScreen(mode: Int, wordLength: Int, lang: String, hiddenWord: String, nav
         }
     }
 
+    GameScreenView(
+
+    )
+
     Column(
         Modifier
-            .fillMaxSize().padding(top = 50.dp)
+            .fillMaxSize()
+            .padding(top = 50.dp)
     ) {
-        GameHeaderBar(navController, viewModel)
+        GameHeader(navController, viewModel)
         GamePlace(viewModel)
         TextResult(viewModel)
         CustomKeyboard(viewModel)
     }
-    if (viewModel.notFoundTrigger.value) NotFoundWordDialog("Слово не найдено")
-    else if (viewModel.hardModeTrigger.value != null) NotFoundWordDialog(viewModel.hardModeTrigger.value!!)
+    if (viewModel.notFoundTrigger.value) NotRightWordDialog("Слово не найдено")
+    else if (viewModel.hardModeTrigger.value != null) NotRightWordDialog(viewModel.hardModeTrigger.value!!)
 
 
 
 
     if (viewModel.dialogFinish.value) {
-        FinishGameDialog(viewModel, viewModel.dialogFinish) { viewModel.dialogFinish.value = false  }
+        FinishGameDialog(viewModel) { viewModel.dialogFinish.value = false }
     }
 }
 
-@Composable
-fun GamePlace(viewModel: GameViewModel) {
-    Column(
-        Modifier.padding(top = 30.dp, start = 16.dp, end = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        viewModel.gridState.chunked(viewModel.wordLength).forEachIndexed { rowIndex, row ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                row.forEachIndexed { colIndex, cell ->
-                    val cellIndex = rowIndex * viewModel.wordLength + colIndex
-                    WordCell(
-                        cell = cell,
-                        isFocused = viewModel.focusedCell == cellIndex,
-                        onClick = { viewModel.setFocusedCell(rowIndex, colIndex) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-        }
-    }
-}
 
-@Composable
-fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    // —————————————————————————————————————————
-    // Существующая логика поворота флипа:
-    var prevColor by remember { mutableStateOf(cell.backgroundColor) }
-    val isFlipping = prevColor != cell.backgroundColor
 
-    val rotationY by animateFloatAsState(
-        targetValue = if (isFlipping) 180f else 0f,
-        animationSpec = tween(durationMillis = 300, easing = LinearEasing),
-        finishedListener = {
-            if (isFlipping) prevColor = cell.backgroundColor
-        }
-    )
-    val showingFront = rotationY <= 90f
-    // —————————————————————————————————————————
-
-    // 1) Animatable для масштаба:
-    val scale = remember { Animatable(1f) }
-    // 2) Триггерим на каждую смену буквы:
-    LaunchedEffect(cell.letter) {
-        // резкий «щелчок» в 0.9
-        scale.snapTo(0.95f)
-        // затем плавно «отскок» обратно к 1f
-        scale.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
-            )
-        )
-    }
-
-    Box(
-        modifier = modifier
-            .graphicsLayer {
-                this.rotationY = rotationY
-                scaleX = scale.value
-                scaleY = scale.value
-//                cameraDistance = 8 * density
-            }
-            .background(
-                color = if (showingFront) Color(prevColor) else Color(cell.backgroundColor),
-                shape = RoundedCornerShape(7.dp)
-            )
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = cell.letter,
-            fontSize = 35.sp,
-            modifier = Modifier
-                .graphicsLayer {
-                    // когда рисуем оборот, поворачиваем текст ещё на 180
-                    if (!showingFront) this.rotationY = 180f
-                }
-                .padding(horizontal = 4.dp, vertical = 8.dp),
-            color = Color.White,
-            style = WordleTypography.bodyLarge
-        )
-        if (isFocused) {
-            Box(
-                modifier = Modifier
-                    .background(
-                        green800,
-                        shape = RoundedCornerShape(bottomEnd = 7.dp, bottomStart = 7.dp)
-                    )
-                    .padding(bottom = 4.dp)
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .align(Alignment.BottomCenter)
-            )
-        }
-    }
-}
 
 @Composable
 fun TextResult(viewModel: GameViewModel) {
@@ -250,7 +136,7 @@ fun TextResult(viewModel: GameViewModel) {
     ) {
         Text(
             text = viewModel.result,
-            color = WordleColor.colors.textColorMkI,
+            color = WordleColor.colors.textForActiveBtnMkI,
             fontSize = 18.sp,
             style = WordleTypography.bodyMedium,
             modifier = Modifier
@@ -260,160 +146,6 @@ fun TextResult(viewModel: GameViewModel) {
     }
 }
 
-@Composable
-fun CustomKeyboard(viewModel: GameViewModel) {
-    Column(
-        Modifier.padding(top = 27.dp, bottom = 10.dp, start = 5.dp, end = 5.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        // Перебираем строки клавиатуры
-        viewModel.keyboardState.forEachIndexed { _, row ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(if (viewModel.lang == "ru") 4.dp else 6.dp)
-            ) {
-                // Перебираем клавиши в строке
-                row.forEachIndexed { _, key ->
-                    KeyboardKey(
-                        key = key,
-                        onClick = {
-                                viewModel.keyboardControl(key.char)
-                        },
-                        modifier = Modifier.weight(if (key.char == '<' || key.char == '>') 2f else 1f)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    // 1) Animatable для масштаба
-    val scale = remember { Animatable(1f) }
-    // 2) CoroutineScope для запуска анимаций
-    val scope = rememberCoroutineScope()
 
 
-    val animatedColor by animateColorAsState(
-        targetValue = Color(key.color),
-        animationSpec = tween(durationMillis = 250) // Плавное изменение цвета за 300 мс
-    )
-
-    Box(
-        modifier = modifier
-            .graphicsLayer {
-                scaleX = scale.value
-                scaleY = scale.value
-            }
-            .background(animatedColor, RoundedCornerShape(6.dp))
-            .clickable {
-                scope.launch {
-                    scale.snapTo(0.95f)  // мгновенно уменьшаем
-                    scale.animateTo(1f,  // потом «отскок» обратно
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
-                    )
-                }
-                onClick()
-            }
-            .padding(vertical = 9.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        when (key.char) {
-            '<' -> {
-                Image(
-                    painterResource(R.drawable.game_backspace), // Иконка для Delete
-                    contentDescription = "Delete",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            '>' -> {
-                Image(
-                    painterResource(R.drawable.game_enter), // Иконка для Delete
-                    contentDescription = "Enter",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            else -> Text(
-                text = key.char.toString(),
-                fontSize = 20.sp,
-                style = WordleTypography.bodyMedium,
-                color = white,
-            )
-        }
-    }
-}
-
-@Composable
-fun GameHeaderBar(navController: NavController, viewModel: GameViewModel) {
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(Modifier.weight(1f)) {
-            ImageButton(R.drawable.arrow_back, modifier = Modifier.size(32.dp)) { navController.popBackStack() }
-            ImageButton(R.drawable.game_lose, modifier = Modifier.size(32.dp)) {
-                coroutineScope.launch {
-                    viewModel.result = "Поражение"
-                    AppDataStore.clearSavedGame(context)
-                    viewModel.addStatisticData(viewModel.result)
-                    viewModel.addWordDictionary(viewModel.hiddenWord) // Теперь можно вызывать suspend метод
-                    viewModel.dialogFinish.value = true
-                }
-            }
-        }
-
-        Box(Modifier.weight(1f),
-            contentAlignment = Alignment.TopCenter) {
-            GameTimer(viewModel)
-        }
-        Box(Modifier.weight(1f),
-            contentAlignment = Alignment.CenterEnd) {
-            ImageButton(
-                R.drawable.nav_set,
-                modifier = Modifier.size(32.dp)
-            ) { navController.navigate("settingsII") }
-
-        }
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun TimerDisplay(totalSeconds: Long) {
-    val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds).toInt()
-    val seconds = totalSeconds % 60
-    val timeText = String.format("%02d:%02d", minutes, seconds)
-
-    Text(
-        text = timeText,
-        fontSize = 16.sp,
-        color = WordleColor.colors.textColorMkII,
-        modifier = Modifier.padding(16.dp),
-        style = WordleTypography.bodyMedium
-    )
-}
-
-@Composable
-fun GameTimer(viewModel: GameViewModel) {
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        scope.launch {
-            while (isActive) {
-                delay(1000)
-                if (viewModel.result == "") viewModel.totalSeconds++
-            }
-        }
-    }
-    TimerDisplay(viewModel.totalSeconds)
-}
 

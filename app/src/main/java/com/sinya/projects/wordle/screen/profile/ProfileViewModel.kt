@@ -1,33 +1,17 @@
 package com.sinya.projects.wordle.screen.profile
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.data.remote.supabase.SupabaseClientHolder
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
 import com.sinya.projects.wordle.data.repository.AvatarRepository
-import com.sinya.projects.wordle.domain.model.entity.Profiles
-import com.sinya.projects.wordle.ui.components.ProfileUiState
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.exceptions.NotFoundRestException
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.storage.storage
-import io.github.jan.supabase.storage.upload
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 
 class ProfileViewModel(
     private val supabase: SupabaseClient,

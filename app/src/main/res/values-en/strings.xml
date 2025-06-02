@@ -83,4 +83,10 @@
     <string name="terms_and_privacy">I accept the %1$s and %2$s</string>
     <string name="terms_of_use_clickable">Terms of Use</string>
     <string name="privacy_policy_clickable">Privacy Policy</string>
+
+    <string name="share_text">What is %1$s? %2$s. I found it in Wordy Fresh — check it out here: %3$s</string>
+    <string name="no_description">No definition found in the dictionary. Tap the first button to search online</string>
+    <string name="shared_to">Share via</string>
+    <string name="no_internet_error">Error: No internet connection</string>
+    <string name="definition_not_found">Definition not found</string>
 </resources>

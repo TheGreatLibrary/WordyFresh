@@ -2,10 +2,7 @@ package com.sinya.projects.wordle.screen.statistic
 
 import android.util.Log
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -18,13 +15,8 @@ class StatisticViewModel(
     private val db: AppDatabase
 ) : ViewModel() {
 
-    private val _statisticState = mutableStateOf<StatisticState>(StatisticState.Loading)
-    val statisticState: State<StatisticState> = _statisticState
-
-    var selectedMode by mutableStateOf("")
-//    var selectedModeIndex by mutableIntStateOf(0)
-
-    var list by mutableStateOf(emptyList<OfflineStatistic>())
+    private val _uiState = mutableStateOf(StatisticUi())
+    val uiState: State<StatisticUi> = _uiState
 
     companion object {
         fun provideFactory(
@@ -42,12 +34,23 @@ class StatisticViewModel(
         loadStatistic()
     }
 
+    fun onEvent(event: StatisticUiEvent) {
+        when (event) {
+            is StatisticUiEvent.SelectMode -> {
+                _uiState.value = _uiState.value.copy(selectedMode = event.modeId)
+            }
+
+            is StatisticUiEvent.Reload -> {
+                loadStatistic()
+            }
+        }
+    }
+
     private fun mergeStatistics(
         offlineStats: List<OfflineStatistic>,
         syncStats: List<SyncStatistic>
     ): List<OfflineStatistic> {
         val syncMap = syncStats.associateBy { it.modeId }
-
         return offlineStats.map { offline ->
             val sync = syncMap[offline.modeId]
             if (sync != null) {
@@ -70,10 +73,12 @@ class StatisticViewModel(
     }
 
     private fun loadStatistic() {
-//        Log.d("Пиздец", "Загрузка статистики??")
+        _uiState.value = _uiState.value.copy(
+            loadingState = StatisticState.Loading,
+            statisticList = emptyList()
+        )
 
         viewModelScope.launch {
-//            Log.d("Пиздец", "Вошёл в launch") // 2
             try {
                 if (db.offlineStatisticDao().count() == 0) {
                     val modes = listOf(
@@ -85,45 +90,21 @@ class StatisticViewModel(
                     val initialStats = modes.map { mode -> OfflineStatistic(modeId = mode) }
                     db.offlineStatisticDao().insertStatisticList(initialStats)
                 }
-                val statsOffline = db.offlineStatisticDao().getAllStatistic()
-                val statsSync = db.syncStatisticDao().getAllStatistic()
-//                Log.d("Пиздец", "$statsOffline я даун")
-//                Log.d("Пиздец", "${statsOffline.size}")
+                val offline = db.offlineStatisticDao().getAllStatistic()
+                val sync = db.syncStatisticDao().getAllStatistic()
+                val merged = mergeStatistics(offline, sync)
 
-
-                val mergedStats = mergeStatistics(statsOffline, statsSync)
-                Log.d("Пиздец", "$statsSync я даун")
-//                list = mergedStats
-
-                _statisticState.value = StatisticState.Success(mergedStats)
+                _uiState.value = _uiState.value.copy(
+                    loadingState = StatisticState.Success(merged),
+                    statisticList = merged
+                )
             } catch (e: Exception) {
-                Log.e("Пиздец", "Ошибка при загрузке статистики", e)
-                _statisticState.value = StatisticState.Error
+                Log.e("StatisticViewModel", "Ошибка при загрузке статистики", e)
+                _uiState.value = _uiState.value.copy(loadingState = StatisticState.Error)
             }
         }
     }
-
-    fun absTime(times: Long, countGame: Int): String {
-        if (countGame == 0) return "00:00" // избегаем деления на 0
-
-        val averageSeconds = times / countGame
-
-        val hours = averageSeconds / 3600
-        val minutes = (averageSeconds % 3600) / 60
-        val seconds = averageSeconds % 60
-
-        return if (hours > 0) {
-            String.format("%02d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            String.format("%02d:%02d", minutes, seconds)
-        }
-    }
 }
 
 
 
-sealed class StatisticState {
-    object Loading : StatisticState()
-    data class Success(val data: List<OfflineStatistic>) : StatisticState()
-    object Error : StatisticState()
-}

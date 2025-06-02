@@ -2,6 +2,7 @@ package com.sinya.projects.wordle.screen.profile.subscreens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.ui.components.RoundedButton
+import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
 import com.sinya.projects.wordle.ui.theme.gray800
@@ -62,34 +63,34 @@ fun ProfileWithoutAccount(navController: NavController) {
         ) {
             RoundedButton(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .shadow(8.dp, spotColor = gray800),
-                ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundBtnMkIII),
-                {
+                    .fillMaxWidth(0.9f),
+                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
+                onClick = {
                     navController.navigate("register")
                 }
             ) {
                 Text(
                     stringResource(R.string.sign_up),
                     fontSize = 18.sp,
-                    color = WordleColor.colors.textColorMkII,
+                    color = WordleColor.colors.textForActiveBtnMkI,
                     style = WordleTypography.bodyMedium
                 )
             }
             Spacer(Modifier.height(19.dp))
             RoundedButton(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .shadow(8.dp, spotColor = gray800),
-                ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundBtnMkI),
-                {
+                    .fillMaxWidth(0.9f),
+                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkII),
+                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
+                onClick = {
                     navController.navigate("login")
                 }
             ) {
                 Text(
                     stringResource(R.string.login),
                     fontSize = 18.sp,
-                    color = WordleColor.colors.onTextColor,
+                    color = WordleColor.colors.textForActiveBtnMkII,
                     style = WordleTypography.bodyMedium
                 )
             }

@@ -2,28 +2,26 @@ package com.sinya.projects.wordle.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val gray900 = Color(0xFF1E1E1E) // тт фон кнопок и фон страницы
+val gray850 = Color(0xBD313131) // прозрачность 74
+val gray800 = Color(0xFF313131) // тт фон карточек
 
+val gray600 = Color(0xFF626269)
+val gray500 = Color(0xFF9D9D9D) // ст прогрессБар
+val gray400 = Color(0xFF7E7E7E)
+val gray300 = Color(0xFFD9D9D9) // тт прогрессБар
+val gray200 = Color(0xFFF6F6F6) // ст фон
+val gray100 = Color(0xFFABB1B7) // цвет клавиши
+val gray30 = Color(0x5C7E7E7E) // прозрачность 36, ячейки текста ст
 
-val gray800 = Color(0xFF1E1E1E)
-val gray600 = Color(0xFF2B2B2B)
-val gray400 = Color(0xFF6E6E6E)
-val gray300 = Color(0xFF7E7E7E)
-val gray250 = Color(0xFF626269)
-val gray200 = Color(0xFF9D9D9D)
-val gray150 = Color(0xFFABB1B7)
-val gray100 = Color(0xFFCCCCCC)
-val white = Color(0xFFFFFFFF)
-val white30 = Color(0x5CFFFFFF)
-val green800 = Color(0xFF257572)
-val green600 = Color(0xFF55A8A5)
-val green400 = Color(0x8670C4C1)
+val white30 = Color(0x5CFFFFFF) // прозрачность 36, ячейки текста тт
+val white = Color(0xFFFFFFFF) // фон карточек и текст ст
+
+val green800 = Color(0xFF257572) // primary
+val green600 = Color(0xFF55A8A5) // фон иконок
+val green500 = Color(0xD4257572) // прозрачность 83, ст
+val green400 = Color(0x8670C4C1) // прозрачнось 53, тт
 val yellow = Color(0xFFE4AF34)
 val red = Color(0xFFE8705C)
 

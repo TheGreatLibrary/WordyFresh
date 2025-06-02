@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
@@ -20,6 +19,7 @@ import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.dao.OfflineDictionaryDao
 import com.sinya.projects.wordle.data.local.dao.OfflineStatisticDao
 import com.sinya.projects.wordle.data.local.dao.WordDao
+import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.domain.model.data.Cell
 import com.sinya.projects.wordle.domain.model.data.GameSettings
@@ -27,8 +27,8 @@ import com.sinya.projects.wordle.domain.model.data.Key
 import com.sinya.projects.wordle.domain.model.data.SavedGame
 import com.sinya.projects.wordle.domain.model.entity.OfflineDictionary
 import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
-import com.sinya.projects.wordle.ui.theme.gray150
-import com.sinya.projects.wordle.ui.theme.gray250
+import com.sinya.projects.wordle.ui.theme.gray100
+import com.sinya.projects.wordle.ui.theme.gray600
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.white30
 import com.sinya.projects.wordle.ui.theme.yellow
@@ -49,9 +49,7 @@ class GameViewModel(
     lang: String,
     hiddenWord: String,
     private val context: Context,
-    private val wordDao: WordDao,
-    private val offlineDictionaryDao: OfflineDictionaryDao,
-    private val offlineStatisticDao: OfflineStatisticDao
+    private val db: AppDatabase,
 ) : ViewModel() {
     var mode by mutableIntStateOf(mode)
     var wordLength by mutableIntStateOf(wordLength)
@@ -80,9 +78,7 @@ class GameViewModel(
             lang: String,
             hiddenWord: String,
             context: Context,
-            wordDao: WordDao,
-            offlineDictionaryDao: OfflineDictionaryDao,
-            offlineStatisticDao: OfflineStatisticDao
+            db: AppDatabase
         ): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -92,9 +88,7 @@ class GameViewModel(
                         lang,
                         hiddenWord,
                         context,
-                        wordDao,
-                        offlineDictionaryDao,
-                        offlineStatisticDao
+                        db
                     ) as T
                 }
             }
@@ -185,7 +179,7 @@ class GameViewModel(
 
         viewModelScope.launch {
             if (hiddenWord.isEmpty()) {
-                hiddenWord = wordDao.getRandomWord(wordLength, lang, ratingWordsStatus)
+                hiddenWord = db.wordDao().getRandomWord(wordLength, lang, ratingWordsStatus)
             } // генерация слова
         }
 
@@ -202,13 +196,13 @@ class GameViewModel(
         }
 
         keyboardState.flatten().forEach { key ->
-            key.color = gray150.value
+            key.color = gray100.value
         }
 
         focusedCell = 0
 
         viewModelScope.launch {
-            hiddenWord = wordDao.getRandomWord(wordLength, lang, false)
+            hiddenWord = db.wordDao().getRandomWord(wordLength, lang, false)
         }
 
         totalSeconds = 0
@@ -343,7 +337,7 @@ class GameViewModel(
                         }
                     } else if (enteredWord.length == wordLength) {
                         viewModelScope.launch {
-                            if (wordDao.findWord(enteredWord, lang, ratingWordsStatus) != null) {
+                            if (db.wordDao().findWord(enteredWord, lang, ratingWordsStatus) != null) {
                                 val tryResult = checkWord(enteredWord, row)
                                 if (result != "") {
                                     AppDataStore.clearSavedGame(context)
@@ -432,7 +426,7 @@ class GameViewModel(
 
     private suspend fun getColorsByWord(enteredWord: String, row: Int): MutableList<Color> {
         val countRowBox = hiddenWord.length // Длина строки
-        val colors = MutableList(countRowBox) { gray250 } // По умолчанию серый
+        val colors = MutableList(countRowBox) { gray600 } // По умолчанию серый
         val usedIndices = BooleanArray(hiddenWord.length) // Отмечает, какие буквы уже использованы
 
         if (enteredWord == hiddenWord) result = "Победа!"
@@ -532,10 +526,10 @@ class GameViewModel(
 
                 val nowColor = keyboardState.flatten().find { it.char == char }?.color
                 val currentColor =
-                    if (nowColor != null) Color(nowColor) else gray250
+                    if (nowColor != null) Color(nowColor) else gray600
                 val finalColor = when {
                     currentColor == green800 -> green800
-                    currentColor == yellow && newColor == gray250 -> yellow
+                    currentColor == yellow && newColor == gray600 -> yellow
                     else -> newColor
                 }
 
@@ -555,7 +549,7 @@ class GameViewModel(
             3 -> "12f9d2ce-1234-4321-aaaa-000000000003"
             else -> "12f9d2ce-1234-4321-aaaa-000000000001"
         }
-        if (offlineStatisticDao.count() == 0) {
+        if (db.offlineStatisticDao().count() == 0) {
             val modes = listOf(
                 "12f9d2ce-1234-4321-aaaa-000000000001",
                 "12f9d2ce-1234-4321-aaaa-000000000002",
@@ -563,9 +557,9 @@ class GameViewModel(
                 "12f9d2ce-1234-4321-aaaa-000000000004"
             )
             val initialStats = modes.map { mode -> OfflineStatistic(modeId = mode) }
-            offlineStatisticDao.insertStatisticList(initialStats)
+            db.offlineStatisticDao().insertStatisticList(initialStats)
         }
-        val currentStatistic = offlineStatisticDao.getStatisticByMode(modeId)
+        val currentStatistic = db.offlineStatisticDao().getStatisticByMode(modeId)
 
         val currentStreak = if (result == "Победа!") currentStatistic.currentStreak + 1 else 0
         val row = focusedCell / wordLength
@@ -583,16 +577,16 @@ class GameViewModel(
             fifthTry = if (row == 4 && win) currentStatistic.fifthTry + 1 else currentStatistic.fifthTry, // пятая попытка
             sixthTry = if (row == 5 && win) currentStatistic.sixthTry + 1 else currentStatistic.sixthTry // шестая попытка
         )
-        offlineStatisticDao.updateStatistic(updated)
+        db.offlineStatisticDao().updateStatistic(updated)
     }
 
     suspend fun addWordDictionary(word: String) {
-        val wordExists = offlineDictionaryDao.findWord(word)
+        val wordExists = db.offlineDictionaryDao().findWord(word)
 
         if (wordExists == null) {
             val description = getWikipediaDefinition(word) // Получаем описание
-            val wordId = wordDao.getWordId(word)
-            offlineDictionaryDao.insertWord(
+            val wordId = db.wordDao().getWordId(word)
+            db.offlineDictionaryDao().insertWord(
                 OfflineDictionary(
                     wordId = wordId,
                     description = description

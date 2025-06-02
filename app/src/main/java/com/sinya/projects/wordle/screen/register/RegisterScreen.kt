@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,14 +20,12 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -38,21 +37,18 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.navigation.Header
-import com.sinya.projects.wordle.ui.components.CustomTextField
-import com.sinya.projects.wordle.ui.components.CustomTextFieldWithLabel
-import com.sinya.projects.wordle.ui.components.RoundedBackgroundText
-import com.sinya.projects.wordle.ui.components.RoundedButton
+import com.sinya.projects.wordle.ui.features.Header
+import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
+import com.sinya.projects.wordle.ui.features.RoundedBackgroundText
+import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.ui.theme.gray800
 import com.sinya.projects.wordle.ui.theme.white
 import io.github.jan.supabase.SupabaseClient
 
@@ -77,14 +73,13 @@ fun RegisterScreen(
 
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-
     Column(
         Modifier
             .fillMaxSize()
             .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 30.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Header("", false, navController)
+        Header("", false, { navController })
 
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -129,10 +124,10 @@ fun RegisterScreen(
             ) {
                 RoundedButton(
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .shadow(8.dp, spotColor = gray800),
-                    ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundBtnMkIII),
-                    {
+                        .fillMaxWidth(0.9f),
+                    colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                    contentPadding = PaddingValues(vertical = 5.dp, horizontal = 15.dp),
+                    onClick = {
                         loading = true
                         error = null
                         viewModel.registerUser(
@@ -149,7 +144,7 @@ fun RegisterScreen(
                     Text(
                         stringResource(R.string.sign_up),
                         fontSize = 18.sp,
-                        color = WordleColor.colors.textColorMkII,
+                        color = WordleColor.colors.textForActiveBtnMkI,
                         style = WordleTypography.bodyMedium
                     )
                 }
@@ -217,6 +212,7 @@ fun RegisterScreen(
             )
         }
     }
+
 }
 
 @Composable

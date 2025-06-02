@@ -43,9 +43,10 @@ import coil.compose.rememberAsyncImagePainter
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.domain.model.entity.Profiles
 import com.sinya.projects.wordle.screen.profile.ProfileViewModel
-import com.sinya.projects.wordle.screen.settings.CardColumn
-import com.sinya.projects.wordle.screen.settings.RowSettingLink
-import com.sinya.projects.wordle.ui.components.RoundedBackgroundText
+import com.sinya.projects.wordle.ui.features.CardColumn
+import com.sinya.projects.wordle.ui.features.CustomCard
+import com.sinya.projects.wordle.ui.features.RoundedBackgroundText
+import com.sinya.projects.wordle.ui.features.RowLink
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
 import com.sinya.projects.wordle.ui.theme.red
@@ -85,19 +86,19 @@ fun ProfileWithAccount(
         RoundedBackgroundText(viewModel.getEmail())
         Spacer(Modifier.height(2.dp))
         CardColumn {
-            RowSettingLink(
+            RowLink(
                 stringResource(R.string.rewrite_screen),
                 "",
                 R.drawable.prof_rewrite,
                 R.drawable.arrow
             ) {}
-            RowSettingLink(
+            RowLink(
                 stringResource(R.string.friends_screen),
                 "",
                 R.drawable.prof_friends,
                 R.drawable.arrow
             ) {}
-            RowSettingLink(
+            RowLink(
                 stringResource(R.string.notification_screen),
                 "",
                 R.drawable.prof_notify,
@@ -105,52 +106,53 @@ fun ProfileWithAccount(
             ) {}
         }
         CardColumn {
-            RowSettingLink(
+            RowLink(
                 stringResource(R.string.about_app_screen),
                 "",
                 R.drawable.prof_about,
                 R.drawable.arrow
             ) {}
-            RowSettingLink(
+            RowLink(
                 stringResource(R.string.policy_privacy),
                 "",
                 R.drawable.prof_privacy,
                 R.drawable.arrow
             ) {}
-            RowSettingLink(
+            RowLink(
                 stringResource(R.string.terms_of_use),
                 "",
                 R.drawable.prof_terms,
                 R.drawable.arrow
             ) {}
         }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp)
-                .clip(RoundedCornerShape(99.dp))
-                .background(color = white)
-                .clickable { viewModel.signOut() }
-                .padding(vertical = 11.dp, horizontal = 13.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Spacer(Modifier.height(3.dp))
+        CustomCard(Modifier
+            .clip(RoundedCornerShape(99.dp))
+            .fillMaxWidth()
+            .clickable { viewModel.signOut() }
         ) {
-            Image(
-                painterResource(R.drawable.prof_exit),
-                contentDescription = null,
-                Modifier
-                    .padding(end = 9.dp)
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(color = red)
-                    .scale(0.75f),
-                colorFilter = ColorFilter.tint(white)
-            )
-            Text(
-                stringResource(R.string.exit),
-                fontSize = 15.sp,
-                color = red,
-                style = WordleTypography.bodyMedium
-            )
+            Row(
+                Modifier.padding(vertical = 11.dp, horizontal = 13.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painterResource(R.drawable.prof_exit),
+                    contentDescription = null,
+                    Modifier
+                        .padding(end = 9.dp)
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(color = red)
+                        .scale(0.75f),
+                    colorFilter = ColorFilter.tint(white)
+                )
+                Text(
+                    stringResource(R.string.exit),
+                    fontSize = 15.sp,
+                    color = red,
+                    style = WordleTypography.bodyMedium
+                )
+            }
         }
     }
 }
@@ -182,7 +184,7 @@ fun AvatarPicker(
 }
 
 @Composable
-fun Avatar(modifier: Modifier, imageUri: Uri?, onClicked: (() -> Unit)? = null) {
+fun Avatar(modifier: Modifier, imageUri: Uri?, onClick: (() -> Unit)? = null) {
     val refreshedUri =
         imageUri?.buildUpon()?.appendQueryParameter("ts", System.currentTimeMillis().toString())
             ?.build()
@@ -197,7 +199,7 @@ fun Avatar(modifier: Modifier, imageUri: Uri?, onClicked: (() -> Unit)? = null) 
             modifier = Modifier
                 .fillMaxSize(0.93f)
                 .clip(CircleShape)
-                .clickable { onClicked?.let { it() } },
+                .clickable { onClick?.let { it() } },
             contentScale = ContentScale.Crop
         )
     }

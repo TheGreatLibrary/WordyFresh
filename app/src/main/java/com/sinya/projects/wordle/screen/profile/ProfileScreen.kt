@@ -17,11 +17,10 @@ import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.repository.AvatarRepository
-import com.sinya.projects.wordle.navigation.Header
+import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.screen.profile.subscreens.ProfilePlaceholder
 import com.sinya.projects.wordle.screen.profile.subscreens.ProfileWithAccount
 import com.sinya.projects.wordle.screen.profile.subscreens.ProfileWithoutAccount
-import com.sinya.projects.wordle.ui.components.ProfileUiState
 import io.github.jan.supabase.SupabaseClient
 
 @Composable
@@ -44,9 +43,9 @@ fun ProfileScreen(
             .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 7.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        Header(stringResource(R.string.profile_screen), false, navController)
+        Header(stringResource(R.string.profile_screen), false, { navController })
 
-//        Crossfade(targetState = uiState) { uiState ->
+        Crossfade(targetState = uiState) { uiState ->
             when (uiState) {
                 is ProfileUiState.Loading -> ProfilePlaceholder()
                 is ProfileUiState.Success -> ProfileWithAccount(
@@ -62,7 +61,7 @@ fun ProfileScreen(
                     modifier = Modifier.padding(top = 50.dp)
                 )
             }
-//        }
+        }
     }
 }
 

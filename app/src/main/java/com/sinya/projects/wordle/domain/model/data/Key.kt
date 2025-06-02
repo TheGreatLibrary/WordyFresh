@@ -1,7 +1,6 @@
 package com.sinya.projects.wordle.domain.model.data
 
-import androidx.compose.ui.graphics.Color
-import com.sinya.projects.wordle.ui.theme.gray150
+import com.sinya.projects.wordle.ui.theme.gray100
 import kotlinx.serialization.Serializable
 
 //data class Key(
@@ -12,6 +11,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Key(
     var char: Char,
-    var color: ULong = gray150.value
+    var color: ULong = gray100.value
 )
 
