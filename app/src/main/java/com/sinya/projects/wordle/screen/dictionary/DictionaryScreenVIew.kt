@@ -40,13 +40,14 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DictionaryScreenView(
-    state: DictionaryUi,
+    state: DictionaryUiState.Success,
     onEvent: (DictionaryUiEvent) -> Unit,
     navigateToBackStack: () -> Unit,
     getList: List<DictionaryItem>
 ) {
     val context = LocalContext.current
     val pullToRefreshState = rememberPullToRefreshState()
+
     if (pullToRefreshState.isRefreshing) {
         LaunchedEffect(true) {
             delay(1000)
@@ -123,7 +124,9 @@ private fun DictionaryViewPreview() {
     DictionaryScreenView(
         navigateToBackStack = { },
         onEvent = { },
-        state = DictionaryUi(),
+        state = DictionaryUiState.Success(
+            onEvent = { }
+        ),
         getList = emptyList()
     )
 }

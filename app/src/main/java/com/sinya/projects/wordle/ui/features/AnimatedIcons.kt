@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.sinya.projects.wordle.domain.model.data.ConfettiParticle
+import com.sinya.projects.wordle.screen.game.model.ConfettiParticle
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

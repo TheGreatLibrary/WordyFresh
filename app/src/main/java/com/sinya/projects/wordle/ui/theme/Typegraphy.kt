@@ -1,10 +1,12 @@
 package com.sinya.projects.wordle.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 
@@ -36,4 +38,13 @@ val WordleTypography = Typography(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Medium,
     ),
+
+
+    labelSmall = TextStyle(
+        color = green600,
+        fontSize = 14.sp,
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.W600,
+        textDecoration = TextDecoration.Underline,
+    ), // стиль ссылок
 )

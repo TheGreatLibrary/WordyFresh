@@ -5,6 +5,9 @@ import androidx.room.Query
 
 @Dao
 interface WordDao {
+    @Query("SELECT EXISTS(SELECT 1 FROM words WHERE word = :word AND language = :lang AND length = :len AND rating = :rating)")
+    suspend fun existsWord(word: String, lang: String, len: Int, rating: Int): Boolean
+
     @Query("SELECT 1 FROM words WHERE word = :word AND language = :lang AND (rating = 0 OR :rating = 1)")
     suspend fun findWord(word: String, lang: String, rating: Boolean): Int?
 

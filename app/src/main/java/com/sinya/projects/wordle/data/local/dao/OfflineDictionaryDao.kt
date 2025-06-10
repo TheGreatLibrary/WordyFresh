@@ -1,6 +1,5 @@
 package com.sinya.projects.wordle.data.local.dao
 
-import android.provider.SyncStateContract.Helpers.insert
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy

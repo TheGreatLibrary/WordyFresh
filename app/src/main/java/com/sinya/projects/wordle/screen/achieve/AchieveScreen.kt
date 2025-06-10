@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.screen.achieve
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,7 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.features.Header
 import kotlinx.coroutines.delay
 
+@SuppressLint("UseOfNonLambdaOffsetOverload")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AchieveScreen(    navigateToBackStack: () -> Unit,
@@ -71,7 +73,11 @@ fun AchieveScreen(    navigateToBackStack: () -> Unit,
                         .alpha(alpha)
                         .padding(top = 50.dp)
                 ) {
-                    Header(stringResource(R.string.dictionary), false, navigateToBackStack)
+                    Header(
+                        title = stringResource(R.string.dictionary),
+                        trashVisible = false,
+                        navigateTo = navigateToBackStack
+                    )
                     Spacer(Modifier.height(21.dp))
                 }
             }

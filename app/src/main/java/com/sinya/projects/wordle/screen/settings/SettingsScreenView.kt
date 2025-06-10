@@ -44,7 +44,11 @@ fun SettingsScreenView(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(9.dp)
     ) {
-        Header(stringResource(R.string.settings_screen), false, navigateToBackStack)
+        Header(
+            title = stringResource(R.string.settings_screen),
+            trashVisible = false,
+            navigateTo = navigateToBackStack
+        )
         Spacer(Modifier.height(0.dp))
         CardColumn {
             RowLink(

@@ -11,17 +11,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.screen.profile.subscreens.Avatar
+import com.sinya.projects.wordle.ui.features.Avatar
 import com.sinya.projects.wordle.ui.features.ImageButton
 import com.sinya.projects.wordle.ui.theme.WordleColor
 
+@Preview
 @Composable
 fun MainHeader(
-    avatarUri: Uri?,
-    onAvatarClick: () -> Unit,
-    onEmailClick: () -> Unit) {
+    avatarUri: Uri? = null,
+    onAvatarClick: () -> Unit = {},
+    onEmailClick: () -> Unit = {}) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -37,7 +39,7 @@ fun MainHeader(
         )
         ImageButton(
             image = R.drawable.home_mail,
-            modifier = Modifier.size(32.dp),
+            modifierIcon = Modifier.size(32.dp),
             onClick = onEmailClick
         )
     }

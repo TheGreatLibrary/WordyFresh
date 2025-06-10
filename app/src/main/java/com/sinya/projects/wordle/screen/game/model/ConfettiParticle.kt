@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.domain.model.data
+package com.sinya.projects.wordle.screen.game.model
 
 import androidx.compose.ui.graphics.Color
 import java.util.UUID

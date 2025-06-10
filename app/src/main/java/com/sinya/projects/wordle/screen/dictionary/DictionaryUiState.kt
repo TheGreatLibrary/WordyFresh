@@ -3,11 +3,17 @@ package com.sinya.projects.wordle.screen.dictionary
 import android.content.Context
 import com.sinya.projects.wordle.domain.model.data.DictionaryItem
 
-data class DictionaryUi(
-    val searchQuery: String = "",
-    val dictionaryList: List<DictionaryItem> = emptyList(),
-    val isRefreshing: Boolean = false
-)
+sealed class DictionaryUiState {
+    data object Loading : DictionaryUiState()
+    data class Success(
+        val searchQuery: String = "",
+        val dictionaryList: List<DictionaryItem> = emptyList(),
+        val isRefreshing: Boolean = false,
+        val onEvent: (DictionaryUiEvent) -> Unit
+    ) : DictionaryUiState()
+
+    data class Error(val message: String) : DictionaryUiState()
+}
 
 sealed class DictionaryUiEvent {
     data object OnRefreshList : DictionaryUiEvent()

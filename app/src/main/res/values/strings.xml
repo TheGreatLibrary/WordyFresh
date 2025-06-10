@@ -89,4 +89,27 @@
     <string name="shared_to">Поделиться через</string>
     <string name="no_internet_error">Ошибка: нет подключения к интернету</string>
     <string name="definition_not_found">Определение не найдено</string>
+
+    <string name="hard_hint_exact_position">Ой! Буква %1$s должна быть на позиции %2$d</string>
+    <string name="hard_hint_letter_required">Не забудь! В слове должна быть буква %1$s</string>
+
+    <string name="placeholder"> </string>
+    <string name="not_found_word">Такого слова нет</string>
+    <string name="hiddent_word">Правильный ответ:</string>
+    <string name="parsing_word">Хочешь узнать, что это слово означает?</string>
+    <string name="put_enter_to_play">Или нажми Enter, чтобы сыграть снова</string>
+    <string name="win">Ты победил!</string>
+    <string name="lose">Увы, ты проиграл</string>
+
+    <string name="russian">Русский</string>
+    <string name="english">Английский</string>
+    <string name="word_size">Размер слова</string>
+    <string name="language_of_game">Язык игры</string>
+    <string name="mode_of_game">Режим игры</string>
+    <string name="hard_mode_horizontal">Сложный</string>
+    <string name="put_word">Брось вызов другу - загадай ему слово от 4 до 11 букв:</string>
+    <string name="copy_shifr">Скопировать шифр</string>
+    <string name="put_shifr">Введи шифр ниже, чтобы отгадать слово от друга:</string>
+    <string name="decode_word">Отгадать слово</string>
+    <string name="put_here">Введите здесь!</string>
 </resources>

@@ -35,7 +35,7 @@ fun ThemeScreen(
     navigateToBackStack: () -> Unit,
     isDark: StateFlow<Boolean>,
     themes: List<ThemeItem>,
-    onClick: (Boolean) -> Unit,
+    toggleTheme: (Boolean) -> Unit,
 ) {
     val currentIsDark by isDark.collectAsState()
 
@@ -53,7 +53,7 @@ fun ThemeScreen(
                 ThemeModeItem(
                     nativeName = stringResource(themes[index].nameRes),
                     isSelected = themes[index].isDark == currentIsDark,
-                    onClick = { onClick(themes[index].isDark) }
+                    onClick = { toggleTheme(themes[index].isDark) }
                 )
                 if (index < themes.lastIndex) {
                     HorizontalDivider(
@@ -74,7 +74,7 @@ private fun ThemeScreenPreview() {
         navigateToBackStack = { },
         isDark = MutableStateFlow(true),
         themes = AppThemes.supported,
-        onClick = { },
+        toggleTheme = { },
     )
 }
 

@@ -13,19 +13,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.repository.AvatarRepository
+import com.sinya.projects.wordle.navigation.ScreenRoute
+import com.sinya.projects.wordle.screen.profile.components.ProfilePlaceholder
 import com.sinya.projects.wordle.ui.features.Header
-import com.sinya.projects.wordle.screen.profile.subscreens.ProfilePlaceholder
-import com.sinya.projects.wordle.screen.profile.subscreens.ProfileWithAccount
-import com.sinya.projects.wordle.screen.profile.subscreens.ProfileWithoutAccount
 import io.github.jan.supabase.SupabaseClient
 
 @Composable
 fun ProfileScreen(
-    navController: NavController,
+    navigateToBackStack: () -> Unit,
+    navigateTo: (ScreenRoute) -> Unit,
     supabase: SupabaseClient
 ) {
     val context = LocalContext.current
@@ -35,29 +34,31 @@ fun ProfileScreen(
         factory = ProfileViewModel.provideFactory(db, supabase, AvatarRepository(supabase, context))
     )
 
-    val uiState = viewModel.uiState.value
+    val uiState = viewModel.state.value
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 7.dp),
+            .padding(start = 16.dp, top = 50.dp, end = 16.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        Header(stringResource(R.string.profile_screen), false, { navController })
-
+        Header(
+            title = stringResource(R.string.profile_screen),
+            trashVisible = false,
+            navigateTo = navigateToBackStack
+        )
         Crossfade(targetState = uiState) { uiState ->
             when (uiState) {
                 is ProfileUiState.Loading -> ProfilePlaceholder()
-                is ProfileUiState.Success -> ProfileWithAccount(
-                    viewModel,
-                    profile = uiState.profile,
-                    avatarUri = uiState.avatarUri,
-                    navController = navController
+                is ProfileUiState.Success -> ProfileInAccount(
+                    state = uiState,
+                    navigateTo = navigateTo,
                 )
-
-                is ProfileUiState.NoAccount -> ProfileWithoutAccount(navController)
+                is ProfileUiState.NoAccount -> ProfileOutAccount(
+                    navigateTo = navigateTo
+                )
                 is ProfileUiState.Error -> Text(
-                    "Ошибка: ${uiState.message}",
+                    text = "Ошибка: ${uiState.message}",
                     modifier = Modifier.padding(top = 50.dp)
                 )
             }

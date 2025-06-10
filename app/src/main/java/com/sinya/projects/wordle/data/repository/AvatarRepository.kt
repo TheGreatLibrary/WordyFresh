@@ -15,7 +15,6 @@ class AvatarRepository(
     private val supabase: SupabaseClient,
     private val context: Context
 ) {
-
     private fun getAvatarFileName(userId: String) = "avatar_$userId.webp"
 
     suspend fun uploadAvatar(userId: String, uri: Uri): Uri? {
@@ -57,14 +56,26 @@ class AvatarRepository(
 
     private fun compressToWebP(uri: Uri, userId: String): File {
         val inputStream = context.contentResolver.openInputStream(uri) ?: error("Failed to open input")
-        val bitmap = BitmapFactory.decodeStream(inputStream)
+        val original = BitmapFactory.decodeStream(inputStream)
         inputStream.close()
 
-        val resized = Bitmap.createScaledBitmap(bitmap, 500, 500, true)
+        // Вычисляем сторону квадрата (по меньшей из ширины/высоты)
+        val side = minOf(original.width, original.height)
+
+        // Центрированная обрезка
+        val offsetX = (original.width - side) / 2
+        val offsetY = (original.height - side) / 2
+
+        val squared = Bitmap.createBitmap(original, offsetX, offsetY, side, side)
+
+        // Теперь уменьшаем до нужного размера (например, 500x500)
+        val scaled = Bitmap.createScaledBitmap(squared, 500, 500, true)
+
         val file = File(context.filesDir, getAvatarFileName(userId))
         FileOutputStream(file).use {
-            resized.compress(Bitmap.CompressFormat.WEBP, 80, it)
+            scaled.compress(Bitmap.CompressFormat.WEBP, 80, it)
         }
+
         return file
     }
 }

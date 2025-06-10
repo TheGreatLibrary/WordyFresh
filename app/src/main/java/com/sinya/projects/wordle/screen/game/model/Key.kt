@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.domain.model.data
+package com.sinya.projects.wordle.screen.game.model
 
 import com.sinya.projects.wordle.ui.theme.gray100
 import kotlinx.serialization.Serializable

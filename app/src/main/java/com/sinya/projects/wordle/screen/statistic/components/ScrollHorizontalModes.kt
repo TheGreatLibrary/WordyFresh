@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.screen.statistic.AppStatsModes
 import com.sinya.projects.wordle.screen.statistic.StatisticUiEvent
-import com.sinya.projects.wordle.screen.statistic.StatisticUi
+import com.sinya.projects.wordle.screen.statistic.StatisticUiState
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordleTypography
 import com.sinya.projects.wordle.ui.theme.gray600
@@ -23,10 +23,10 @@ import com.sinya.projects.wordle.ui.theme.white
 
 @Composable
 fun ScrollHorizontalModes(
-    state: StatisticUi,
+    state: StatisticUiState.Success,
     onEvent: (StatisticUiEvent) -> Unit
 ) {
-    if (state.selectedMode == "") {
+    if (state.selectedMode == AppStatsModes.supported[0].uuid) {
         onEvent(StatisticUiEvent.SelectMode(AppStatsModes.supported[0].uuid))
     }
 

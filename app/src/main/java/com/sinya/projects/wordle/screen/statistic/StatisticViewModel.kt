@@ -1,6 +1,5 @@
 package com.sinya.projects.wordle.screen.statistic
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -15,8 +14,8 @@ class StatisticViewModel(
     private val db: AppDatabase
 ) : ViewModel() {
 
-    private val _uiState = mutableStateOf(StatisticUi())
-    val uiState: State<StatisticUi> = _uiState
+    private val _state = mutableStateOf<StatisticUiState>(StatisticUiState.Loading)
+    val state: State<StatisticUiState> = _state
 
     companion object {
         fun provideFactory(
@@ -35,13 +34,42 @@ class StatisticViewModel(
     }
 
     fun onEvent(event: StatisticUiEvent) {
+        val currentState = _state.value
+        if (currentState !is StatisticUiState.Success) return
+
         when (event) {
             is StatisticUiEvent.SelectMode -> {
-                _uiState.value = _uiState.value.copy(selectedMode = event.modeId)
+                _state.value = currentState.copy(selectedMode = event.modeId)
             }
-
             is StatisticUiEvent.Reload -> {
                 loadStatistic()
+            }
+        }
+    }
+
+    private fun loadStatistic() {
+        viewModelScope.launch {
+            try {
+                if (db.offlineStatisticDao().count() == 0) {
+                    val modes = listOf(
+                        "12f9d2ce-1234-4321-aaaa-000000000001",
+                        "12f9d2ce-1234-4321-aaaa-000000000002",
+                        "12f9d2ce-1234-4321-aaaa-000000000003",
+                        "12f9d2ce-1234-4321-aaaa-000000000004"
+                    )
+                    val initialStats = modes.map { mode -> OfflineStatistic(modeId = mode) }
+                    db.offlineStatisticDao().insertStatisticList(initialStats)
+                }
+                val offline = db.offlineStatisticDao().getAllStatistic()
+                val sync = db.syncStatisticDao().getAllStatistic()
+                val merged = mergeStatistics(offline, sync)
+
+                _state.value = StatisticUiState.Success(
+                    statisticList = merged,
+                    onEvent = ::onEvent,
+                )
+            } catch (e: Exception) {
+                _state.value = StatisticUiState.Error("Ошибка загрузки данных: ${e.message}")
             }
         }
     }
@@ -68,39 +96,6 @@ class StatisticViewModel(
                 )
             } else {
                 offline
-            }
-        }
-    }
-
-    private fun loadStatistic() {
-        _uiState.value = _uiState.value.copy(
-            loadingState = StatisticState.Loading,
-            statisticList = emptyList()
-        )
-
-        viewModelScope.launch {
-            try {
-                if (db.offlineStatisticDao().count() == 0) {
-                    val modes = listOf(
-                        "12f9d2ce-1234-4321-aaaa-000000000001",
-                        "12f9d2ce-1234-4321-aaaa-000000000002",
-                        "12f9d2ce-1234-4321-aaaa-000000000003",
-                        "12f9d2ce-1234-4321-aaaa-000000000004"
-                    )
-                    val initialStats = modes.map { mode -> OfflineStatistic(modeId = mode) }
-                    db.offlineStatisticDao().insertStatisticList(initialStats)
-                }
-                val offline = db.offlineStatisticDao().getAllStatistic()
-                val sync = db.syncStatisticDao().getAllStatistic()
-                val merged = mergeStatistics(offline, sync)
-
-                _uiState.value = _uiState.value.copy(
-                    loadingState = StatisticState.Success(merged),
-                    statisticList = merged
-                )
-            } catch (e: Exception) {
-                Log.e("StatisticViewModel", "Ошибка при загрузке статистики", e)
-                _uiState.value = _uiState.value.copy(loadingState = StatisticState.Error)
             }
         }
     }

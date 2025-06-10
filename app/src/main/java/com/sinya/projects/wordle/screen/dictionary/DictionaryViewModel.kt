@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.domain.model.data.DictionaryItem
+import com.sinya.projects.wordle.screen.home.HomeUiState
 import com.sinya.projects.wordle.utils.getDefinitionWithFallback
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -19,8 +20,8 @@ class DictionaryViewModel(
     private val db: AppDatabase,
 ) : ViewModel() {
 
-    private val _uiState = mutableStateOf(DictionaryUi())
-    val uiState: State<DictionaryUi> = _uiState
+    private val _state = mutableStateOf<DictionaryUiState>(DictionaryUiState.Loading)
+    val state: State<DictionaryUiState> = _state
 
     companion object {
         fun provideFactory(
@@ -39,13 +40,15 @@ class DictionaryViewModel(
     }
 
     fun onEvent(event: DictionaryUiEvent) {
+        val currentState = _state.value
+        if (currentState !is DictionaryUiState.Success) return
+
         when(event) {
             is DictionaryUiEvent.OnRefreshList -> {
                 viewModelScope.launch {
-                    _uiState.value = _uiState.value.copy(isRefreshing = true)
-                    // TODO: здесь добавить обновление с Supabase
-                    delay(1000)
-                    _uiState.value = _uiState.value.copy(isRefreshing = false)
+                    _state.value = currentState.copy(isRefreshing = true)
+                    loadDictionary()
+                    _state.value = currentState.copy(isRefreshing = false)
                 }
             }
             is DictionaryUiEvent.OnReloadedDefinition -> {
@@ -57,7 +60,7 @@ class DictionaryViewModel(
                 }
             }
             is DictionaryUiEvent.OnSearchQueryChanged -> {
-                _uiState.value = _uiState.value.copy(searchQuery = event.query)
+                _state.value = currentState.copy(searchQuery = event.query)
             }
             is DictionaryUiEvent.OnShareWord -> {
                 val intent = Intent(Intent.ACTION_SEND).apply {
@@ -81,11 +84,21 @@ class DictionaryViewModel(
 
     private fun loadDictionary() {
         viewModelScope.launch {
-            val offline = db.offlineDictionaryDao().getAllWords()
-            val sync = db.syncDictionaryDao().getAllWords()
-            val merged = mergeDictionary(offline, sync)
+            try {
+                val offline = db.offlineDictionaryDao().getAllWords()
+                val sync = db.syncDictionaryDao().getAllWords()
+                val merged = mergeDictionary(offline, sync)
 
-            _uiState.value = _uiState.value.copy(dictionaryList = merged)
+                _state.value = DictionaryUiState.Success(
+                    dictionaryList = merged,
+                    onEvent = ::onEvent
+                )
+            }
+            catch (e: Exception) {
+                _state.value = DictionaryUiState.Error(
+                    message = "Ошибка загрузки данных: ${e.message}"
+                )
+            }
         }
     }
 
@@ -98,9 +111,9 @@ class DictionaryViewModel(
         return (syncMap + offlineMap).values.toList()
     }
 
-    fun getFilteredList(): List<DictionaryItem> {
-        val query = _uiState.value.searchQuery
-        return _uiState.value.dictionaryList.filter {
+    fun getFilteredList(state: DictionaryUiState.Success): List<DictionaryItem> {
+        val query = state.searchQuery
+        return state.dictionaryList.filter {
             it.word.contains(query, ignoreCase = true)
         }
     }

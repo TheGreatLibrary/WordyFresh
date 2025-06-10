@@ -19,13 +19,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordleColor
@@ -33,6 +37,7 @@ import com.sinya.projects.wordle.ui.theme.WordleTypography
 import com.sinya.projects.wordle.ui.theme.gray800
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.white
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,12 +45,12 @@ fun BottomSheet(onClickGame: (ScreenRoute) -> Unit, onDismissRequest: () -> Unit
     val sheetState = rememberModalBottomSheetState()
 
     val wordSizes = listOf("4", "5", "6", "7", "8", "9", "10", "11")
-    val langMode = listOf("Русский", "Английский")
-    val gameMode = listOf("Классика", "Сложный")
+    val langMode = listOf(R.string.russian, R.string.english)
+    val gameMode = listOf(R.string.classic_mode, R.string.hard_mode_horizontal)
 
-    val lang = remember { mutableStateOf(langMode[0]) }
+    val lang = remember { mutableIntStateOf(langMode[0]) }
     val selectedSize = remember { mutableStateOf(wordSizes[1]) }
-    val modes = remember { mutableStateOf(gameMode[mode]) }
+    val modes = remember { mutableIntStateOf(gameMode[mode]) }
 
     ModalBottomSheet(
         shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
@@ -63,20 +68,34 @@ fun BottomSheet(onClickGame: (ScreenRoute) -> Unit, onDismissRequest: () -> Unit
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextSheet("Размер слова")
-                OptionSelectorRow(wordSizes, selectedSize.value, { item -> selectedSize.value = item }, true)
+                TextSheet(stringResource(R.string.word_size))
+                OptionSelectorRow(
+                    items = wordSizes,
+                    selected = selectedSize.value,
+                    onSelected = { selectedSize.value = it },
+                    isCircle = true,
+                    label = { it })
 
-                TextSheet("Язык игры")
-                OptionSelectorRow(langMode, lang.value, { item -> lang.value = item })
+                TextSheet(stringResource(R.string.language_of_game))
+                OptionSelectorRow(
+                    items = langMode,
+                    selected = lang.intValue,
+                    onSelected = { lang.intValue = it },
+                    label = { id -> stringResource(id) }
+                )
 
-                TextSheet("Режим игры")
-                OptionSelectorRow(gameMode, modes.value, { item -> modes.value = item })
+                TextSheet(stringResource(R.string.mode_of_game))
+                OptionSelectorRow(
+                    items = gameMode,
+                    selected = modes.intValue,
+                    onSelected = { modes.intValue = it },
+                    label = { id -> stringResource(id) })
                 Spacer(Modifier.height(3.dp))
 
-                val gameModeValue = if (modes.value == "Классика") 0 else 1
-                val languageCode = if (lang.value == "Русский") "ru" else "en"
-                val navRoute = "game/$gameModeValue/${selectedSize.value}/$languageCode/"
+                val gameModeValue = if (modes.intValue == R.string.classic_mode) 0 else 1
+                val languageCode = if (lang.intValue == R.string.russian) "ru" else "en"
 
+                val coroutineScope = rememberCoroutineScope()
                 RoundedButton(
                     modifier = Modifier.fillMaxWidth(0.7f),
                     colors = ButtonDefaults.buttonColors(
@@ -84,13 +103,17 @@ fun BottomSheet(onClickGame: (ScreenRoute) -> Unit, onDismissRequest: () -> Unit
                         containerColor = WordleColor.colors.textForActiveBtnMkI
                     ),
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
-                    onClick = { onClickGame(
-                        ScreenRoute.Game(
-                            mode = gameModeValue,
-                            wordLength = selectedSize.value.toInt(),
-                            lang = languageCode,
+                    onClick = {
+                        coroutineScope.launch {
+                            sheetState.hide()
+                            onClickGame(
+                                ScreenRoute.Game(
+                                    mode = gameModeValue,
+                                    wordLength = selectedSize.value.toInt(),
+                                    lang = languageCode,
+                                )
                             )
-                        )
+                        }
                     },
                 ) {
                     Text("Начать", fontSize = 14.sp, style = WordleTypography.bodyMedium)
@@ -101,11 +124,12 @@ fun BottomSheet(onClickGame: (ScreenRoute) -> Unit, onDismissRequest: () -> Unit
 }
 
 @Composable
-private fun OptionSelectorRow(
-    items: List<String>,
-    selected: String,
-    onSelected: (String) -> Unit,
-    isCircle: Boolean = false
+private fun <T> OptionSelectorRow(
+    items: List<T>,
+    selected: T,
+    onSelected: (T) -> Unit,
+    isCircle: Boolean = false,
+    label: @Composable (T) -> String
 ) {
     if (isCircle) {
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -120,7 +144,7 @@ private fun OptionSelectorRow(
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                     onClick = { onSelected(item) },
                 ) {
-                    Text(text = item, fontSize = 14.sp, style = WordleTypography.bodyMedium)
+                    Text(label(item), fontSize = 14.sp, style = WordleTypography.bodyMedium)
                 }
             }
         }
@@ -136,7 +160,7 @@ private fun OptionSelectorRow(
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                     onClick = { onSelected(item) },
                 ) {
-                    Text(item, fontSize = 14.sp, style = WordleTypography.bodyMedium)
+                    Text(label(item), fontSize = 14.sp, style = WordleTypography.bodyMedium)
                 }
             }
         }

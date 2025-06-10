@@ -6,6 +6,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +41,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.features.CustomTextField
@@ -82,7 +85,7 @@ fun FriendModeDialog(navigateTo: (ScreenRoute) -> Unit, onDismiss: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    "Дружеский вызов",
+                    stringResource(R.string.friend_mode),
                     color = WordleColor.colors.textPrimary,
                     style = WordleTypography.titleLarge,
                     fontSize = 18.sp
@@ -168,19 +171,19 @@ private fun GetTabContent(
 
     when (selectedTab) {
         0 -> WordInputSection(
-            title = "Брось вызов другу - загадай ему слово от 4 до 11 букв:",
+            title = stringResource(R.string.put_word),
             textFieldValue = viewModel.hiddenPlace,
             onTextFieldChange = viewModel::onHiddenPlaceChange,
-            buttonText = "Скопировать шифр",
+            buttonText = stringResource(R.string.copy_shifr),
             modifier,
             onButtonClick = { viewModel.requestCopyCipher() },
             viewModel.errorText
         )
         1 -> WordInputSection(
-            title = "Введи шифр ниже, чтобы отгадать слово от друга:",
+            title = stringResource(R.string.put_shifr),
             textFieldValue = viewModel.guessedWord,
             onTextFieldChange = viewModel::onGuessedWordChange,
-            buttonText = "Отгадать слово",
+            buttonText = stringResource(R.string.decode_word),
             modifier,
             onButtonClick = { viewModel.navigateToGame(navigateTo = navigateTo) },
             viewModel.errorText
@@ -208,8 +211,9 @@ private fun WordInputSection(
     CustomTextField(
         value = textFieldValue,
         onValueChange = onTextFieldChange,
-        placeholder = "Введите здесь!",
-        modifier
+        placeholder = stringResource(R.string.put_here),
+        modifier,
+        color = WordleColor.colors.primary,
     )
     Text(
         text = errorText ?: "",

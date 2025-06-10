@@ -13,13 +13,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.data.local.datastore.AppDataStore
-import com.sinya.projects.wordle.screen.game.GameViewModel
+import com.sinya.projects.wordle.navigation.ScreenRoute
+import com.sinya.projects.wordle.screen.game.GameUiEvent
+import com.sinya.projects.wordle.screen.game.GameUiState
 import com.sinya.projects.wordle.ui.features.ImageButton
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
@@ -29,10 +29,12 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 @Composable
-fun GameHeader(navController: NavController, viewModel: GameViewModel) {
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-
+fun GameHeader(
+    navigateToBackStack: () -> Unit,
+    navigateTo: (ScreenRoute) -> Unit,
+    onEvent: (GameUiEvent) -> Unit,
+    state: GameUiState
+) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -42,37 +44,61 @@ fun GameHeader(navController: NavController, viewModel: GameViewModel) {
     ) {
         Row(Modifier.weight(1f)) {
             ImageButton(
-                R.drawable.arrow_back,
-                modifier = Modifier.size(32.dp)
-            ) { navController.popBackStack() }
-            ImageButton(R.drawable.game_lose, modifier = Modifier.size(32.dp)) {
-                coroutineScope.launch {
-                    viewModel.result = "Поражение"
-                    AppDataStore.clearSavedGame(context)
-                    viewModel.addStatisticData(viewModel.result)
-                    viewModel.addWordDictionary(viewModel.hiddenWord) // Теперь можно вызывать suspend метод
-                    viewModel.dialogFinish.value = true
-                }
+                image = R.drawable.arrow_back,
+                modifierIcon = Modifier.size(32.dp),
+                colorFilter = ColorFilter.tint(WordleColor.colors.textPrimary),
+                onClick = navigateToBackStack
+            )
+            if (state.result == R.string.placeholder) {
+                ImageButton(
+                    image = R.drawable.game_lose,
+                    modifierIcon = Modifier.size(32.dp),
+                    onClick = { onEvent(GameUiEvent.GameFinished(R.string.lose, true)) }
+                )
             }
         }
-
         Box(
             Modifier.weight(1f),
             contentAlignment = Alignment.TopCenter
         ) {
-            GameTimer(viewModel)
+            GameTimer(
+                state = state,
+                onEvent = onEvent
+            )
         }
         Box(
             Modifier.weight(1f),
             contentAlignment = Alignment.CenterEnd
         ) {
             ImageButton(
-                R.drawable.nav_set,
-                modifier = Modifier.size(32.dp)
-            ) { navController.navigate("settingsII") }
-
+                image = R.drawable.nav_set,
+                modifierIcon = Modifier.size(32.dp),
+                colorFilter = ColorFilter.tint(WordleColor.colors.textPrimary),
+                onClick = { navigateTo(ScreenRoute.SettingWithoutBar) }
+            )
         }
     }
+}
+
+
+
+@Composable
+private fun GameTimer(
+    state: GameUiState,
+    onEvent: (GameUiEvent) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            while (isActive) {
+                delay(1000)
+                if (state.result == R.string.placeholder) onEvent(GameUiEvent.TimerTick)
+            }
+        }
+    }
+
+    TimerDisplay(state.timePassed)
 }
 
 @SuppressLint("DefaultLocale")
@@ -85,24 +111,8 @@ private fun TimerDisplay(totalSeconds: Long) {
     Text(
         text = timeText,
         fontSize = 16.sp,
-        color = WordleColor.colors.textForPassiveBtn,
+        color = WordleColor.colors.textPrimary,
         modifier = Modifier.padding(16.dp),
         style = WordleTypography.bodyMedium
     )
 }
-
-@Composable
-private fun GameTimer(viewModel: GameViewModel) {
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        scope.launch {
-            while (isActive) {
-                delay(1000)
-                if (viewModel.result == "") viewModel.totalSeconds++
-            }
-        }
-    }
-    TimerDisplay(viewModel.totalSeconds)
-}
-

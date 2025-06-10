@@ -19,8 +19,8 @@ class ProfileViewModel(
     private val avatarRepo: AvatarRepository
 ) : ViewModel() {
 
-    private val _uiState = mutableStateOf<ProfileUiState>(ProfileUiState.Loading)
-    val uiState: State<ProfileUiState> = _uiState
+    private val _state = mutableStateOf<ProfileUiState>(ProfileUiState.Loading)
+    val state: State<ProfileUiState> = _state
 
     companion object {
         fun provideFactory(
@@ -40,61 +40,72 @@ class ProfileViewModel(
         loadProfile()
     }
 
+    fun onEvent(event: ProfileUiEvent) {
+        when(event) {
+            is ProfileUiEvent.SignOut -> signOut()
+            is ProfileUiEvent.UpdateAvatar -> updateAvatar(event.uri)
+            is ProfileUiEvent.LoadAvatar -> loadAvatar()
+        }
+    }
+
     private fun loadProfile() {
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id
             if (userId == null) {
-                _uiState.value = ProfileUiState.NoAccount
+                _state.value = ProfileUiState.NoAccount
                 return@launch
             }
 
             try {
                 val profile = SupabaseService.fetchProfile(userId)
                 if (profile != null) {
-                    _uiState.value = ProfileUiState.Success(profile, null)
+                    _state.value = ProfileUiState.Success(
+                        profile = profile,
+                        email  = getEmail(),
+                        avatarUri = null,
+                        onEvent = ::onEvent)
                 } else {
-                    _uiState.value = ProfileUiState.NoAccount
+                    _state.value = ProfileUiState.NoAccount
                 }
             } catch (e: Exception) {
-                _uiState.value = ProfileUiState.Error(e.localizedMessage ?: "Ошибка загрузки профиля")
+                _state.value = ProfileUiState.Error(e.localizedMessage ?: "Ошибка загрузки профиля")
             }
         }
     }
 
-
-    fun signOut() {
+    private fun signOut() {
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
             avatarRepo.deleteLocal(userId)
             db.clearAll()
             supabase.auth.signOut()
-            _uiState.value = ProfileUiState.NoAccount
+            _state.value = ProfileUiState.NoAccount
         }
     }
 
-    fun getEmail(): String {
+    private fun getEmail(): String {
         val user = supabase.auth.currentUserOrNull()
         return user?.email ?: "Данные не найдены"
     }
 
-    fun updateAvatar(uri: Uri) {
+    private fun updateAvatar(uri: Uri) {
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
             val newAvatar = avatarRepo.uploadAvatar(userId, uri)
-            val current = _uiState.value
+            val current = _state.value
             if (current is ProfileUiState.Success) {
-                _uiState.value = current.copy(avatarUri = newAvatar)
+                _state.value = current.copy(avatarUri = newAvatar)
             }
         }
     }
 
-    fun loadAvatar() {
+    private fun loadAvatar() {
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
             val avatar = avatarRepo.downloadAvatar(userId)
-            val current = _uiState.value
+            val current = _state.value
             if (current is ProfileUiState.Success) {
-                _uiState.value = current.copy(avatarUri = avatar)
+                _state.value = current.copy(avatarUri = avatar)
             }
         }
     }

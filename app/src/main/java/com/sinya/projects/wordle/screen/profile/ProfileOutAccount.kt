@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.screen.profile.subscreens
+package com.sinya.projects.wordle.screen.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,26 +13,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.ui.theme.gray800
 
 @Composable
-fun ProfileWithoutAccount(navController: NavController) {
+fun ProfileOutAccount(navigateTo: (ScreenRoute) -> Unit,
+) {
     Column(
         Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Spacer(Modifier.fillMaxWidth())
+        Spacer(Modifier)
         Column(
             Modifier
                 .fillMaxWidth()
@@ -41,7 +39,7 @@ fun ProfileWithoutAccount(navController: NavController) {
         ) {
             Text(
                 text = stringResource(R.string.sync_to_save_stat),
-                color = Color.White,
+                color = WordleColor.colors.textPrimary,
                 style = WordleTypography.titleLarge,
                 fontSize = 21.sp,
                 textAlign = TextAlign.Center
@@ -49,16 +47,15 @@ fun ProfileWithoutAccount(navController: NavController) {
             Spacer(Modifier.height(15.dp))
             Text(
                 text = stringResource(R.string.play_with_friends),
-                color = WordleColor.colors.background,
-                fontSize = 16.sp,
+                color = WordleColor.colors.textCardSecondary,
                 style = WordleTypography.titleLarge,
+                fontSize = 16.sp,
                 textAlign = TextAlign.Center
             )
         }
         Column(
             Modifier
-                .fillMaxWidth()
-                .padding(bottom = 130.dp),
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             RoundedButton(
@@ -67,7 +64,7 @@ fun ProfileWithoutAccount(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = {
-                    navController.navigate("register")
+                    navigateTo(ScreenRoute.Register)
                 }
             ) {
                 Text(
@@ -83,17 +80,17 @@ fun ProfileWithoutAccount(navController: NavController) {
                     .fillMaxWidth(0.9f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkII),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
-                onClick = {
-                    navController.navigate("login")
+                onClick = {navigateTo(ScreenRoute.Login)
                 }
             ) {
                 Text(
-                    stringResource(R.string.login),
+                    stringResource(R.string.sign_in),
                     fontSize = 18.sp,
                     color = WordleColor.colors.textForActiveBtnMkII,
                     style = WordleTypography.bodyMedium
                 )
             }
         }
+        Spacer(Modifier)
     }
 }

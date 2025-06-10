@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.sinya.projects.wordle.AppSettings
-import com.sinya.projects.wordle.domain.model.data.SavedGame
+import com.sinya.projects.wordle.screen.game.model.Game
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -67,7 +67,7 @@ object AppDataStore {
 
 
     // 🎮 Состояние игры
-    suspend fun saveGame(context: Context, game: SavedGame) {
+    suspend fun saveGame(context: Context, game: Game) {
         val json = Json.encodeToString(game)
         context.dataStore.edit  { it[LAST_GAME_STATE_KEY] = json
         }
@@ -78,14 +78,14 @@ object AppDataStore {
         }
     }
 
-    suspend fun loadGame(context: Context): SavedGame? {
+    suspend fun loadGame(context: Context): Game? {
         val json = context.dataStore.data
             .map { it[LAST_GAME_STATE_KEY] }
             .firstOrNull()
 
         return json?.let {
             try {
-                Json.decodeFromString<SavedGame>(it)
+                Json.decodeFromString<Game>(it)
             } catch (e: Exception) {
                 Log.d("Пизда", "ошибка $e")
                 null

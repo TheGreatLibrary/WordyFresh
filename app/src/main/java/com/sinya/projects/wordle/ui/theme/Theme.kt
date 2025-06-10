@@ -8,7 +8,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-
 @Immutable
 data class WordleColors (
     val background: Color, // фоновый цвет для приложения
@@ -16,34 +15,44 @@ data class WordleColors (
 
     val backgroundCard: Color, // фоновый цвет карточки
     val textCardPrimary: Color, // основной цвет текста в карточках
-    val textCardSecondary: Color,
+    val textCardSecondary: Color, // второстепенный цвет текста в карточках
 
-    val backgroundActiveBtnMkI: Color, // фоновый цвет для активной кнопки (зеленая?)
-    val backgroundActiveBtnMkII: Color, // фоновый цвет для активной кнопки (белый?)
-    val backgroundPassiveBtn: Color, // фоновый цвет для второстепенной кнопки (черный?)
-    val textForActiveBtnMkI: Color, // цвет текста для выбранной кнопки
-    val textForActiveBtnMkII: Color, // цвет текста для выбранной кнопки
-    val textForPassiveBtn: Color, // цвет текста для второстепенной кнопки
+    val backgroundActiveBtnMkI: Color = green800, // фоновый цвет для активной кнопки
+    val textForActiveBtnMkI: Color = white, // цвет текста для выбранной кнопки
 
-    val backgroundIcon: Color,
-    val foregroundIcon: Color,
+    val backgroundActiveBtnMkII: Color = white, // цвет для активной кнопки
+    val textForActiveBtnMkII: Color = green800, // цвет текста для выбранной кнопки
 
-    val shadowColor: Color,
+    val backgroundPassiveBtn: Color = gray800, // фоновый цвет для пассивной кнопки
+    val textForPassiveBtn: Color = white, // цвет текста для пассивной кнопки
 
-    val checkedThumbColor: Color,
-    val checkedTrackColor: Color, // Цвет трека в включенном состоянии
-    val uncheckedThumbColor: Color, // Цвет кружка в выключенном состоянии
-    val uncheckedTrackColor: Color, // Цвет т
+    val backgroundIcon: Color = green600, // фоновый цвет иконки
+    val foregroundIcon: Color = white, // цвет иконки
 
-    val backgroundBoxDefault: Color,
-    val textTitleColor: Color,
-    val onTextColor: Color,
-    val textLinkColor: Color,
+    val shadowColor: Color, // тень у карточек
 
-    val primary: Color, // зеленый
-    val backPrimary: Color, // светло-зеленый
-    val secondary: Color, // красный
-    val tertiary: Color, // желтый
+    val checkedThumbColor: Color, // кружок свича выбранный
+    val checkedTrackColor: Color, // трек свича выбранный
+    val uncheckedThumbColor: Color, // кружок свича невыбранный
+    val uncheckedTrackColor: Color, // трек свича невыбранный
+
+    val backgroundBoxDefault: Color = gray30, // ячейка игровая пустая
+    val backgroundBoxGood: Color = green800, // ячейка угадана
+    val backgroundBoxNormal: Color = yellow, // ячейка частично угадана
+    val backgroundBoxBad: Color = gray600, // ячейка неугадана
+
+    val backgroundKeyDefault: Color = gray100, // клавиша игровая дефолт
+
+    val textOnColorCard: Color, // цвет текста у карточек
+    val textLinkColor: Color = green600, // цвет ссылки
+
+    val backgroundFinishHiddenWord: Color,
+    val textFinishHiddenWord: Color,
+
+    val primary: Color = green800, // главная нота приложения
+    val backPrimary: Color = green600, // дополнительный цвет приложения
+    val secondary: Color = red, // второстепенный
+    val tertiary: Color = yellow, // третьестепенный
 )
 
 val LightWordleColors = WordleColors(
@@ -54,18 +63,6 @@ val LightWordleColors = WordleColors(
     textCardPrimary = gray800,
     textCardSecondary = gray500,
 
-    backgroundActiveBtnMkI = green800, // Светло-серый цвет кнопок
-    textForActiveBtnMkI = white, // Чёрный текст
-
-    backgroundActiveBtnMkII = white, // Ещё темнее
-    textForActiveBtnMkII = green800, // Чёрный текст
-
-    backgroundPassiveBtn = gray800,
-    textForPassiveBtn = white,
-
-    backgroundIcon = green600, // Серый фон иконок
-    foregroundIcon = white, // Чёрные иконки
-
     shadowColor = gray400,
 
     checkedThumbColor = green600,
@@ -73,15 +70,10 @@ val LightWordleColors = WordleColors(
     uncheckedThumbColor = gray300,
     uncheckedTrackColor = gray500,
 
-    backgroundBoxDefault = white30,
-    textTitleColor = white,
-    onTextColor = green800, // Белый текст на цветных кнопках
-    textLinkColor = gray200, // Синий для ссылок
+    backgroundFinishHiddenWord = gray100,
+    textFinishHiddenWord = white,
 
-    primary = green800, // Зелёный
-    backPrimary = green600, // Светло-зелёный
-    secondary = red, // Красный
-    tertiary = yellow // Жёлтый
+    textOnColorCard = white,
 )
 
 val DarkWordleColors = WordleColors(
@@ -92,34 +84,17 @@ val DarkWordleColors = WordleColors(
     textCardPrimary = white,
     textCardSecondary = gray300,
 
-    backgroundActiveBtnMkI = green800, // Светло-серый цвет кнопок
-    textForActiveBtnMkI = white, // Чёрный текст
-
-    backgroundActiveBtnMkII = white, // Ещё темнее
-    textForActiveBtnMkII = green800, // Чёрный текст
-
-    backgroundPassiveBtn = gray800,
-    textForPassiveBtn = white,
-
-    backgroundIcon = green600, // Серый фон иконок
-    foregroundIcon = white, // Чёрные иконки
-
     shadowColor = gray900,
 
     checkedThumbColor = green600,
-    checkedTrackColor = green400, // Цвет трека в включенном состоянии
-    uncheckedThumbColor = gray100, // Цвет кружка в выключенном состоянии
-    uncheckedTrackColor = gray300, // Цвет т
+    checkedTrackColor = green400,
+    uncheckedThumbColor = gray100,
+    uncheckedTrackColor = gray300,
 
-    backgroundBoxDefault = white30,
-    textTitleColor = white,
-    onTextColor = green800, // Белый текст на цветных кнопках
-    textLinkColor = gray200, // Синий для ссылок
+    backgroundFinishHiddenWord = gray800,
+    textFinishHiddenWord = white,
 
-    primary = green800, // Зелёный
-    backPrimary = green600, // Светло-зелёный
-    secondary = red, // Красный
-    tertiary = yellow // Жёлтый
+    textOnColorCard = white,
 )
 
 val LocalWordleColors = staticCompositionLocalOf { LightWordleColors }

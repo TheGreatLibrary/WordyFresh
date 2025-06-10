@@ -19,13 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.domain.model.data.Key
+import com.sinya.projects.wordle.screen.game.model.Key
 import com.sinya.projects.wordle.ui.theme.WordleTypography
 import com.sinya.projects.wordle.ui.theme.white
 import kotlinx.coroutines.launch
@@ -34,9 +35,7 @@ import kotlinx.coroutines.launch
 fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
     // 1) Animatable для масштаба
     val scale = remember { Animatable(1f) }
-    // 2) CoroutineScope для запуска анимаций
     val scope = rememberCoroutineScope()
-
 
     val animatedColor by animateColorAsState(
         targetValue = Color(key.color),
@@ -50,6 +49,7 @@ fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
                 scaleY = scale.value
             }
             .background(animatedColor, RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(6.dp))
             .clickable {
                 scope.launch {
                     scale.snapTo(0.95f)  // мгновенно уменьшаем
@@ -63,6 +63,7 @@ fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
                 }
                 onClick()
             }
+
             .padding(vertical = 9.dp),
         contentAlignment = Alignment.Center
     ) {

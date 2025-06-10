@@ -1,9 +1,9 @@
-package com.sinya.projects.wordle.domain.model.data
+package com.sinya.projects.wordle.screen.game.model
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SavedGame(
+data class Game(
     val targetWord: String,
     val mode: Int,
     val lang: String,
@@ -17,5 +17,6 @@ data class SavedGame(
 @Serializable
 data class GameSettings(
     val confettiStatus: Boolean,
-    val ratingStatus: Boolean
+    val ratingStatus: Boolean,
+    val keyboardCode: Int
 )

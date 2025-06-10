@@ -34,7 +34,6 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleShapes
 import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.ui.theme.gray600
 import com.sinya.projects.wordle.ui.theme.gray800
 import com.sinya.projects.wordle.ui.theme.white
 
@@ -65,7 +64,7 @@ fun CardMode(
                 title,
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
-                color = WordleColor.colors.textTitleColor,
+                color = WordleColor.colors.textOnColorCard,
                 style = WordleTypography.titleLarge
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -16,7 +16,6 @@
     <string name="settings_screen">Settings</string>
     <string name="achievements">Achievements</string>
     <string name="profile_screen">Profile</string>
-    <string name="login">Log In</string>
     <string name="sign_up">Sign Up</string>
     <string name="change_lang">Language</string>
     <string name="change_theme">Theme</string>
@@ -89,4 +88,26 @@
     <string name="shared_to">Share via</string>
     <string name="no_internet_error">Error: No internet connection</string>
     <string name="definition_not_found">Definition not found</string>
+
+    <string name="placeholder"> </string> <!-- Было "Слово не найдено" -->
+    <string name="hard_hint_exact_position">Oops! The letter %1$s should be in position %2$d</string>
+    <string name="hard_hint_letter_required">Don\'t forget! The word must include the letter %1$s</string>
+    <string name="not_found_word">Hmm… That word doesn’t seem to exist</string>
+    <string name="hiddent_word">The correct word was:</string>
+    <string name="parsing_word">Curious what this word means?</string>
+    <string name="put_enter_to_play">Or press Enter to play again</string>
+    <string name="win">You win!</string>
+    <string name="lose">Oops, not this time</string>
+
+    <string name="russian">Russian</string>
+    <string name="english">English</string>
+    <string name="word_size">Word Length</string>
+    <string name="language_of_game">Game Language</string>
+    <string name="mode_of_game">Game Mode</string>
+    <string name="hard_mode_horizontal">Hard Mode</string>
+    <string name="put_word">Challenge your friend — come up with a word from 4 to 11 letters:</string>
+    <string name="copy_shifr">Copy Code</string>
+    <string name="put_shifr">Enter the code below to guess your friend’s word:</string>
+    <string name="decode_word">Guess the Word</string>
+    <string name="put_here">Type here!</string>
 </resources>

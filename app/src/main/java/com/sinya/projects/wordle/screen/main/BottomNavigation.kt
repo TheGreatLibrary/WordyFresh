@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
 import com.sinya.projects.wordle.ui.theme.green600
+import com.sinya.projects.wordle.utils.getRouteName
 
 @Composable
 fun BottomNavigation(navController: NavController) {
@@ -40,9 +41,7 @@ fun BottomNavigation(navController: NavController) {
         AppNavigationItems.Dictionary,
         AppNavigationItems.Settings
     )
-
-    val currentBackStack = navController.currentBackStackEntryAsState().value
-    val currentRoute = currentBackStack?.destination?.route?.substringAfterLast('.')
+    val currentRoute = getRouteName(navController)
 
     NavigationBar (
         containerColor = WordleColor.colors.backgroundCard

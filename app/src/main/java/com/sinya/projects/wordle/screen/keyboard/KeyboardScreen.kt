@@ -54,7 +54,11 @@ fun KeyboardScreen(
             .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 7.dp),
 
         ) {
-        Header(stringResource(R.string.change_keyboard), false, navigateToBackStack)
+        Header(
+            title =stringResource(R.string.change_keyboard),
+            trashVisible = false,
+            navigateTo = navigateToBackStack
+        )
         LazyColumn {
             items(boards.size) { index ->
                 KeyboardModeItem(

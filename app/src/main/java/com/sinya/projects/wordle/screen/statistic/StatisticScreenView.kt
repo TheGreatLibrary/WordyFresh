@@ -2,11 +2,7 @@ package com.sinya.projects.wordle.screen.statistic
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,17 +17,12 @@ import com.sinya.projects.wordle.ui.features.Header
 
 @Composable
 fun StatisticScreenView(
-    uiState: StatisticUi,
+    uiState: StatisticUiState.Success,
     onEvent: (StatisticUiEvent) -> Unit,
     navigateToBackStack: () -> Unit,
     navigateTo: (ScreenRoute) -> Unit
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(start = 16.dp, top = 50.dp, end = 16.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
+    Column {
         Header(stringResource(R.string.statistic_screen), true, navigateToBackStack)
         ScrollHorizontalModes(uiState, onEvent)
         StatContainers(uiState)
@@ -42,9 +33,11 @@ fun StatisticScreenView(
 
 @Preview
 @Composable
-private fun StatisticViewPreview() {
+private fun StatisticScreenPreview() {
     StatisticScreenView(
-        uiState = StatisticUi(),
+        uiState = StatisticUiState.Success(
+            onEvent = {}
+        ),
         onEvent = {},
         navigateToBackStack = { },
         navigateTo = { }

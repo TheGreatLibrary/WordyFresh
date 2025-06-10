@@ -1,36 +1,61 @@
 package com.sinya.projects.wordle.screen.main
 
-import android.util.Log
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.screen.language.LocaleViewModel
-import com.sinya.projects.wordle.screen.theme.ThemeViewModel
 import com.sinya.projects.wordle.navigation.NavGraph
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.red
+import com.sinya.projects.wordle.utils.getRouteName
+import com.sinya.projects.wordle.utils.isInternetAvailable
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun MainActivityScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleViewModel) {
+fun MainActivityScreen(
+    lang: StateFlow<String>,
+    changeLang: (String) -> Unit,
+    isDark: StateFlow<Boolean>,
+    toggleTheme: (Boolean) -> Unit,
+) {
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     val navController = rememberNavController()
-    val currentBackStack = navController.currentBackStackEntryAsState().value
-    val currentRoute = currentBackStack?.destination?.route?.substringAfterLast('.')
-        ?.substringBefore("/")
-        ?.substringBefore("?") // получаем ключ типа: "Game", "Profile", "Login"
+    val currentRoute = getRouteName(navController)
+    val navigateTo: (ScreenRoute) -> Unit = { route ->
+        navController.navigate(route)
+    }
+    val navigateBack: () -> Unit = {
+        val canGoBack = navController.previousBackStackEntry != null
+        if (canGoBack) {
+            navController.popBackStack()
+        }
+    }
 
     val withOutImage = currentRoute in listOf(
         ScreenRoute.LanguageMode::class.simpleName,
@@ -47,15 +72,16 @@ fun MainActivityScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleVi
         ScreenRoute.Register::class.simpleName
     ) || withOutImage
 
-    Log.d("database", ""+currentRoute)
-
     Scaffold(
-        modifier = Modifier.fillMaxSize().background(color = WordleColor.colors.background),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = WordleColor.colors.background),
         bottomBar = {
             if (withOutBottomBar) {
-                AddBlock()
+                AddBlock(context)
             } else BottomNavigation(navController)
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = WordleColor.colors.background
     ) { innerPadding ->
 //        if (!withOutImage) Image(
@@ -66,13 +92,33 @@ fun MainActivityScreen(themeViewModel: ThemeViewModel, localeViewModel: LocaleVi
 //                .blur(if (withOutBottomBar) 5.dp else 0.dp),
 //            contentScale = ContentScale.Crop
 //        )
-        NavGraph(themeViewModel, localeViewModel, navController, Modifier.padding(innerPadding))
+        NavGraph(
+            lang = lang,
+            isDark = isDark,
+            toggleTheme = toggleTheme,
+            changeLang = changeLang,
+            navHostController = navController,
+            navigateTo = navigateTo,
+            navigateToBackStack = navigateBack,
+            modifier = Modifier.padding(innerPadding),
+            snackbarHost = snackbarHostState
+        )
     }
 }
 
 @Composable
-fun AddBlock() {
-    Box(
-        modifier = Modifier.fillMaxWidth().wrapContentHeight()
-    )
+fun AddBlock(context: Context) {
+    if (isInternetAvailable(context)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+//                .heightIn(45.dp)
+//                .background(color = red),
+            contentAlignment = Alignment.Center
+        ) {
+            Spacer(Modifier.height(45.dp))
+//            Text("Когда-нибудь здесь будет реклама", color = Color.White)
+        }
+    } else Spacer(Modifier.height(45.dp))
 }

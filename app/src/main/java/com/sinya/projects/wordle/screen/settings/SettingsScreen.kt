@@ -7,8 +7,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
-import com.sinya.projects.wordle.screen.language.LocaleViewModel
-import com.sinya.projects.wordle.screen.theme.ThemeViewModel
 import com.sinya.projects.wordle.domain.model.data.KeyboardItem
 import com.sinya.projects.wordle.domain.model.data.ThemeItem
 import com.sinya.projects.wordle.navigation.ScreenRoute
@@ -16,26 +14,27 @@ import com.sinya.projects.wordle.screen.keyboard.AppKeyboards
 import com.sinya.projects.wordle.screen.language.AppLanguages
 import com.sinya.projects.wordle.screen.theme.AppThemes
 import com.sinya.projects.wordle.utils.sendSupportEmail
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
     navigateToBackStack: () -> Unit,
     navigateTo: (ScreenRoute) -> Unit,
-    themeViewModel: ThemeViewModel,
-    localeViewModel: LocaleViewModel,
+    isDark: StateFlow<Boolean>,
+    lang: StateFlow<String>
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    val isDark by themeViewModel.isDarkMode.collectAsState()
-    val lang by localeViewModel.language.collectAsState()
+    val currentIsDark by isDark.collectAsState()
+    val locale by lang.collectAsState()
     val codeKeyboard by AppDataStore.getKeyboardMode(context).collectAsState(initial = 0)
     val confettiEnabled by AppDataStore.getConfettiMode(context).collectAsState(initial = false)
     val ratingModeEnabled by AppDataStore.getRatingWordMode(context).collectAsState(initial = false)
 
-    val currentLang = AppLanguages.getByCode(lang)
-    val currentTheme = AppThemes.getByCode(isDark)
+    val currentLang = AppLanguages.getByCode(locale)
+    val currentTheme = AppThemes.getByCode(currentIsDark)
     val currentKeyboard = AppKeyboards.getByCode(codeKeyboard)
 
     SettingsScreenView(

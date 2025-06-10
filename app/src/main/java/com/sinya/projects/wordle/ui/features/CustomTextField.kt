@@ -1,7 +1,5 @@
 package com.sinya.projects.wordle.ui.features
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,26 +7,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.ui.theme.Montserrat
+import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.gray400
 import com.sinya.projects.wordle.ui.theme.green400
 import com.sinya.projects.wordle.ui.theme.green800
@@ -43,7 +38,8 @@ fun CustomTextField(
     maxLines: Int = 1,
     minLines: Int = 1,
     isError: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    color: Color = Color.Transparent
 ) {
     val customSelectionColors = TextSelectionColors(
         backgroundColor = green400,
@@ -51,7 +47,7 @@ fun CustomTextField(
     )
 
     CompositionLocalProvider(LocalTextSelectionColors provides customSelectionColors) {
-        Column() {
+        Column {
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -62,13 +58,13 @@ fun CustomTextField(
                     fontSize = 14.sp,
                     fontFamily = Montserrat,
                     fontWeight = FontWeight.Medium,
-                    color = green800
+                    color = if (isError) WordleColor.colors.secondary else WordleColor.colors.primary
                 ),
                 cursorBrush = SolidColor(green800),
                 modifier = Modifier
                     .border(
                         width = 1.dp,
-                        color = if (isError) Color.Red else Color.Transparent,
+                        color = if (isError) WordleColor.colors.secondary else color,
                         shape = RoundedCornerShape(90.dp)
                     )
                     .then(modifier),
@@ -89,13 +85,12 @@ fun CustomTextField(
                     }
                 }
             )
-
             if (!errorMessage.isNullOrBlank()) {
                 if (isError) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = errorMessage,
-                        color = Color.Red,
+                        color = WordleColor.colors.secondary,
                         fontSize = 12.sp,
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Normal
@@ -108,48 +103,27 @@ fun CustomTextField(
 }
 
 @Composable
-fun ImageButton(image: Int, modifier: Modifier, colorFilter: ColorFilter? = null, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        Image(
-            painter = painterResource(image),
-            contentDescription = null,
-            modifier,
-            colorFilter = colorFilter
-        )
-    }
-}
-
-@Composable
-fun RoundedBackgroundText(text: String) {
-    Box(
-        modifier = Modifier
-            .background(color = Color(0x9C257572), shape = RoundedCornerShape(90.dp))
-            .padding(horizontal = 30.dp, vertical = 8.dp)
-    ) {
-        Text(text, color = Color.White, fontSize = 14.sp)
-    }
-}
-
-@Composable
 fun CustomTextFieldWithLabel(
     label: String,
-    name: MutableState<String>,
+    name: String,
+    onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier,
-    isError: MutableState<Boolean>,
+    isError: Boolean,
     error: String,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        Text(label, color = Color.White, fontSize = 16.sp)
+        Text(label, color = WordleColor.colors.textPrimary, fontSize = 16.sp)
         CustomTextField(
-            value = name.value,
-            onValueChange = { name.value = it },
+            value = name,
+            onValueChange = onValueChange,
             placeholder = placeholder,
             modifier = modifier,
-            isError = isError.value,
-            errorMessage = error
+            isError = isError,
+            errorMessage = error,
+            color = WordleColor.colors.primary
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.dialog
+package com.sinya.projects.wordle.screen.game.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -39,22 +40,21 @@ fun NotRightWordDialog(
             enter = fadeIn(animationSpec = tween(200)) + scaleIn(initialScale = 0.8f),
             exit = fadeOut(animationSpec = tween(150)) + scaleOut(targetScale = 0.9f)
         ) {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 20.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(color = WordleColor.colors.backgroundCard)
-                        .padding(vertical = 13.dp, horizontal = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        message,
-                        color = WordleColor.colors.textCardPrimary,
-                        style = WordleTypography.bodyLarge,
-                        fontSize = 20.sp
-                    )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(color = WordleColor.colors.background)
+                    .padding(horizontal = 15.dp, vertical = 20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    message,
+                    color = WordleColor.colors.textPrimary,
+                    style = WordleTypography.bodyLarge,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }

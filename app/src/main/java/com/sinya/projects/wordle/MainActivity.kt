@@ -12,8 +12,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
@@ -33,6 +40,7 @@ import com.sinya.projects.wordle.screen.language.LocaleViewModel
 import com.sinya.projects.wordle.screen.theme.ThemeViewModel
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseClientHolder
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseSyncManager
+import com.sinya.projects.wordle.screen.home.components.HomePlaceholder
 import com.sinya.projects.wordle.screen.main.MainActivityScreen
 import com.sinya.projects.wordle.ui.theme.WordleTheme
 import com.sinya.projects.wordle.utils.isInternetAvailable
@@ -104,13 +112,22 @@ class MainActivity : ComponentActivity() {
             settings?.let {
                 WordleTheme(darkTheme = it.isDarkTheme) {
                     CompositionLocalProvider(LocalAppSettings provides it) {
-                        MainActivityScreen(themeViewModel, localeViewModel)
+                        MainActivityScreen(
+                            lang = localeViewModel.language,
+                            isDark = themeViewModel.isDarkMode,
+                            toggleTheme = { state -> themeViewModel.toggleTheme(state) },
+                            changeLang = { lang -> localeViewModel.changeLanguage(lang) },
+                        )
                     }
                 }
             } ?: run {
-                // пока нет настроек — можно показать Splash / Preloader
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .consumeWindowInsets(WindowInsets.statusBars)
+                        .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 50.dp),
+                ) {
+                    HomePlaceholder()
                 }
             }
         }

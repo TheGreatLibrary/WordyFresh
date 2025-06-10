@@ -4,12 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,16 +33,14 @@ import java.util.concurrent.TimeUnit
 @SuppressLint("DefaultLocale")
 @Composable
 fun HomeScreenView(
-    state: HomeUi,
+    state: HomeUiState.Success,
     navigateTo: (ScreenRoute) -> Unit,
     sendEmail: () -> Unit,
     onEvent: (HomeUiEvent) -> Unit
 ) {
     Column(
         Modifier
-            .fillMaxSize()
-            .consumeWindowInsets(WindowInsets.statusBars)
-            .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 50.dp),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -159,9 +153,11 @@ fun HomeScreenView(
 
 @Preview
 @Composable
-private fun PreviewHomeView() {
+private fun HomeScreenPreview() {
     HomeScreenView(
-        state = HomeUi(),
+        state = HomeUiState.Success(
+            onEvent = { }
+        ),
         navigateTo = {  },
         sendEmail = {  },
         onEvent = { }

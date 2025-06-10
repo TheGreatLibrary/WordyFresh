@@ -1,12 +1,12 @@
 package com.sinya.projects.wordle.data.remote.supabase
 
 import android.content.Context
-import android.net.ConnectivityManager
 import android.util.Log
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.domain.model.toSyncAchievements
 import com.sinya.projects.wordle.domain.model.toSyncDictionary
 import com.sinya.projects.wordle.domain.model.toSyncStatistic
+import com.sinya.projects.wordle.utils.isInternetAvailable
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import kotlinx.serialization.json.Json
@@ -108,10 +108,7 @@ object SupabaseSyncManager {
         }
     }
 
-    private fun isInternetAvailable(context: Context): Boolean {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        return cm.activeNetworkInfo?.isConnected == true
-    }
+
 
     fun getCurrentIsoTimestamp(): String {
         return OffsetDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
