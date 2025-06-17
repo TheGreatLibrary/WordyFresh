@@ -16,6 +16,7 @@ sealed class ScreenRoute {
         val word: String? = "",
     ) : ScreenRoute()
 
+    @Serializable data object Onboarding : ScreenRoute()
     @Serializable data object Home : ScreenRoute()
     @Serializable data object Statistic : ScreenRoute()
     @Serializable data object Achieves : ScreenRoute()

@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.screen.dictionary
+package com.sinya.projects.wordle.screen.achieve
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateDpAsState
@@ -31,19 +31,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.domain.model.data.DictionaryItem
+import com.sinya.projects.wordle.screen.dictionary.DictionaryUiEvent
+import com.sinya.projects.wordle.screen.dictionary.DictionaryUiState
 import com.sinya.projects.wordle.screen.dictionary.components.DictionaryCard
-import com.sinya.projects.wordle.screen.dictionary.components.SearchContainer
 import com.sinya.projects.wordle.ui.features.Header
 import kotlinx.coroutines.delay
 
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DictionaryScreenView(
-    state: DictionaryUiState.Success,
-    onEvent: (DictionaryUiEvent) -> Unit,
+fun AchieveScreenView(
+    state: AchieveUiState.Success,
+    onEvent: (AchieveUiEvent) -> Unit,
     navigateToBackStack: () -> Unit,
-    getList: List<DictionaryItem>
 ) {
     val context = LocalContext.current
     val pullToRefreshState = rememberPullToRefreshState()
@@ -86,25 +86,22 @@ fun DictionaryScreenView(
                         .padding(top = 50.dp)
                 ) {
                     Header(
-                        title = stringResource(R.string.dictionary),
+                        title = stringResource(R.string.achievements),
                         trashVisible = true,
                         navigateTo = navigateToBackStack,
-                        trashOnClick = {})
-                    SearchContainer(
-                        searchQuery = state.searchQuery,
-                        onValueChanged = { query -> onEvent(DictionaryUiEvent.OnSearchQueryChanged(query)) }
+                        trashOnClick = {}
                     )
                     Spacer(Modifier.height(21.dp))
                 }
             }
 
-            itemsIndexed(getList, key = { _, item -> item.word }) { _, word ->
-                DictionaryCard(
-                    context = context,
-                    title = word.word,
-                    description = word.description,
-                    onEvent = onEvent
-                )
+            itemsIndexed(state.achieveList, key = { _, item -> item.id }) { _, word ->
+//                DictionaryCard(
+//                    context = context,
+//                    title = word.word,
+//                    description = word.description,
+//                    onEvent = onEvent
+//                )
             }
 
             item {
@@ -119,15 +116,14 @@ fun DictionaryScreenView(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun DictionaryViewPreview() {
-    DictionaryScreenView(
+private fun AchieveScreenPreview() {
+    AchieveScreenView(
         navigateToBackStack = { },
         onEvent = { },
-        state = DictionaryUiState.Success(
+        state = AchieveUiState.Success(
             onEvent = { }
         ),
-        getList = emptyList()
     )
 }

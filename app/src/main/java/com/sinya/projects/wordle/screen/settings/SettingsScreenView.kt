@@ -73,7 +73,7 @@ fun SettingsScreenView(
                 icon = R.drawable.set_guide,
                 icon2 = R.drawable.arrow
             ) {
-                navigateTo(ScreenRoute.ThemeMode)
+                navigateTo(ScreenRoute.Onboarding)
             }
         }
         CardColumn {

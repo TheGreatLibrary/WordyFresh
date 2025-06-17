@@ -7,8 +7,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.sinya.projects.wordle.AppSettings
+import com.sinya.projects.wordle.domain.model.data.AppSettings
 import com.sinya.projects.wordle.screen.game.model.Game
+import com.sinya.projects.wordle.utils.getInitialAppLocale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -16,9 +17,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 
 
-val Context.dataStore by preferencesDataStore(name = "settings")
-
 object AppDataStore {
+    private val Context.dataStore by preferencesDataStore(name = "settings")
 
     private val RATING_WORDS_KEY = booleanPreferencesKey("rating_words")
     private val CONFETTI_KEY = booleanPreferencesKey("confetti")
@@ -29,6 +29,7 @@ object AppDataStore {
     private val LANGUAGE_KEY = stringPreferencesKey("language")
     private val LAST_GAME_STATE_KEY = stringPreferencesKey("last_game_state")
 
+    private val ONBOARDING_KEY = booleanPreferencesKey("onboarding")
 
     // 🌙 Тема
     suspend fun setDarkMode(context: Context, isDark: Boolean) {
@@ -69,12 +70,14 @@ object AppDataStore {
     // 🎮 Состояние игры
     suspend fun saveGame(context: Context, game: Game) {
         val json = Json.encodeToString(game)
-        context.dataStore.edit  { it[LAST_GAME_STATE_KEY] = json
+        context.dataStore.edit {
+            it[LAST_GAME_STATE_KEY] = json
         }
     }
 
     suspend fun clearSavedGame(context: Context) {
-        context.dataStore.edit  { it.remove(LAST_GAME_STATE_KEY)
+        context.dataStore.edit {
+            it.remove(LAST_GAME_STATE_KEY)
         }
     }
 
@@ -93,6 +96,18 @@ object AppDataStore {
         }
     }
 
+    fun getSavedGame(context: Context): Flow<Game?> =
+        context.dataStore.data.map { prefs ->
+            prefs[LAST_GAME_STATE_KEY]?.let {
+                try {
+                    Json.decodeFromString<Game>(it)
+                } catch (e: Exception) {
+                    Log.e("AppDataStore", "Ошибка при разборе Game: $e")
+                    null
+                }
+            }
+        }
+
 
     // Положение клавиатуры
     suspend fun setKeyboardMode(context: Context, mode: Int) {
@@ -103,13 +118,21 @@ object AppDataStore {
         context.dataStore.data.map { it[KEYBOARD_MODE_KEY] ?: 0 }
 
 
-
     // ✅ Если хочешь получить всё сразу
     suspend fun getSettings(context: Context): AppSettings {
         val prefs = context.dataStore.data.first()
         return AppSettings(
-            languageCode = prefs[LANGUAGE_KEY] ?: "ru",
+            languageCode = prefs[LANGUAGE_KEY] ?: getInitialAppLocale(context),
             isDarkTheme = prefs[DARK_MODE_KEY] ?: false
         )
     }
+
+
+    // показ онбординга
+    suspend fun setOnboardingMode(context: Context, state: Boolean) {
+        context.dataStore.edit { it[ONBOARDING_KEY] = state }
+    }
+
+    fun getOnboardingMode(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { it[ONBOARDING_KEY] ?: false }
 }

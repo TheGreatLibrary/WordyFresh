@@ -20,6 +20,7 @@ import com.sinya.projects.wordle.screen.keyboard.KeyboardScreen
 import com.sinya.projects.wordle.screen.language.AppLanguages
 import com.sinya.projects.wordle.screen.language.LanguageScreen
 import com.sinya.projects.wordle.screen.login.LoginScreen
+import com.sinya.projects.wordle.screen.onboarding.OnboardingPager
 import com.sinya.projects.wordle.screen.profile.ProfileScreen
 import com.sinya.projects.wordle.screen.register.RegisterScreen
 import com.sinya.projects.wordle.screen.settings.SettingsScreen
@@ -32,13 +33,19 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun NavGraph(
+    startRoute: ScreenRoute,
+    toggleOnboard: (Boolean) -> Unit,
+
     lang: StateFlow<String>,
     changeLang: (String) -> Unit,
+
     isDark: StateFlow<Boolean>,
     toggleTheme: (Boolean) -> Unit,
+
     navHostController: NavHostController,
     navigateToBackStack: () -> Unit,
     navigateTo: (ScreenRoute) -> Unit,
+
     modifier: Modifier,
     snackbarHost: SnackbarHostState
 ) {
@@ -47,11 +54,22 @@ fun NavGraph(
 
     NavHost(
         navController = navHostController,
-        startDestination = ScreenRoute.Home,
+        startDestination = startRoute,
         modifier = Modifier
             .fillMaxSize()
             .then(modifier),
     ) {
+        composable<ScreenRoute.Onboarding> {
+            OnboardingPager(
+                changeLang = changeLang,
+                isDark = isDark,
+                toggleTheme = toggleTheme,
+                onFinish = {
+                    toggleOnboard(true)
+                    navigateTo(ScreenRoute.Home)
+                }
+            )
+        }
         composable<ScreenRoute.Home> {
             HomeScreen(
                 navigateTo = navigateTo,

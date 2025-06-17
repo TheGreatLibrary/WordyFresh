@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -51,7 +50,10 @@ fun Header(
             color = WordleColor.colors.textPrimary,
             style = WordleTypography.titleLarge
         )
-        Box(Modifier.wrapContentSize()) {
+        Box(
+            modifier = Modifier.size(42.dp),
+            contentAlignment = Alignment.Center
+        ) {
             if (trashVisible) {
                 var showDialog by remember { mutableStateOf(false) }
 

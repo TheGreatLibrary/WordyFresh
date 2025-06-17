@@ -57,7 +57,7 @@ fun AchievesCard(
                 colorFilter = ColorFilter.tint(white)
             )
             Text(
-                stringResource(R.string.achievement),
+                stringResource(R.string.achievements),
                 fontSize = 18.sp,
                 color = WordleColor.colors.textCardPrimary,
 

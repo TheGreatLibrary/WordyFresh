@@ -18,7 +18,6 @@ class LocaleViewModel(application: Application) : AndroidViewModel(application) 
     private val _languageChanged = MutableSharedFlow<Unit>()
     val languageChanged: SharedFlow<Unit> = _languageChanged.asSharedFlow()
 
-
     @SuppressLint("StaticFieldLeak")
     private val context = application.applicationContext
 

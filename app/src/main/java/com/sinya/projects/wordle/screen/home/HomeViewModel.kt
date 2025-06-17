@@ -40,13 +40,14 @@ class HomeViewModel(
             try {
                 val userId = supabase.auth.currentUserOrNull()?.id
                 val avatar = if (userId != null) avatarRepo.downloadAvatar(userId) else null
-                val savedGame = AppDataStore.loadGame(context)
 
-                _state.value = HomeUiState.Success(
-                    avatarUri = avatar,
-                    savedGame = savedGame,
-                    onEvent = ::onEvent
-                )
+                AppDataStore.getSavedGame(context).collect { savedGame ->
+                    _state.value = HomeUiState.Success(
+                        avatarUri = avatar,
+                        savedGame = savedGame,
+                        onEvent = ::onEvent
+                    )
+                }
             } catch (e: Exception) {
                 _state.value = HomeUiState.Error("Ошибка загрузки данных: ${e.message}")
             }

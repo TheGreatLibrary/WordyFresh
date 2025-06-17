@@ -18,7 +18,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,9 +33,6 @@ import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordleColor
 import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.ui.theme.gray800
-import com.sinya.projects.wordle.ui.theme.green800
-import com.sinya.projects.wordle.ui.theme.white
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

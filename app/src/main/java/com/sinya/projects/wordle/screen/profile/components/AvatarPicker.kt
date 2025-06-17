@@ -34,7 +34,7 @@ fun AvatarPicker(
         )
         ImageButton(
             image = R.drawable.prof_camera,
-            modifierButton = Modifier
+            modifierBox = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 10.dp)
                 .background(WordleColor.colors.primary, CircleShape)

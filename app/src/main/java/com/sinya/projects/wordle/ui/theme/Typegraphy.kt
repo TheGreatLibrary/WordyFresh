@@ -1,7 +1,6 @@
 package com.sinya.projects.wordle.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -25,20 +24,22 @@ val FiraSans = FontFamily(
 
 // Определяем типографику
 val WordleTypography = Typography(
-    titleLarge = TextStyle(
-        fontFamily = FiraSans,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 0.2.sp
-    ),
+
     bodyLarge = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.SemiBold,
-    ),
+    ), // жирные выделения
+
     bodyMedium = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Medium,
-    ),
+    ), // обычный текст
 
+    titleLarge = TextStyle(
+        fontFamily = FiraSans,
+        fontWeight = FontWeight.Medium,
+        letterSpacing = 0.2.sp,
+    ), // заголовок в шапке игры и онбординге
 
     labelSmall = TextStyle(
         color = green600,

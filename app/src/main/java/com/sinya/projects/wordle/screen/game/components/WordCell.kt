@@ -84,7 +84,7 @@ fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modi
         contentAlignment = Alignment.Center
     ) {
         val fontSize = with(density) {
-            val calculated = (maxWidth * 0.7f).toSp()
+            val calculated = (maxHeight.value*maxWidth.value * 0.032f).toSp()
             calculated.value.coerceIn(14f, 35f).sp // преобразуем к Float → ограничиваем → обратно в sp
         }
 

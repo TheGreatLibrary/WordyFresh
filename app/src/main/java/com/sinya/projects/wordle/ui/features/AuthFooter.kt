@@ -94,7 +94,7 @@ private fun RowSocialAuth(
     ) {
         ImageButton(
             image = R.drawable.social_google,
-            modifierButton = Modifier
+            modifierBox = Modifier
                 .shadow(
                     elevation = 7.dp,
                     spotColor = WordleColor.colors.shadowColor,
@@ -106,7 +106,7 @@ private fun RowSocialAuth(
         ) { navigateTo() }
         ImageButton(
             image = R.drawable.social_vk,
-            modifierButton = Modifier
+            modifierBox = Modifier
                 .shadow(
                     elevation = 7.dp,
                     spotColor = WordleColor.colors.shadowColor,
@@ -118,7 +118,7 @@ private fun RowSocialAuth(
         ) { navigateTo() }
         ImageButton(
             image = R.drawable.social_tg,
-            modifierButton = Modifier
+            modifierBox = Modifier
                 .shadow(
                     elevation = 7.dp,
                     spotColor = WordleColor.colors.shadowColor,

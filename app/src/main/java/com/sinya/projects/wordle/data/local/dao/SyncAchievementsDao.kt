@@ -24,4 +24,7 @@ interface SyncAchievementsDao {
             updateFields(dto.id, dto.userId, dto.count, dto.updatedAt)
         }
     }
+
+    @Query("SELECT * FROM sync_achievements")
+    suspend fun getAchievements(): List<com.sinya.projects.wordle.domain.model.entity.SyncAchievements>
 }

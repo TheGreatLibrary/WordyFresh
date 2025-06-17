@@ -3,7 +3,6 @@ package com.sinya.projects.wordle
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -12,15 +11,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
@@ -31,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -40,19 +35,24 @@ import com.sinya.projects.wordle.screen.language.LocaleViewModel
 import com.sinya.projects.wordle.screen.theme.ThemeViewModel
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseClientHolder
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseSyncManager
-import com.sinya.projects.wordle.screen.home.components.HomePlaceholder
+import com.sinya.projects.wordle.domain.model.data.AppSettings
+import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.main.MainActivityScreen
 import com.sinya.projects.wordle.ui.theme.WordleTheme
 import com.sinya.projects.wordle.utils.isInternetAvailable
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
     private val localeViewModel: LocaleViewModel by viewModels()
+    private val localAppSettings = compositionLocalOf<AppSettings> {
+        error("AppSettings not provided")
+    }
 
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,7 +64,8 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             WindowInsetsControllerCompat(window, window.decorView).apply {
                 hide(android.view.WindowInsets.Type.systemBars())
-                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         }
 
@@ -75,7 +76,10 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch {
                 SupabaseClientHolder.client.auth.sessionStatus.collect { status ->
                     if (status is SessionStatus.Authenticated && lastStatus !is SessionStatus.Authenticated) {
-                        Log.d("SupabaseSyncManager", "Сессия активирована — синхронизация началась.")
+                        Log.d(
+                            "SupabaseSyncManager",
+                            "Сессия активирована — синхронизация началась."
+                        )
                         syncWithSupabase() // Синхронизация данных
                     }
                     lastStatus = status
@@ -86,12 +90,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             var settings by remember { mutableStateOf<AppSettings?>(null) }
+            var startRoute by remember { mutableStateOf<ScreenRoute>(ScreenRoute.Home) }
 
-            // один раз запускаем загрузку настроек
             LaunchedEffect(Unit) {
                 val loadedSettings = AppDataStore.getSettings(context)
                 applyAppLocale(loadedSettings.languageCode)
                 setAppTheme(loadedSettings.isDarkTheme)
+                val onboardingMode = AppDataStore.getOnboardingMode(context).first()
+                startRoute = if (!onboardingMode) ScreenRoute.Onboarding else ScreenRoute.Home
+
                 settings = loadedSettings
             }
 
@@ -111,8 +118,10 @@ class MainActivity : ComponentActivity() {
 
             settings?.let {
                 WordleTheme(darkTheme = it.isDarkTheme) {
-                    CompositionLocalProvider(LocalAppSettings provides it) {
+                    CompositionLocalProvider(localAppSettings provides it) {
                         MainActivityScreen(
+                            startRoute = startRoute,
+                            toggleOnboard = { state -> toggleOnboard(context, state) },
                             lang = localeViewModel.language,
                             isDark = themeViewModel.isDarkMode,
                             toggleTheme = { state -> themeViewModel.toggleTheme(state) },
@@ -122,12 +131,13 @@ class MainActivity : ComponentActivity() {
                 }
             } ?: run {
                 Box(
-                    Modifier
-                        .fillMaxSize()
-                        .consumeWindowInsets(WindowInsets.statusBars)
-                        .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 50.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    HomePlaceholder()
+                    Image(
+                        painter = painterResource(R.drawable.icon_app),
+                        contentDescription = null, modifier = Modifier.size(125.dp)
+                    )
                 }
             }
         }
@@ -179,15 +189,10 @@ class MainActivity : ComponentActivity() {
             else AppCompatDelegate.MODE_NIGHT_NO
         )
     }
-}
 
-
-
-data class AppSettings(
-    val languageCode: String,
-    val isDarkTheme: Boolean
-)
-
-val LocalAppSettings = compositionLocalOf<AppSettings> {
-    error("AppSettings not provided")
+    private fun toggleOnboard(context: Context, state: Boolean) {
+        lifecycleScope.launch {
+            AppDataStore.setOnboardingMode(context = context, state = state)
+        }
+    }
 }

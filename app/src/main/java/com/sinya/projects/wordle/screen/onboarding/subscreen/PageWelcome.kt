@@ -1,0 +1,82 @@
+package com.sinya.projects.wordle.screen.onboarding.subscreen
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.screen.onboarding.components.LocalizedText
+import com.sinya.projects.wordle.ui.features.RoundedButton
+import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordleTypography
+
+@Composable
+fun PageWelcome(
+    onNext: () -> Unit = {},
+    changeLang: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Spacer(Modifier)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(30.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.app_name),
+                style = WordleTypography.titleLarge,
+                fontSize = 24.sp,
+                color = WordleColor.colors.textPrimary,
+            )
+            Image(
+                painter = painterResource(R.drawable.icon_app),
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth(0.5f)
+            )
+            Text(
+                text = stringResource(R.string.onboard_welcome),
+                style = WordleTypography.bodyMedium,
+                fontSize = 16.sp,
+                color = WordleColor.colors.textPrimary,
+                textAlign = TextAlign.Center
+            )
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            LocalizedText(onNext, changeLang)
+            RoundedButton(
+                modifier = Modifier.fillMaxWidth(0.7f),
+                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                contentPadding = PaddingValues(vertical = 3.dp, horizontal = 15.dp),
+                onClick = onNext
+            ) {
+                Text(
+                    stringResource(R.string.start_learn),
+                    fontSize = 16.sp,
+                    color = WordleColor.colors.textForActiveBtnMkI,
+                    style = WordleTypography.bodyMedium
+                )
+            }
+        }
+    }
+}
+

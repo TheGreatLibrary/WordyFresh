@@ -45,7 +45,6 @@
     <string name="home">Home</string>
     <string name="abs_time">Avg. time</string>
     <string name="stat_progress_title">Win guess distribution</string>
-    <string name="achievement">Achievements</string>
     <string name="confirm_delete">Confirm Deletion</string>
     <string name="text_dialog_delete_stat">Are you sure you want to clear the statistics? All local and synchronized data will be lost.</string>
     <string name="cancel">Cancel</string>
@@ -110,4 +109,29 @@
     <string name="put_shifr">Enter the code below to guess your friend’s word:</string>
     <string name="decode_word">Guess the Word</string>
     <string name="put_here">Type here!</string>
+
+    <string name="continue_in_lang">Continue in English</string>
+
+    <string name="onboard_welcome">The perfect way to pass time while traveling or waiting!</string>
+    <string name="start_learn">Start Tutorial</string>
+<!--    <string name="continue_in_lang">Continue in Russian</string> &lt;!&ndash; Эта строка у тебя динамическая, скорее всего &ndash;&gt;-->
+    <string name="color_cell">The cell color is a hint</string>
+    <string name="good_try">Correct!</string>
+    <string name="not_bad_try">Right letter, wrong spot</string>
+    <string name="bad_try">Not in the word</string>
+    <string name="tryes_6">You have 6 tries!</string>
+    <string name="attemts_descr1">Type words using the game keyboard into the green underlined cells!</string>
+    <string name="navigation_btns">Use the keys to navigate</string>
+    <string name="previos_btn">to the previous cell</string>
+    <string name="next_btn">to the next cell</string>
+    <string name="rule1">Nouns only*</string>
+    <string name="rule1_descr">* The author takes no responsibility for any non-noun words you may encounter</string>
+    <string name="rule2">Singular form</string>
+    <string name="rule2_descr">Words must be singular, except for valid plural forms</string>
+    <string name="rule3">No "Ё" involved</string>
+    <string name="rule3_descr">For simplicity, the letter Ё is not used</string>
+    <string name="finish_onboard">Now it\'s your time to shine!</string>
+    <string name="duplicate_descr">Only one letter will be highlighted if it appears once in the word</string>
+    <string name="duplicate">Duplicate Letter</string>
+    <string name="open_the_game">Start the journey!</string>
 </resources>

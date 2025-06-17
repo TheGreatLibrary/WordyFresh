@@ -15,7 +15,6 @@
     <string name="settings_screen">Настройки</string>
     <string name="achievements">Достижения</string>
     <string name="profile_screen">Профиль</string>
-    <string name="login">Войти</string>
     <string name="sign_up">Зарегистрироваться</string>
     <string name="change_lang">Язык</string>
     <string name="change_theme">Тема</string>
@@ -43,7 +42,6 @@
     <string name="percent_win">Процент побед</string>
     <string name="abs_time">Среднее время</string>
     <string name="stat_progress_title">Распределение выигрышных попыток</string>
-    <string name="achievement">Достижения</string>
     <string name="percent_lose">Процент поражений</string>
     <string name="confirm_delete">Подтвердите удаление</string>
     <string name="text_dialog_delete_stat">Вы действительно хотите очистить статистику? Вся локальная и синхронизированная статистика будет утрачена.</string>
@@ -112,4 +110,29 @@
     <string name="put_shifr">Введи шифр ниже, чтобы отгадать слово от друга:</string>
     <string name="decode_word">Отгадать слово</string>
     <string name="put_here">Введите здесь!</string>
+
+    <string name="onboard_welcome">Лучший вариант провести время в транспорте или в ожидании!</string>
+    <string name="start_learn">Начать обучение</string>
+    <string name="continue_in_lang">Продолжить на Русском</string>
+    <string name="color_cell">Цвет ячейки - это подсказка</string>
+    <string name="good_try">угадал!</string>
+    <string name="not_bad_try">на другом месте в слове</string>
+    <string name="bad_try">нет в слове</string>
+    <string name="tryes_6">Всего 6 попыток!</string>
+    <string name="attemts_descr1">Вводи слова с помощью игровой клавиатуры в ячейки подчеркнутые зеленым!</string>
+    <string name="navigation_btns">Для навигации используйте клавиши</string>
+    <string name="previos_btn">на предыдущую ячейку</string>
+    <string name="next_btn">на следующую ячейку</string>
+    <string name="rule1">Только существительные*</string>
+    <string name="rule1_descr">* автор не несет ответственности за попадающиеся слова другой части речи</string>
+    <string name="rule2">Единственное число</string>
+    <string name="rule2_descr">Слова только в единственном числе за исключением правильных форм множественного числа</string>
+    <string name="rule3">Ё в сделку не входила</string>
+    <string name="rule3_descr">Для удобства и упрощения игры буква Ё не используется</string>
+    <string name="finish_onboard">Пришло твое время показать мастер-класс</string>
+    <string name="duplicate_descr">Во введенном слове будет выделена только одна буква, если в слове она встречается единоразово</string>
+    <string name="duplicate">Повтор буквы</string>
+    <string name="open_the_game">Начать путешествие!</string>
+
+
 </resources>
