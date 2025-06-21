@@ -57,4 +57,45 @@ interface OfflineStatisticDao {
 
     @Query("DELETE FROM offline_statistic")
     suspend fun clear()
+
+    @Query("""
+      SELECT
+        o.id                                    AS id,
+        o.mode_id                               AS mode_id,
+        o.count_game + COALESCE(s.count_game,0) AS count_game,
+        o.current_streak + COALESCE(s.current_streak,0) AS current_streak,
+        max(o.best_streak, COALESCE(s.best_streak,0))   AS best_streak,
+        o.win_game + COALESCE(s.win_game,0)     AS win_game,
+        o.sum_time + COALESCE(s.sum_time,0)     AS sum_time,
+        o.first_try + COALESCE(s.first_try,0)   AS first_try,
+        o.second_try + COALESCE(s.second_try,0) AS second_try,
+        o.third_try + COALESCE(s.third_try,0)   AS third_try,
+        o.fourth_try + COALESCE(s.fourth_try,0) AS fourth_try,
+        o.fifth_try + COALESCE(s.fifth_try,0)   AS fifth_try,
+        o.sixth_try + COALESCE(s.sixth_try,0)   AS sixth_try
+      FROM offline_statistic o
+      LEFT JOIN sync_statistic s ON o.mode_id = s.mode_id
+    """)
+    suspend fun getMergedStatsList(): List<OfflineStatistic>
+
+    @Query("""
+      SELECT 
+        0                              AS id,
+        'all'                          AS mode_id,
+        SUM(o.count_game + COALESCE(s.count_game,0)) AS count_game,
+        SUM(o.current_streak + COALESCE(s.current_streak,0)) AS current_streak,
+        MAX( max(o.best_streak, COALESCE(s.best_streak,0)) ) AS best_streak,
+        SUM(o.win_game + COALESCE(s.win_game,0))       AS win_game,
+        SUM(o.sum_time + COALESCE(s.sum_time,0))       AS sum_time,
+        SUM(o.first_try + COALESCE(s.first_try,0))     AS first_try,
+        SUM(o.second_try + COALESCE(s.second_try,0))   AS second_try,
+        SUM(o.third_try + COALESCE(s.third_try,0))     AS third_try,
+        SUM(o.fourth_try + COALESCE(s.fourth_try,0))   AS fourth_try,
+        SUM(o.fifth_try + COALESCE(s.fifth_try,0))     AS fifth_try,
+        SUM(o.sixth_try + COALESCE(s.sixth_try,0))     AS sixth_try
+      FROM offline_statistic o
+      LEFT JOIN sync_statistic s ON o.mode_id = s.mode_id
+    """)
+    suspend fun getMergedSummary(): OfflineStatistic
 }
+

@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.utils
 import android.content.Context
 import android.util.Log
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,7 +19,10 @@ suspend fun getDefinitionWithFallback(word: String, context: Context): String {
         }
 
         val encodedWord = URLEncoder.encode(word.lowercase(), "UTF-8")
-        val lang = AppDatabase.getInstance(context).offlineDictionaryDao().getLangForWord(word) ?: "ru"
+        val db = WordyApplication.database
+
+//    val db = remember { AppDatabase.getInstance(context) }
+        val lang = db.offlineDictionaryDao().getLangForWord(word) ?: "ru"
 
         // 1. Пробуем Wikipedia
         val wikipediaResult = getFromWikipedia(encodedWord, lang)

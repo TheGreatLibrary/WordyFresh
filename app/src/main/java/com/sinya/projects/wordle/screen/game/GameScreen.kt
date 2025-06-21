@@ -10,14 +10,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.navigation.ScreenRoute
+import com.sinya.projects.wordle.screen.game.model.GameMode
 
 
 @Composable
 fun GameScreen(
-    mode: Int,
+    mode: GameMode,
     wordLength: Int,
     lang: String,
     hiddenWord: String,
@@ -40,7 +42,8 @@ fun GameScreen(
             ratingEnable = ratingEnable,
             confettiEnable = confettiEnable,
             context,
-            db = AppDatabase.getInstance(LocalContext.current)
+            db = WordyApplication.database
+
         )
     )
 

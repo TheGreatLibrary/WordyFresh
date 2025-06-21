@@ -6,9 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.WordyApplication
+import com.sinya.projects.wordle.data.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
-import com.sinya.projects.wordle.domain.model.data.KeyboardItem
-import com.sinya.projects.wordle.domain.model.data.ThemeItem
+import com.sinya.projects.wordle.screen.keyboard.KeyboardItem
+import com.sinya.projects.wordle.screen.theme.ThemeItem
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.keyboard.AppKeyboards
 import com.sinya.projects.wordle.screen.language.AppLanguages
@@ -55,7 +58,12 @@ fun SettingsScreen(
         },
         navigateToBackStack = navigateToBackStack,
         navigateTo = navigateTo,
-        sendEmail = { sendSupportEmail(context) }
+        sendEmail = {
+            sendSupportEmail(context)
+            coroutineScope.launch {
+                AchievementManager.onTrigger(AchievementTrigger.SupportMessageSent, WordyApplication.database.loadStats())
+            }
+        }
     )
 }
 

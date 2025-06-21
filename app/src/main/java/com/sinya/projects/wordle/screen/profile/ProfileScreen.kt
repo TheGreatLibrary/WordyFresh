@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.repository.AvatarRepository
 import com.sinya.projects.wordle.navigation.ScreenRoute
@@ -28,7 +29,9 @@ fun ProfileScreen(
     supabase: SupabaseClient
 ) {
     val context = LocalContext.current
-    val db = remember { AppDatabase.getInstance(context) }
+    val db = WordyApplication.database
+
+//    val db = remember { AppDatabase.getInstance(context) }
 
     val viewModel: ProfileViewModel = viewModel(
         factory = ProfileViewModel.provideFactory(db, supabase, AvatarRepository(supabase, context))

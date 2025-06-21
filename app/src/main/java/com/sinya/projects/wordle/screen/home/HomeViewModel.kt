@@ -6,6 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.sinya.projects.wordle.data.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
+import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.data.repository.AvatarRepository
 import io.github.jan.supabase.SupabaseClient
@@ -15,7 +18,8 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val supabase: SupabaseClient,
     private val avatarRepo: AvatarRepository,
-    private val context: Context
+    private val context: Context,
+    private val db: AppDatabase
 ) : ViewModel() {
 
     private val _state = mutableStateOf<HomeUiState>(HomeUiState.Loading)
@@ -25,11 +29,12 @@ class HomeViewModel(
         fun provideFactory(
             supabase: SupabaseClient,
             avatarRepo: AvatarRepository,
-            context: Context
+            context: Context,
+            db: AppDatabase
         ): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return HomeViewModel(supabase, avatarRepo, context) as T
+                    return HomeViewModel(supabase, avatarRepo, context, db) as T
                 }
             }
         }
@@ -70,6 +75,11 @@ class HomeViewModel(
             }
             is HomeUiEvent.BottomSheetUploadVisible -> {
                 _state.value = currentState.copy(showBottomSheet = event.visibility)
+            }
+            is HomeUiEvent.SendEmailSupport -> {
+                viewModelScope.launch {
+                    AchievementManager.onTrigger(AchievementTrigger.SupportMessageSent, db.loadStats())
+                }
             }
         }
     }

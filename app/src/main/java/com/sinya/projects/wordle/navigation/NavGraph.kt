@@ -14,6 +14,7 @@ import com.sinya.projects.wordle.data.remote.supabase.SupabaseClientHolder
 import com.sinya.projects.wordle.screen.achieve.AchieveScreen
 import com.sinya.projects.wordle.screen.dictionary.DictionaryScreen
 import com.sinya.projects.wordle.screen.game.GameScreen
+import com.sinya.projects.wordle.screen.game.model.GameMode
 import com.sinya.projects.wordle.screen.home.HomeScreen
 import com.sinya.projects.wordle.screen.keyboard.AppKeyboards
 import com.sinya.projects.wordle.screen.keyboard.KeyboardScreen
@@ -111,14 +112,15 @@ fun NavGraph(
 
         composable<ScreenRoute.Game> { backStackEntry ->
             val game = backStackEntry.toRoute<ScreenRoute.Game>()
-            val actualWordLength = (if (game.mode == 3) (4..11).random() else game.wordLength) ?: 5
-            val actualLang = if (game.mode == 3) listOf("ru", "en").random() else game.lang ?: "ru"
+            val gameMode = GameMode.fromCode(game.mode)
+            val actualWordLength = (if (gameMode == GameMode.RANDOM) (4..11).random() else game.wordLength) ?: 5
+            val actualLang = if (gameMode == GameMode.RANDOM) listOf("ru", "en").random() else game.lang ?: "ru"
 
             GameScreen(
-                mode = game.mode,
+                mode = gameMode,
                 wordLength = actualWordLength,
                 lang = actualLang,
-                hiddenWord = if (game.mode == 2) game.word.orEmpty() else "",
+                hiddenWord = if (gameMode == GameMode.FRIENDLY) game.word.orEmpty() else "",
                 navigateToBackStack = navigateToBackStack,
                 navigateTo = navigateTo
             )

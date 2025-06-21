@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.screen.game
 import android.content.Context
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.screen.game.model.Cell
+import com.sinya.projects.wordle.screen.game.model.GameMode
 import com.sinya.projects.wordle.screen.game.model.Key
 
 data class GameUiState(
@@ -16,7 +17,7 @@ data class GameUiState(
         val focusedCell: Int = 0,
         val result: Int = R.string.placeholder,
         val timePassed: Long = 0,
-        val mode: Int = 0,
+        val mode: GameMode = GameMode.NORMAL,
         val wordLength: Int = 5,
         val lang: String = "ru",
         val hiddenWord: String = "",
@@ -38,4 +39,5 @@ sealed class GameUiEvent {
     data class GameFinished(val message: Int = R.string.placeholder, val show: Boolean = false) : GameUiEvent()
     data class ShowHardModeHint(val message: String?) : GameUiEvent()
     data class WordNotFound(val show: Boolean) : GameUiEvent()
+    data class ShowFinishDialog(val show: Boolean): GameUiEvent()
 }

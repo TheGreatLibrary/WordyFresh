@@ -1,7 +1,5 @@
 package com.sinya.projects.wordle.screen.language
 
-import com.sinya.projects.wordle.domain.model.data.LangItem
-
 object AppLanguages {
     val supported = listOf(
         LangItem("en", "English", "English"),
@@ -10,4 +8,6 @@ object AppLanguages {
     )
 
     fun getByCode(code: String): String? = supported.find { it.code == code }?.nativeName
+
+    fun getCode(code: String): String? = supported.find { it.code == code }?.code
 }

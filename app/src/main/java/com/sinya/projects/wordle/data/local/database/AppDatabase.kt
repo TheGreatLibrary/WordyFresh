@@ -1,9 +1,9 @@
 package com.sinya.projects.wordle.data.local.database
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.sinya.projects.wordle.data.achievement.UserStats
+import com.sinya.projects.wordle.data.local.dao.AchievementsDao
 import com.sinya.projects.wordle.data.local.dao.OfflineAchievementsDao
 import com.sinya.projects.wordle.data.local.dao.OfflineDictionaryDao
 import com.sinya.projects.wordle.data.local.dao.OfflineStatisticDao
@@ -12,7 +12,8 @@ import com.sinya.projects.wordle.data.local.dao.SyncAchievementsDao
 import com.sinya.projects.wordle.data.local.dao.SyncDictionaryDao
 import com.sinya.projects.wordle.data.local.dao.SyncStatisticDao
 import com.sinya.projects.wordle.data.local.dao.WordDao
-import com.sinya.projects.wordle.domain.model.entity.CategoriesAchieve
+import com.sinya.projects.wordle.domain.model.entity.Achievements
+import com.sinya.projects.wordle.domain.model.entity.CategoriesAchieves
 import com.sinya.projects.wordle.domain.model.entity.Modes
 import com.sinya.projects.wordle.domain.model.entity.OfflineAchievements
 import com.sinya.projects.wordle.domain.model.entity.OfflineDictionary
@@ -25,7 +26,8 @@ import com.sinya.projects.wordle.domain.model.entity.Words
 
 @Database(
     entities = [
-        CategoriesAchieve::class,
+        Achievements::class,
+        CategoriesAchieves::class,
         Modes::class,
         OfflineAchievements::class,
         OfflineDictionary::class,
@@ -48,25 +50,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun syncDictionaryDao(): SyncDictionaryDao
     abstract fun syncStatisticDao(): SyncStatisticDao
     abstract fun wordDao(): WordDao
-
-    companion object {
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
-
-        fun getInstance(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "wordy.db"
-                )
-                    .createFromAsset("wordy.db")
-                    .build()
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
+    abstract fun achievementsDao(): AchievementsDao
 
     suspend fun clearAll() {
         profilesDao().clear()
@@ -77,4 +61,11 @@ abstract class AppDatabase : RoomDatabase() {
         syncDictionaryDao().clear()
         syncStatisticDao().clear()
     }
+
+    suspend fun loadStats(): UserStats {
+        return UserStats(
+            statistic = offlineStatisticDao().getMergedSummary(),
+        )
+    }
 }
+

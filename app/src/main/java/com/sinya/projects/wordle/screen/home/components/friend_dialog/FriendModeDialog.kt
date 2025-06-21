@@ -42,6 +42,7 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.features.CustomTextField
@@ -59,9 +60,10 @@ import com.sinya.projects.wordle.ui.theme.white
 fun FriendModeDialog(navigateTo: (ScreenRoute) -> Unit, onDismiss: () -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+    val db = WordyApplication.database
 
     val viewModel: FriendViewModel = viewModel(
-        factory = FriendViewModel.provideFactory(remember { AppDatabase.getInstance(context) }.wordDao())
+        factory = FriendViewModel.provideFactory(remember { db }.wordDao())
     )
 
     LaunchedEffect(Unit) {

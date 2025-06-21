@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.domain.model.data.KeyboardItem
-import com.sinya.projects.wordle.domain.model.data.ThemeItem
+import com.sinya.projects.wordle.screen.keyboard.KeyboardItem
+import com.sinya.projects.wordle.screen.theme.ThemeItem
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.settings.components.AppVersionInfo
 import com.sinya.projects.wordle.screen.settings.components.RowSwitch

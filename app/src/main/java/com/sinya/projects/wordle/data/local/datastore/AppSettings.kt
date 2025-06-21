@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.domain.model.data
+package com.sinya.projects.wordle.data.local.datastore
 
 data class AppSettings(
     val languageCode: String,

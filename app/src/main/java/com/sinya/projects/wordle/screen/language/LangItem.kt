@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.domain.model.data
+package com.sinya.projects.wordle.screen.language
 
 data class LangItem(
     val code: String,         // "ru", "en", etc.

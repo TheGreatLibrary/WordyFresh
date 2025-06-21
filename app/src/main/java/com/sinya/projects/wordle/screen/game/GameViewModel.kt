@@ -1,6 +1,7 @@
 package com.sinya.projects.wordle.screen.game
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +11,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.data.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.screen.game.model.Cell
@@ -18,7 +21,7 @@ import com.sinya.projects.wordle.screen.game.model.GameSettings
 import com.sinya.projects.wordle.screen.game.model.Key
 import com.sinya.projects.wordle.domain.model.entity.OfflineDictionary
 import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
-import com.sinya.projects.wordle.screen.statistic.StatisticUiState
+import com.sinya.projects.wordle.screen.game.model.GameMode
 import com.sinya.projects.wordle.ui.theme.gray100
 import com.sinya.projects.wordle.ui.theme.gray30
 import com.sinya.projects.wordle.ui.theme.gray600
@@ -29,7 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class GameViewModel(
-    mode: Int,
+    mode: GameMode,
     wordLength: Int,
     lang: String,
     hiddenWord: String,
@@ -45,7 +48,7 @@ class GameViewModel(
 
     companion object {
         fun provideFactory(
-            mode: Int,
+            mode: GameMode,
             wordLength: Int,
             lang: String,
             hiddenWord: String,
@@ -84,18 +87,23 @@ class GameViewModel(
             keyboardCode = keyboardCode,
         )
 
-        if (mode == -1) {
+        if (mode == GameMode.SAVED) {
             viewModelScope.launch {
                 val game = AppDataStore.loadGame(context)
                 if (game != null) {
                     restoreGame(game)
                 } else {
-                    _state.value = _state.value.copy(showFinishDialog = true)
+                    onEvent(GameUiEvent.ShowFinishDialog(show = true))
                 }
             }
         } else {
             startNewGame()
         }
+    }
+
+    private suspend fun onTriggerAchievement(trigger: AchievementTrigger) {
+        val stats = db.loadStats()
+        AchievementManager.onTrigger(trigger, stats)
     }
 
     fun onEvent(event: GameUiEvent) {
@@ -105,11 +113,27 @@ class GameViewModel(
                     result = event.message,
                     showFinishDialog = event.show
                 )
+                Log.d("пидр", "Меня вызвали чтобы финишировать!")
                 viewModelScope.launch {
                     AppDataStore.clearSavedGame(context)
                     addStatisticData(_state.value.result)
                     addWordDictionary(_state.value.hiddenWord)
+                    onTriggerAchievement(AchievementTrigger.GameFinishedTrigger(
+                        isWin = _state.value.result == R.string.win,
+                        mode = _state.value.mode,
+                        lang = _state.value.lang,
+                        word = _state.value.hiddenWord,
+                        attempts = _state.value.focusedCell / state.value.wordLength,
+                        timeSeconds = _state.value.timePassed
+                    ))
+
                 }
+            }
+
+            is GameUiEvent.ShowFinishDialog -> {
+                _state.value = _state.value.copy(
+                    showFinishDialog = event.show
+                )
             }
 
             is GameUiEvent.ShowHardModeHint -> {
@@ -415,7 +439,7 @@ class GameViewModel(
                 _state.value = _state.value.copy(showNotFoundDialog = true)
                 return@launch
             } else {
-                if (_state.value.mode == 1 && row > 0) {
+                if (_state.value.mode == GameMode.HARD && row > 0) {
                     if (!checkHardMode(enteredWord, row)) return@launch
                 }
                 setFocusToRow(row + 1)
@@ -423,10 +447,7 @@ class GameViewModel(
 
             checkFinishWithAnimation(enteredWord, row)
 
-            if (_state.value.result != R.string.placeholder) {
-                onEvent(GameUiEvent.GameFinished(_state.value.result, true))
-                AppDataStore.clearSavedGame(context)
-            } else if (col < _state.value.wordLength && row < 5) {
+            if (col < _state.value.wordLength && row < 5) {
                 saveGame(context)
             }
         }
@@ -688,10 +709,10 @@ class GameViewModel(
 
     private suspend fun addStatisticData(result: Int) {
             val modeId = when (_state.value.mode) {
-                0 -> "12f9d2ce-1234-4321-aaaa-000000000001"
-                1 -> "12f9d2ce-1234-4321-aaaa-000000000002"
-                2 -> "12f9d2ce-1234-4321-aaaa-000000000004"
-                3 -> "12f9d2ce-1234-4321-aaaa-000000000003"
+                GameMode.NORMAL -> "12f9d2ce-1234-4321-aaaa-000000000001"
+                GameMode.HARD -> "12f9d2ce-1234-4321-aaaa-000000000002"
+                GameMode.RANDOM -> "12f9d2ce-1234-4321-aaaa-000000000003"
+                GameMode.FRIENDLY -> "12f9d2ce-1234-4321-aaaa-000000000004"
                 else -> "12f9d2ce-1234-4321-aaaa-000000000001"
             }
             if (db.offlineStatisticDao().count() == 0) {

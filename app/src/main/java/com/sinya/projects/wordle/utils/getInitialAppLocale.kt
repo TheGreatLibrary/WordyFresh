@@ -5,5 +5,5 @@ import com.sinya.projects.wordle.screen.language.AppLanguages
 
 fun getInitialAppLocale(context: Context): String {
     val systemLang = context.resources.configuration.locales[0].language
-    return AppLanguages.getByCode(systemLang) ?: "ru"
+    return AppLanguages.getCode(systemLang) ?: "ru"
 }

@@ -14,9 +14,9 @@ interface SyncAchievementsDao {
     @Query("""
         UPDATE sync_achievements
         SET count = :count, updated_at = :updatedAt
-        WHERE user_id = :userId AND id = :id
+        WHERE user_id = :userId AND achieve_id = :id
     """)
-    suspend fun updateFields(id: String, userId: String, count: Int, updatedAt: String)
+    suspend fun updateFields(id: Int, userId: String, count: Int, updatedAt: String)
 
     @Transaction
     suspend fun updateAchievementsList(list: List<SyncAchievements>) {
@@ -24,7 +24,7 @@ interface SyncAchievementsDao {
             updateFields(dto.id, dto.userId, dto.count, dto.updatedAt)
         }
     }
-
-    @Query("SELECT * FROM sync_achievements")
-    suspend fun getAchievements(): List<com.sinya.projects.wordle.domain.model.entity.SyncAchievements>
+//
+//    @Query("SELECT * FROM sync_achievements")
+//    suspend fun getAchievements(): List<com.sinya.projects.wordle.domain.model.entity.SyncAchievements>
 }

@@ -1,7 +1,6 @@
 package com.sinya.projects.wordle.screen.theme
 
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.domain.model.data.ThemeItem
 
 object AppThemes {
     val supported = listOf(

@@ -22,4 +22,5 @@ sealed class HomeUiEvent {
     data class FriendDialogUploadVisible(val visibility: Boolean) : HomeUiEvent()
     data class BottomSheetUploadMode(val mode: Int) : HomeUiEvent()
     data class BottomSheetUploadVisible(val visibility: Boolean) : HomeUiEvent()
+    data object SendEmailSupport : HomeUiEvent()
 }

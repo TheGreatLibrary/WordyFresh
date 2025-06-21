@@ -13,12 +13,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sinya.projects.wordle.WordyApplication
+import com.sinya.projects.wordle.data.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.repository.AvatarRepository
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.home.components.HomePlaceholder
 import com.sinya.projects.wordle.utils.sendSupportEmail
 import io.github.jan.supabase.SupabaseClient
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -31,7 +36,8 @@ fun HomeScreen(
         factory = HomeViewModel.provideFactory(
             supabase,
             AvatarRepository(supabase, context),
-            context
+            context,
+            WordyApplication.database
         )
     )
 
@@ -49,7 +55,10 @@ fun HomeScreen(
                 is HomeUiState.Success -> HomeScreenView(
                     state = state,
                     navigateTo = navigateTo,
-                    sendEmail = { sendSupportEmail(context) },
+                    sendEmail = {
+                        sendSupportEmail(context)
+                        viewModel.onEvent(HomeUiEvent.SendEmailSupport)
+                    },
                     onEvent = state.onEvent
                 )
                 is HomeUiState.Error -> Text(

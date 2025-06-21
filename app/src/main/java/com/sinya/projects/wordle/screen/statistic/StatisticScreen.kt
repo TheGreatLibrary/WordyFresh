@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.statistic.components.StatisticPlaceholder
@@ -20,9 +21,12 @@ fun StatisticScreen(
     navigateToBackStack: () -> Unit,
     navigateTo: (ScreenRoute) -> Unit
 ) {
+    val db = WordyApplication.database
+
+//    val db = remember { AppDatabase.getInstance(context) }
     val viewModel: StatisticViewModel = viewModel(
         factory = StatisticViewModel.provideFactory(
-            AppDatabase.getInstance(LocalContext.current)
+            db
         )
     )
 

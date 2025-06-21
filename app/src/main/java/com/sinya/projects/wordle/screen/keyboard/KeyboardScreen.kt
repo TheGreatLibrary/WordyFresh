@@ -31,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
-import com.sinya.projects.wordle.domain.model.data.KeyboardItem
 import com.sinya.projects.wordle.ui.features.CheckedIcon
 import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.ui.theme.WordleColor

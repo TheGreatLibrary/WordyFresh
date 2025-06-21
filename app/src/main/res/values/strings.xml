@@ -134,5 +134,93 @@
     <string name="duplicate">Повтор буквы</string>
     <string name="open_the_game">Начать путешествие!</string>
 
+    <string name="padawan">Падаван</string>
+    <string name="dilettant">Любитель</string>
+    <string name="veteran">Опытный</string>
+    <string name="the_old">Олд</string>
+    <!-- Падаван -->
+    <string name="achieve_first_word">Первое слово</string>
+    <string name="achieve_descr_first">Ма-ма? Па-па? Нет, Бобер.</string>
+    <string name="achieve_cond_first">Сыграть 1 игру</string>
+
+    <string name="achieve_normal">Обычный</string>
+    <string name="achieve_descr_normal">А по-оригинальнее можно было?</string>
+    <string name="achieve_cond_normal">Отгадать 1 слово в Обычном режиме</string>
+
+    <string name="achieve_hardcore">Хардкорный игрок</string>
+    <string name="achieve_descr_hardcore">Разрушенная психика и куча поражений, но какова награда!</string>
+    <string name="achieve_cond_hardcore">Отгадать 1 слово в Сложном режиме</string>
+
+    <string name="achieve_random_debut">Дебют рандома</string>
+    <string name="achieve_descr_random">Когда-то он был обычным бобром</string>
+    <string name="achieve_cond_random">Отгадать 1 слово в Рандомном режиме</string>
+
+    <string name="achieve_friend_mode">Да не друг ты мне!</string>
+    <string name="achieve_descr_friend">А он отгадал твое слово в ответ?</string>
+    <string name="achieve_cond_friend">Отгадать 1 слово в Дружеском режиме</string>
+
+    <!-- Любитель -->
+    <string name="achieve_winner">Победитель</string>
+    <string name="achieve_descr_win">Приятно выигрывать, не правда ли?</string>
+    <string name="achieve_cond_win">Выиграть 20 игр</string>
+
+    <string name="achieve_loser">Додеп</string>
+    <string name="achieve_descr_lose">Ну вот в следующий раз точно получится!</string>
+    <string name="achieve_cond_lose">Проиграть 10 игр</string>
+
+    <string name="achieve_wordlefilia">WordleFilia</string>
+    <string name="achieve_descr_addict">Не можешь остановиться?</string>
+    <string name="achieve_cond_addict">Сыграть 50 игр</string>
+
+    <string name="achieve_registered">Раб системы</string>
+    <string name="achieve_descr_registered">Теперь я слежу за тобой!</string>
+    <string name="achieve_cond_registered">Зарегистрировать аккаунт</string>
+
+    <string name="achieve_scholar_1">Ученый I</string>
+    <string name="achieve_descr_scholar_1">Что это там у тебя в рукаве, словарик припрятал?</string>
+    <string name="achieve_cond_scholar_1">Составить словарь из 50 слов</string>
+
+    <!-- Опытный -->
+    <string name="achieve_streak_10">Серийный маньяк</string>
+    <string name="achieve_descr_streak">Тебе пора бы сходить к психиатору...</string>
+    <string name="achieve_cond_streak">Достичь текущей серии равной 10</string>
+
+    <string name="achieve_lucky">Везунчик</string>
+    <string name="achieve_descr_lucky">Кажется, пора пойти поучаствовать в лотерее :3</string>
+    <string name="achieve_cond_lucky">Отгадать слово с 1 попытки. Дружеский режим не в счет!</string>
+
+    <string name="achieve_scholar_2">Ученый II</string>
+    <string name="achieve_descr_scholar_2">Словарный запас больше чем у любой азбуки!</string>
+    <string name="achieve_cond_scholar_2">Составить словарь из 150 слов</string>
+
+    <string name="achieve_speedster">Скорострел</string>
+    <string name="achieve_descr_speedster">Воу-воу, ковбой, полегче!</string>
+    <string name="achieve_cond_speedster">Отгадать слово меньше чем за 30 секунд</string>
+
+    <string name="achieve_evil_genius">Злой гений</string>
+    <string name="achieve_descr_genius">У тебя ведь есть план?</string>
+    <string name="achieve_cond_genius">Проиграть 5 игр подряд</string>
+
+    <!-- Олд -->
+    <string name="achieve_grinder">Задрот</string>
+    <string name="achieve_descr_grinder">Полиглот? Полиграф? Кто ты воин?</string>
+    <string name="achieve_cond_grinder">Отгадать все слова игры</string>
+
+    <string name="achieve_elephant">Слон</string>
+    <string name="achieve_descr_elephant">Настоящий патриот</string>
+    <string name="achieve_cond_elephant">Отгадать все русские слова</string>
+
+    <string name="achieve_tester">Тестировщик</string>
+    <string name="achieve_descr_tester">Пора подавать вакансию...</string>
+    <string name="achieve_cond_tester">Отправить сообщение в тех-поддержку</string>
+
+    <string name="achieve_picnic">Пикник</string>
+    <string name="achieve_descr_picnic">Это как тот сайт с картинками?</string>
+    <string name="achieve_cond_picnic">Отгадать слово... какое?</string>
+
+    <string name="achieve_secret">\?\?\?</string>
+    <string name="achieve_descr_secret">Олды шарят</string>
+    <string name="achieve_cond_secret">Отгадать слово @#$*%!</string>
+
 
 </resources>

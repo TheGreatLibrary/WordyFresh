@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.theme.white
@@ -25,12 +26,10 @@ fun RegisterScreen(
     snackbarHost: SnackbarHostState,
     onRegistered: () -> Unit
 ) {
-    val context = LocalContext.current
-    val db = remember { AppDatabase.getInstance(context) }
-    val profileDao = db.profilesDao()
+    val db = WordyApplication.database
 
     val viewModel: RegisterViewModel = viewModel(
-        factory = RegisterViewModel.provideFactory(profileDao, supabase)
+        factory = RegisterViewModel.provideFactory(db, supabase)
     )
 
     val state = viewModel.state.value

@@ -35,7 +35,7 @@ import com.sinya.projects.wordle.screen.language.LocaleViewModel
 import com.sinya.projects.wordle.screen.theme.ThemeViewModel
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseClientHolder
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseSyncManager
-import com.sinya.projects.wordle.domain.model.data.AppSettings
+import com.sinya.projects.wordle.data.local.datastore.AppSettings
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.main.MainActivityScreen
 import com.sinya.projects.wordle.ui.theme.WordleTheme
@@ -50,9 +50,6 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
     private val localeViewModel: LocaleViewModel by viewModels()
-    private val localAppSettings = compositionLocalOf<AppSettings> {
-        error("AppSettings not provided")
-    }
 
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -195,4 +192,8 @@ class MainActivity : ComponentActivity() {
             AppDataStore.setOnboardingMode(context = context, state = state)
         }
     }
+}
+
+val localAppSettings = compositionLocalOf<AppSettings> {
+    error("AppSettings not provided")
 }

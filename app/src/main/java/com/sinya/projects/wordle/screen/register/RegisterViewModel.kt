@@ -5,7 +5,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.sinya.projects.wordle.data.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.dao.ProfilesDao
+import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.domain.model.entity.Profiles
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -20,19 +24,19 @@ import java.util.UUID
 
 class RegisterViewModel(
     private val supabase: SupabaseClient,
-    private val profileDao: ProfilesDao
+    private val db: AppDatabase
 ) : ViewModel() {
     private val _state = mutableStateOf(RegisterUiState())
     val state: State<RegisterUiState> = _state
 
     companion object {
         fun provideFactory(
-            profileDao: ProfilesDao,
+            db: AppDatabase,
             supabase: SupabaseClient
         ): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return RegisterViewModel(supabase, profileDao) as T
+                    return RegisterViewModel(supabase, db) as T
                 }
             }
         }
@@ -63,6 +67,9 @@ class RegisterViewModel(
                             isLoading = false
                         )
                         event.success()
+                        viewModelScope.launch {
+                            AchievementManager.onTrigger(AchievementTrigger.AccountRegistered, db.loadStats())
+                        }
                     },
                     onError = {
                         _state.value = _state.value.copy(
@@ -71,7 +78,6 @@ class RegisterViewModel(
                         )
                     }
                 )
-
             }
             is RegisterUiEvent.ErrorDismissed -> {
                 _state.value = _state.value.copy(
@@ -101,7 +107,7 @@ class RegisterViewModel(
                                 createdAt = Clock.System.now().toString()
                             )
                         )
-                        profileDao.insertProfile(
+                        db.profilesDao().insertProfile(
                             Profiles(
                                 id = supabase.auth.currentUserOrNull()!!.id,
                                 nickname = _state.value.nickname,
@@ -124,7 +130,7 @@ class RegisterViewModel(
                                 createdAt = Clock.System.now().toString()
                             )
                         )
-                        profileDao.insertProfile(
+                        db.profilesDao().insertProfile(
                             Profiles(
                                 id = supabase.auth.currentUserOrNull()?.id ?: UUID.randomUUID().toString(),
                                 nickname = _state.value.nickname,

@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.sinya.projects.wordle.domain.model.data.AppSettings
 import com.sinya.projects.wordle.screen.game.model.Game
 import com.sinya.projects.wordle.utils.getInitialAppLocale
 import kotlinx.coroutines.flow.Flow

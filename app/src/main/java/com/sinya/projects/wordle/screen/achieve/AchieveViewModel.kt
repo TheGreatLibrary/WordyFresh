@@ -6,14 +6,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.domain.model.data.AchieveItem
-import com.sinya.projects.wordle.domain.model.entity.OfflineAchievements
-import com.sinya.projects.wordle.domain.model.entity.SyncAchievements
 import kotlinx.coroutines.launch
 
 class AchieveViewModel(
     private val db: AppDatabase
 ): ViewModel() {
+
     private val _state = mutableStateOf<AchieveUiState>(AchieveUiState.Loading)
     val state: State<AchieveUiState> = _state
 
@@ -51,12 +49,10 @@ class AchieveViewModel(
     private fun loadAchievements() {
         viewModelScope.launch {
             try {
-                val offline = db.offlineAchievementsDao().getAchievements()
-                val sync = db.syncAchievementsDao().getAchievements()
-                val merged = mergeAchievements(offline, sync)
+                val achieveList = db.achievementsDao().getAchievementsList()
 
                 _state.value = AchieveUiState.Success(
-                    achieveList = merged,
+                    achieveList =  achieveList,
                     onEvent = ::onEvent
                 )
             }
@@ -65,28 +61,6 @@ class AchieveViewModel(
                     message = "Ошибка загрузки данных: ${e.message}"
                 )
             }
-        }
-    }
-
-    private fun mergeAchievements(
-        offlineList: List<OfflineAchievements>,
-        syncList: List<SyncAchievements>
-    ): List<AchieveItem> {
-
-        val offlineMap = offlineList.associateBy { it.id }
-
-        return syncList.map { sync ->
-            val offline = offlineMap[sync.id]
-            val totalCount = sync.count + (offline?.count ?: 0)
-            AchieveItem(
-                id = sync.id,
-                categoryId = sync.categoryId,
-                title = sync.title,
-                description = sync.description,
-                iconUrl = sync.iconUrl,
-                count = totalCount,
-                maxCount = sync.maxCount
-            )
         }
     }
 }

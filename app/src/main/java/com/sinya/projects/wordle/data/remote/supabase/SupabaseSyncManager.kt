@@ -2,6 +2,7 @@ package com.sinya.projects.wordle.data.remote.supabase
 
 import android.content.Context
 import android.util.Log
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.domain.model.toSyncAchievements
 import com.sinya.projects.wordle.domain.model.toSyncDictionary
@@ -20,7 +21,8 @@ object SupabaseSyncManager {
     suspend fun syncAllToLocal(context: Context, userId: String) {
         if (!isInternetAvailable(context)) return
 
-        val db = AppDatabase.getInstance(context)
+        val db = WordyApplication.database
+//        val db = AppDatabase.getInstance(context)
 
         try {
             val user = SupabaseService.fetchProfile(userId)
@@ -42,7 +44,8 @@ object SupabaseSyncManager {
     suspend fun syncAllToSupabase(context: Context) {
         if (!isInternetAvailable(context)) return
 
-        val db = AppDatabase.getInstance(context)
+        val db = WordyApplication.database
+//        val db = AppDatabase.getInstance(context)
 
         try {
             val supabase = SupabaseClientHolder.client

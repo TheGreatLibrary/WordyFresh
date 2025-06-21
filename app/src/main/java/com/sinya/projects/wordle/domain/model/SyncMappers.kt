@@ -25,7 +25,7 @@ fun List<OfflineAchievements>.toSyncAchievements(userId: String): List<SyncAchie
     val updatedAt = getCurrentIsoTimestamp()
     return this.map {
         SyncAchievements(
-            id = it.id,
+            id = it.achieveId,
             userId = userId,
             count = it.count,
             updatedAt = updatedAt

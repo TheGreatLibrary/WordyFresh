@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.sinya.projects.wordle.domain.model.data.DictionaryItem
 import com.sinya.projects.wordle.domain.model.entity.OfflineDictionary
+import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
 
 @Dao
 interface OfflineDictionaryDao {
@@ -38,4 +39,19 @@ interface OfflineDictionaryDao {
             insertWord(OfflineDictionary(id = wordId, wordId = wordId, description = description))
         }
     }
+
+
+    @Query("""
+    SELECT 
+        d.id, 
+        w.word, 
+        d.description 
+    FROM (
+        SELECT id, word_id, description FROM offline_dictionary
+        UNION
+        SELECT id, word_id, description FROM sync_dictionary
+    ) AS d
+    JOIN words w ON d.word_id = w.id
+""")
+    suspend fun getMergedSummary(): List<DictionaryItem>
 }

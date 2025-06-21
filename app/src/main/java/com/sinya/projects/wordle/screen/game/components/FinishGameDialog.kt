@@ -39,7 +39,7 @@ fun FinishGameDialog(
     state: GameUiState,
     onEvent: (GameUiEvent) -> Unit = { }
 ) {
-    Dialog(onDismissRequest = { onEvent(GameUiEvent.GameFinished(state.result)) }) {
+    Dialog(onDismissRequest = { onEvent(GameUiEvent.ShowFinishDialog(show = false)) }) {
         AnimatedVisibility(true) {
             val context = LocalContext.current
             Column(

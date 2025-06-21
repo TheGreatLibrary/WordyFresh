@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.domain.model.data
+package com.sinya.projects.wordle.screen.keyboard
 
 data class KeyboardItem(
     val code: Int,         // 0, 1, 2....

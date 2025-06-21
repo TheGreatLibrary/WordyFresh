@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SyncAchievements(
-    val id: String,
+    val id: Int,
     @SerialName("user_id") val userId: String,
     val count: Int,
     @SerialName("updated_at") val updatedAt: String

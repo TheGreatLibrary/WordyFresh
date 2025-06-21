@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.screen.dictionary.components.DictionaryPlaceholder
 
@@ -15,9 +16,12 @@ import com.sinya.projects.wordle.screen.dictionary.components.DictionaryPlacehol
 fun DictionaryScreen(
     navigateToBackStack: () -> Unit,
 ) {
+    val db = WordyApplication.database
+
     val viewModel: DictionaryViewModel =
         viewModel(factory = DictionaryViewModel.provideFactory(
-            AppDatabase.getInstance(LocalContext.current)
+            db
+//            AppDatabase.getInstance(LocalContext.current)
         )
     )
 
