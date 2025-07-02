@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -22,14 +21,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun Header(
     title: String,
     trashVisible: Boolean = false,
-
     navigateTo: () -> Unit,
     trashOnClick: () -> Unit = { },
 ) {
@@ -40,15 +39,15 @@ fun Header(
     ) {
         ImageButton(
             image = R.drawable.arrow_back,
-            modifierIcon = Modifier.size(32.dp),
-            colorFilter = ColorFilter.tint(WordleColor.colors.textPrimary),
+            modifierImage = Modifier.size(32.dp),
+            colorFilter = ColorFilter.tint(WordyColor.colors.textPrimary),
             onClick = navigateTo
         )
         Text(
             title,
             fontSize = 24.sp,
-            color = WordleColor.colors.textPrimary,
-            style = WordleTypography.titleLarge
+            color = WordyColor.colors.textPrimary,
+            style = WordyTypography.titleLarge
         )
         Box(
             modifier = Modifier.size(42.dp),
@@ -59,8 +58,8 @@ fun Header(
 
                 ImageButton(
                     image = R.drawable.stat_trash,
-                    modifierIcon = Modifier.size(32.dp),
-                    colorFilter = ColorFilter.tint(WordleColor.colors.textPrimary),
+                    modifierImage = Modifier.size(32.dp),
+                    colorFilter = ColorFilter.tint(WordyColor.colors.textPrimary),
                     onClick = { showDialog = true }
                 )
 
@@ -89,7 +88,7 @@ private fun TrashAlertDialog(
                     onDismissRequest()
                 },
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = WordleColor.colors.secondary
+                    contentColor = WordyColor.colors.secondary
                 )
             ) {
                 Text(stringResource(R.string.delete))
@@ -99,13 +98,13 @@ private fun TrashAlertDialog(
             TextButton(
                 onClick = onDismissRequest,
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = WordleColor.colors.textPrimary,
+                    contentColor = WordyColor.colors.textPrimary,
                 )
             ) {
                 Text(stringResource(R.string.cancel))
             }
         },
-        containerColor = WordleColor.colors.background,
+        containerColor = WordyColor.colors.background,
         title = {
             Box(
                 Modifier.fillMaxWidth(),
@@ -113,9 +112,9 @@ private fun TrashAlertDialog(
             ) {
                 Text(
                     text = stringResource(R.string.confirm_delete),
-                    style = WordleTypography.bodyLarge,
+                    style = WordyTypography.bodyLarge,
                     fontSize = 18.sp,
-                    color = WordleColor.colors.textPrimary
+                    color = WordyColor.colors.textPrimary
                 )
             }
         },
@@ -126,13 +125,13 @@ private fun TrashAlertDialog(
             ) {
                 Text(
                     stringResource(R.string.text_dialog_delete_stat),
-                    style = WordleTypography.bodyMedium,
+                    style = WordyTypography.bodyMedium,
                     fontSize = 14.sp,
-                    color = WordleColor.colors.textPrimary
+                    color = WordyColor.colors.textPrimary
                 )
             }
         },
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp)
+        shape = WordyShapes.small
     )
 }

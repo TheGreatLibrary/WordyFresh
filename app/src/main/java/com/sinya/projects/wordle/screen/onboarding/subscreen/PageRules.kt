@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.screen.game.components.WordCell
 import com.sinya.projects.wordle.screen.game.model.Cell
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.gray600
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.yellow
@@ -88,15 +88,15 @@ fun PageRules() {
             ) {
                 Text(
                     text = stringResource(R.string.rule2),
-                    style = WordleTypography.titleLarge,
+                    style = WordyTypography.titleLarge,
                     fontSize = 24.sp,
-                    color = WordleColor.colors.textPrimary,
+                    color = WordyColor.colors.textPrimary,
                 )
                 Text(
                     text = stringResource(R.string.rule2_descr),
-                    style = WordleTypography.bodyMedium,
+                    style = WordyTypography.bodyMedium,
                     fontSize = 16.sp,
-                    color = WordleColor.colors.textPrimary,
+                    color = WordyColor.colors.textPrimary,
                     textAlign = TextAlign.Center
                 )
 
@@ -124,15 +124,15 @@ fun PageRules() {
             ) {
                 Text(
                     text = stringResource(R.string.rule3),
-                    style = WordleTypography.titleLarge,
+                    style = WordyTypography.titleLarge,
                     fontSize = 24.sp,
-                    color = WordleColor.colors.textPrimary,
+                    color = WordyColor.colors.textPrimary,
                 )
                 Text(
                     text = stringResource(R.string.rule3_descr),
-                    style = WordleTypography.bodyMedium,
+                    style = WordyTypography.bodyMedium,
                     fontSize = 16.sp,
-                    color = WordleColor.colors.textPrimary,
+                    color = WordyColor.colors.textPrimary,
                     textAlign = TextAlign.Center
                 )
                 Row(
@@ -159,15 +159,15 @@ fun PageRules() {
             ) {
                 Text(
                     text = stringResource(R.string.rule1),
-                    style = WordleTypography.titleLarge,
+                    style = WordyTypography.titleLarge,
                     fontSize = 24.sp,
-                    color = WordleColor.colors.textPrimary,
+                    color = WordyColor.colors.textPrimary,
                 )
                 Text(
                     text = stringResource(R.string.rule1_descr),
-                    style = WordleTypography.bodyMedium,
+                    style = WordyTypography.bodyMedium,
                     fontSize = 16.sp,
-                    color = WordleColor.colors.textPrimary,
+                    color = WordyColor.colors.textPrimary,
                     textAlign = TextAlign.Center
                 )
             }

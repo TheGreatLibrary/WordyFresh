@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.features.CheckedIcon
 import com.sinya.projects.wordle.ui.features.Header
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -42,7 +42,7 @@ fun LanguageScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .background(color = WordleColor.colors.background)
+            .background(color = WordyColor.colors.background)
             .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 7.dp)
     ) {
         Header(
@@ -64,7 +64,7 @@ fun LanguageScreen(
                 if (index < languages.lastIndex) {
                     HorizontalDivider(
                         modifier = Modifier.fillMaxWidth(0.82f),
-                        color = WordleColor.colors.textCardSecondary,
+                        color = WordyColor.colors.textCardSecondary,
                         thickness = 1.dp
                     )
                 }
@@ -95,12 +95,12 @@ fun LanguageItem(
             Text(
                 text = nativeName,
                 style = MaterialTheme.typography.bodyLarge,
-                color = WordleColor.colors.textPrimary
+                color = WordyColor.colors.textPrimary
             )
             Text(
                 text = englishName,
                 style = MaterialTheme.typography.bodySmall,
-                color = WordleColor.colors.textCardSecondary
+                color = WordyColor.colors.textCardSecondary
 
             )
         }

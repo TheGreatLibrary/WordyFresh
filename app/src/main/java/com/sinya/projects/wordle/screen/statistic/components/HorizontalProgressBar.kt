@@ -26,8 +26,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.gray100
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.white
@@ -45,7 +45,7 @@ fun HorizontalProgressBar(number: String, count: String, percent: Float) {
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(number,                 color = WordleColor.colors.textCardPrimary, fontSize = 14.sp)
+        Text(number,                 color = WordyColor.colors.textCardPrimary, fontSize = 14.sp)
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.75f)
@@ -74,7 +74,7 @@ fun HorizontalProgressBar(number: String, count: String, percent: Float) {
                             color = white,
                             modifier = Modifier.padding(end = 3.dp),
                             fontSize = 11.sp,
-                            style = WordleTypography.bodyMedium
+                            style = WordyTypography.bodyMedium
                         )
                     }
                 }
@@ -82,12 +82,12 @@ fun HorizontalProgressBar(number: String, count: String, percent: Float) {
         }
         Text(
             text = count,
-            color = WordleColor.colors.textCardPrimary,
+            color = WordyColor.colors.textCardPrimary,
 
             modifier = Modifier.fillMaxWidth(0.7f),
             fontSize = 14.sp,
             textAlign = TextAlign.End,
-            style = WordleTypography.bodyMedium
+            style = WordyTypography.bodyMedium
         )
     }
 }

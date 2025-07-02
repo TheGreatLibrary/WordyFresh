@@ -1,6 +1,7 @@
 package com.sinya.projects.wordle.data.remote.supabase
 
 import android.util.Log
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.domain.model.entity.Profiles
 import com.sinya.projects.wordle.domain.model.entity.SyncDictionary
 import com.sinya.projects.wordle.domain.model.entity.SyncStatistic
@@ -10,25 +11,28 @@ import io.github.jan.supabase.postgrest.from
 
 object SupabaseService {
 
+    suspend fun insertNewProfile(profile: Profiles) {
+        val supabase = WordyApplication.supabaseClient
+        supabase.from("profiles").insert(profile)
+    }
+
     /**
-     * Получение последних синхронизированных данных из Supabase БД.
+     * Получение последних синхронизированных данных из Supabase в БД.
      *
      * Данные берутся по id пользователя, который сейчас находится актуальным на телефоне.
      */
-    suspend fun fetchProfile(userId: String): Profiles {
-        val supabase = SupabaseClientHolder.client
+    suspend fun fetchProfile(userId: String): Profiles? {
+        val supabase = WordyApplication.supabaseClient
         return supabase
             .from("profiles")
             .select {
-                filter {
-                    eq("id", userId)
-                }
+                filter { eq("id", userId) }
             }
-            .decodeSingle<Profiles>()
+            .decodeSingleOrNull<Profiles>()
     }
 
     suspend fun fetchSyncDictionary(userId: String): List<SyncDictionary> {
-        val supabase = SupabaseClientHolder.client
+        val supabase = WordyApplication.supabaseClient
         return supabase
             .from("sync_dictionary")
             .select {
@@ -40,8 +44,7 @@ object SupabaseService {
     }
 
     suspend fun fetchSyncStatistics(userId: String): List<SyncStatistic> {
-        Log.d("Пиздец", "Проверяем загрузку данных...")
-        val supabase = SupabaseClientHolder.client
+        val supabase = WordyApplication.supabaseClient
         return supabase
             .from("sync_statistic")
             .select {
@@ -53,7 +56,7 @@ object SupabaseService {
     }
 
     suspend fun fetchSyncAchievements(userId: String): List<SyncAchievements> {
-        val supabase = SupabaseClientHolder.client
+        val supabase = WordyApplication.supabaseClient
         return supabase
             .from("sync_achievements")
             .select {
@@ -71,7 +74,7 @@ object SupabaseService {
      * Данные отправляются и вставляются на id таком-то
      */
     suspend fun upsertProfile(user: Profiles) : Boolean {
-        val supabase = SupabaseClientHolder.client
+        val supabase = WordyApplication.supabaseClient
         return try {
             supabase.from("profiles").upsert(user)
             true
@@ -82,7 +85,7 @@ object SupabaseService {
     }
 
     suspend fun upsertDictionaryList(dictionary: List<SyncDictionary>) : Boolean {
-        val supabase = SupabaseClientHolder.client
+        val supabase = WordyApplication.supabaseClient
         return try {
             supabase.from("sync_dictionary").upsert(dictionary)
             true
@@ -93,7 +96,7 @@ object SupabaseService {
     }
 
     suspend fun upsertStatisticList(statistics: List<SyncStatistic>) : Boolean {
-        val supabase = SupabaseClientHolder.client
+        val supabase = WordyApplication.supabaseClient
         return try {
             supabase.from("sync_statistic").upsert(statistics) {
                 onConflict= "user_id,mode_id" }
@@ -105,7 +108,7 @@ object SupabaseService {
     }
 
     suspend fun upsertAchievementList(achievements: List<SyncAchievements>) : Boolean {
-        val supabase = SupabaseClientHolder.client
+        val supabase = WordyApplication.supabaseClient
         return try {
             supabase.from("sync_achievements").upsert(achievements)
             true

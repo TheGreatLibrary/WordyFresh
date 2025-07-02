@@ -11,15 +11,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
 
 @Composable
-fun RoundedBackText(text: String, color: Color = WordleColor.colors.primary) {
+fun RoundedBackText(text: String, color: Color = WordyColor.colors.primary) {
     Box(
         modifier = Modifier
-            .background(color = color.copy(alpha = 0.8f), shape = CircleShape)
+            .background(
+                color = color.copy(alpha = 0.8f),
+                shape = WordyShapes.extraLarge
+            )
             .padding(horizontal = 30.dp, vertical = 8.dp)
     ) {
-        Text(text, color = Color.White, fontSize = 14.sp, textAlign = TextAlign.Center)
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }

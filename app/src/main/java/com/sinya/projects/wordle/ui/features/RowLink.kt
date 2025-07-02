@@ -16,8 +16,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun RowLink(
@@ -46,15 +46,15 @@ fun RowLink(
             Text(
                 mode,
                 fontSize = 13.sp,
-                color = WordleColor.colors.textCardSecondary,
+                color = WordyColor.colors.textCardSecondary,
                 modifier = Modifier.padding(end = 4.dp),
-                style = WordleTypography.bodyMedium
+                style = WordyTypography.bodyMedium
             )
             Image(
                 painter = painterResource(icon2),
                 contentDescription = null,
                 Modifier.size(15.dp),
-            colorFilter = ColorFilter.tint(color = WordleColor.colors.textCardSecondary)
+                colorFilter = ColorFilter.tint(color = WordyColor.colors.textCardSecondary)
             )
         }
     }

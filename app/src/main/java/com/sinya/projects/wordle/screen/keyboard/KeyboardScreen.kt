@@ -33,7 +33,7 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.ui.features.CheckedIcon
 import com.sinya.projects.wordle.ui.features.Header
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -49,7 +49,7 @@ fun KeyboardScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .background(color = WordleColor.colors.background)
+            .background(color = WordyColor.colors.background)
             .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 7.dp),
 
         ) {
@@ -84,8 +84,8 @@ fun KeyboardModeItem(
             .clip(RoundedCornerShape(12.dp))
             .clickable { onSelect() },
         colors = CardDefaults.cardColors(containerColor =
-            if (isSelected) WordleColor.colors.backPrimary.copy(alpha = 0.3f)
-            else WordleColor.colors.textPrimary.copy(alpha = 0.05f)
+            if (isSelected) WordyColor.colors.backPrimary.copy(alpha = 0.3f)
+            else WordyColor.colors.textPrimary.copy(alpha = 0.05f)
         )
     ) {
         Column(Modifier.padding(16.dp)) {
@@ -93,7 +93,7 @@ fun KeyboardModeItem(
                 Text(
                     text = stringResource(mode.modeName),
                     style = MaterialTheme.typography.titleMedium,
-                    color = WordleColor.colors.textCardPrimary,
+                    color = WordyColor.colors.textCardPrimary,
                     modifier = Modifier.weight(1f)
                 )
                 CheckedIcon(isSelected)
@@ -102,7 +102,7 @@ fun KeyboardModeItem(
             Text(
                 text = stringResource(mode.modeDescription),
                 style = MaterialTheme.typography.bodyMedium,
-                color = WordleColor.colors.textCardSecondary
+                color = WordyColor.colors.textCardSecondary
             )
             Spacer(modifier = Modifier.height(12.dp))
             Image(

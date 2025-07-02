@@ -7,12 +7,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun AuthHeader(title: String, subtitle: String) {
@@ -23,9 +21,9 @@ fun AuthHeader(title: String, subtitle: String) {
     ) {
         Text(
             text = title,
-            style = WordleTypography.titleLarge,
+            style = WordyTypography.titleLarge,
             fontSize = 25.sp,
-            color = WordleColor.colors.textPrimary
+            color = WordyColor.colors.textPrimary
         )
         RoundedBackText(text = subtitle)
     }

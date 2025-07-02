@@ -221,6 +221,21 @@
     <string name="achieve_secret">\?\?\?</string>
     <string name="achieve_descr_secret">Олды шарят</string>
     <string name="achieve_cond_secret">Отгадать слово @#$*%!</string>
+    <string name="check_your_mail">Пожалуйста проверьте вашу почту</string>
+    <string name="forgot_password_quest">Забыли пароль?</string>
+    <string name="put_email_of_account">Пожалуйста, напишите ниже ваш Email от аккаунта для восстановления</string>
+    <string name="send_letter">Отправить письмо</string>
+    <string name="email_error">Некорректное значение Email</string>
+    <string name="reset_password">Восстановление пароля</string>
+    <string name="put_new_password">Задай новые значения для пароля</string>
+    <string name="new_password">Новый пароль</string>
+    <string name="repeat_new_password">Повторить новый пароль</string>
+    <string name="is_password_error">Некорректное значение Пароля</string>
+    <string name="password_sample">f92F37fAX01Gef1</string>
+    <string name="email_sample">examle@gmail.com</string>
+    <string name="is_email_error">Некорректное значение Email</string>
+    <string name="is_name_error">Некорректное значение Name</string>
+    <string name="email">Email</string>
 
 
 </resources>

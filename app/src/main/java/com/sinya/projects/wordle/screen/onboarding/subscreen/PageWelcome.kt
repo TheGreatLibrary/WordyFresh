@@ -15,14 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.screen.onboarding.components.LocalizedText
 import com.sinya.projects.wordle.ui.features.RoundedButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun PageWelcome(
@@ -41,9 +40,9 @@ fun PageWelcome(
         ) {
             Text(
                 text = stringResource(R.string.app_name),
-                style = WordleTypography.titleLarge,
+                style = WordyTypography.titleLarge,
                 fontSize = 24.sp,
-                color = WordleColor.colors.textPrimary,
+                color = WordyColor.colors.textPrimary,
             )
             Image(
                 painter = painterResource(R.drawable.icon_app),
@@ -52,9 +51,9 @@ fun PageWelcome(
             )
             Text(
                 text = stringResource(R.string.onboard_welcome),
-                style = WordleTypography.bodyMedium,
+                style = WordyTypography.bodyMedium,
                 fontSize = 16.sp,
-                color = WordleColor.colors.textPrimary,
+                color = WordyColor.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
         }
@@ -65,15 +64,15 @@ fun PageWelcome(
             LocalizedText(onNext, changeLang)
             RoundedButton(
                 modifier = Modifier.fillMaxWidth(0.7f),
-                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 3.dp, horizontal = 15.dp),
                 onClick = onNext
             ) {
                 Text(
                     stringResource(R.string.start_learn),
                     fontSize = 16.sp,
-                    color = WordleColor.colors.textForActiveBtnMkI,
-                    style = WordleTypography.bodyMedium
+                    color = WordyColor.colors.textForActiveBtnMkI,
+                    style = WordyTypography.bodyMedium
                 )
             }
         }

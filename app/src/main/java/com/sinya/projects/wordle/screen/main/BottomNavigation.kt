@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.utils.getRouteName
 
 @Composable
@@ -38,7 +38,7 @@ fun BottomNavigation(navController: NavController) {
             .fillMaxWidth()
 
             .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
-            .background(WordleColor.colors.backgroundCard)
+            .background(WordyColor.colors.backgroundCard)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,
@@ -58,7 +58,7 @@ fun BottomNavigation(navController: NavController) {
                 Icon(
                     painter = painterResource(id = item.iconId),
                     contentDescription = null,
-                    tint = if (isSelected) WordleColor.colors.backPrimary else WordleColor.colors.textPrimary,
+                    tint = if (isSelected) WordyColor.colors.backPrimary else WordyColor.colors.textPrimary,
                     modifier = Modifier.size(24.dp)
                 )
             }

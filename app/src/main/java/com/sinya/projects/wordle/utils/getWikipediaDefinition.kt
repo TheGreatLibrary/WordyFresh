@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.WordyApplication
-import com.sinya.projects.wordle.data.local.database.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -12,17 +11,14 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-suspend fun getDefinitionWithFallback(word: String, context: Context): String {
+suspend fun Context.getDefinitionWithFallback(word: String): String {
     return withContext(Dispatchers.IO) {
-        if (!isInternetAvailable(context)) {
-            return@withContext context.getString(R.string.no_internet_error) // "Ошибка: нет подключения к интернету"
+        if (!isInternetAvailable()) {
+            return@withContext getString(R.string.no_internet_error)
         }
 
         val encodedWord = URLEncoder.encode(word.lowercase(), "UTF-8")
-        val db = WordyApplication.database
-
-//    val db = remember { AppDatabase.getInstance(context) }
-        val lang = db.offlineDictionaryDao().getLangForWord(word) ?: "ru"
+        val lang = WordyApplication.database.offlineDictionaryDao().getLangForWord(word) ?: "ru"
 
         // 1. Пробуем Wikipedia
         val wikipediaResult = getFromWikipedia(encodedWord, lang)
@@ -33,7 +29,7 @@ suspend fun getDefinitionWithFallback(word: String, context: Context): String {
 //        if (!wiktionaryResult.isNullOrBlank()) return@withContext wiktionaryResult
 
         // 3. Если ничего не нашли
-        return@withContext context.getString(R.string.definition_not_found) // "Определение не найдено"
+        return@withContext getString(R.string.definition_not_found) // "Определение не найдено"
     }
 }
 

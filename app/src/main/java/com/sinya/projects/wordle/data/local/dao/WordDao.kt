@@ -5,13 +5,13 @@ import androidx.room.Query
 
 @Dao
 interface WordDao {
-    @Query("SELECT EXISTS(SELECT 1 FROM words WHERE word = :word AND language = :lang AND length = :len AND rating = :rating)")
+    @Query("SELECT EXISTS(SELECT 1 FROM words WHERE word = :word AND language = :lang AND length = :len AND (:rating OR rating = 0))")
     suspend fun existsWord(word: String, lang: String, len: Int, rating: Int): Boolean
 
-    @Query("SELECT 1 FROM words WHERE word = :word AND language = :lang AND (rating = 0 OR :rating = 1)")
+    @Query("SELECT 1 FROM words WHERE word = :word AND language = :lang AND (rating = 0 OR :rating)")
     suspend fun findWord(word: String, lang: String, rating: Boolean): Int?
 
-    @Query("SELECT word FROM words WHERE length = :length AND language = :lang AND (CASE WHEN :rating THEN 1 ELSE rating = 0 END) ORDER BY RANDOM() LIMIT 1")
+    @Query("SELECT word FROM words WHERE length = :length AND language = :lang AND (:rating OR rating = 0) ORDER BY RANDOM() LIMIT 1")
     suspend fun getRandomWord(length: Int, lang: String, rating: Boolean): String
 
     @Query("DELETE FROM words WHERE word IN (:words)")
@@ -25,5 +25,8 @@ interface WordDao {
 
     @Query("SELECT language FROM words WHERE word = :word LIMIT 1")
     suspend fun getWordLang(word: String): String?
+
+    @Query("SELECT rating FROM words WHERE word = :word LIMIT 1")
+    suspend fun getWordRating(word: String): Boolean
 }
 

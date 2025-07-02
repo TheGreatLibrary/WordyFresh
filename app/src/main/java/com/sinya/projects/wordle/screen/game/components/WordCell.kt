@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.screen.game.model.Cell
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.green800
 
 @Composable
@@ -97,7 +97,7 @@ fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modi
                 }
                 .padding(horizontal = 4.dp, vertical = 8.dp),
             color = Color.White,
-            style = WordleTypography.bodyLarge
+            style = WordyTypography.bodyLarge
         )
 
         if (isFocused) {

@@ -7,8 +7,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.WordyApplication
-import com.sinya.projects.wordle.data.achievement.AchievementTrigger
-import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
+import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.local.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.screen.keyboard.KeyboardItem
 import com.sinya.projects.wordle.screen.theme.ThemeItem
@@ -59,7 +59,7 @@ fun SettingsScreen(
         navigateToBackStack = navigateToBackStack,
         navigateTo = navigateTo,
         sendEmail = {
-            sendSupportEmail(context)
+            context.sendSupportEmail()
             coroutineScope.launch {
                 AchievementManager.onTrigger(AchievementTrigger.SupportMessageSent, WordyApplication.database.loadStats())
             }

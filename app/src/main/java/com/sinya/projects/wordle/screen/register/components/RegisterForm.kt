@@ -15,19 +15,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.screen.login.LoginUiEvent
 import com.sinya.projects.wordle.screen.register.RegisterUiEvent
 import com.sinya.projects.wordle.screen.register.RegisterUiState
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
 import com.sinya.projects.wordle.ui.features.RoundedButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun RegisterForm(
-    state: RegisterUiState,
+    state: RegisterUiState.RegisterForm,
     onEvent: (RegisterUiEvent) -> Unit,
-    navigateTo: () -> Unit,
     modifier: Modifier,
     onRegisterIn: () -> Unit
 ) {
@@ -39,26 +37,27 @@ fun RegisterForm(
             onValueChange = { onEvent(RegisterUiEvent.NicknameChanged(it)) },
             modifier = modifier,
             isError = state.isNickNameError,
-            error = "Некорректное значение Name")
+            error = stringResource(R.string.is_name_error)
+        )
         Spacer(Modifier.height(15.dp))
         CustomTextFieldWithLabel(
-            label = "Email",
+            label = stringResource(R.string.email),
             name = state.email,
-            placeholder = "examle@gmail.com",
+            placeholder = stringResource(R.string.email_sample),
             onValueChange = { onEvent(RegisterUiEvent.EmailChanged(it)) },
             modifier = modifier,
             isError = state.isEmailError,
-            error = "Некорректное значение Email"
+            error = stringResource(R.string.is_email_error)
         )
         Spacer(Modifier.height(15.dp))
         CustomTextFieldWithLabel(
             label = stringResource(R.string.password),
             name = state.password,
-            placeholder = "f92F37fAX01Gef1",
+            placeholder = stringResource(R.string.password_sample),
             onValueChange = { onEvent(RegisterUiEvent.PasswordChanged(it)) },
             modifier = modifier,
             isError = state.isPasswordError,
-            error = "Неверное значение Пароль"
+            error = stringResource(R.string.is_password_error)
         )
         Spacer(Modifier.height(15.dp))
         AcceptPolicy(
@@ -72,7 +71,7 @@ fun RegisterForm(
         ) {
             RoundedButton(
                 modifier = Modifier.fillMaxWidth(0.9f),
-                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = {
                     onEvent(RegisterUiEvent.RegisterClicked(success = onRegisterIn))
@@ -81,8 +80,8 @@ fun RegisterForm(
                 Text(
                     text = stringResource(R.string.sign_up),
                     fontSize = 18.sp,
-                    color = WordleColor.colors.textForActiveBtnMkI,
-                    style = WordleTypography.bodyMedium
+                    color = WordyColor.colors.textForActiveBtnMkI,
+                    style = WordyTypography.bodyMedium
                 )
             }
         }

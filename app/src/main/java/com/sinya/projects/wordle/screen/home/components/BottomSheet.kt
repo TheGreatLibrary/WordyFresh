@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.features.RoundedButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +52,7 @@ fun BottomSheet(onClickGame: (ScreenRoute) -> Unit, onDismissRequest: () -> Unit
         shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = WordleColor.colors.background
+        containerColor = WordyColor.colors.background
     ) {
         Column(
             modifier = Modifier
@@ -95,8 +95,8 @@ fun BottomSheet(onClickGame: (ScreenRoute) -> Unit, onDismissRequest: () -> Unit
                 RoundedButton(
                     modifier = Modifier.fillMaxWidth(0.7f),
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = WordleColor.colors.backgroundActiveBtnMkI,
-                        containerColor = WordleColor.colors.textForActiveBtnMkI
+                        contentColor = WordyColor.colors.backgroundActiveBtnMkI,
+                        containerColor = WordyColor.colors.textForActiveBtnMkI
                     ),
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                     onClick = {
@@ -112,7 +112,7 @@ fun BottomSheet(onClickGame: (ScreenRoute) -> Unit, onDismissRequest: () -> Unit
                         }
                     },
                 ) {
-                    Text("Начать", fontSize = 14.sp, style = WordleTypography.bodyMedium)
+                    Text("Начать", fontSize = 14.sp, style = WordyTypography.bodyMedium)
                 }
             }
         }
@@ -134,13 +134,13 @@ private fun <T> OptionSelectorRow(
                     elevation = 0,
                     modifier = Modifier.size(37.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selected == item) WordleColor.colors.backgroundActiveBtnMkI else WordleColor.colors.backgroundPassiveBtn,
-                        contentColor = WordleColor.colors.textForActiveBtnMkI
+                        containerColor = if (selected == item) WordyColor.colors.backgroundActiveBtnMkI else WordyColor.colors.backgroundPassiveBtn,
+                        contentColor = WordyColor.colors.textForActiveBtnMkI
                     ),
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                     onClick = { onSelected(item) },
                 ) {
-                    Text(label(item), fontSize = 14.sp, style = WordleTypography.bodyMedium)
+                    Text(label(item), fontSize = 14.sp, style = WordyTypography.bodyMedium)
                 }
             }
         }
@@ -150,13 +150,13 @@ private fun <T> OptionSelectorRow(
                 RoundedButton(
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selected == item) WordleColor.colors.backgroundActiveBtnMkI else WordleColor.colors.backgroundPassiveBtn,
-                        contentColor = WordleColor.colors.textForActiveBtnMkI
+                        containerColor = if (selected == item) WordyColor.colors.backgroundActiveBtnMkI else WordyColor.colors.backgroundPassiveBtn,
+                        contentColor = WordyColor.colors.textForActiveBtnMkI
                     ),
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                     onClick = { onSelected(item) },
                 ) {
-                    Text(label(item), fontSize = 14.sp, style = WordleTypography.bodyMedium)
+                    Text(label(item), fontSize = 14.sp, style = WordyTypography.bodyMedium)
                 }
             }
         }
@@ -168,8 +168,8 @@ private fun TextSheet(text: String) {
     Text(
         text,
         textAlign = TextAlign.Center,
-        style = WordleTypography.titleLarge,
+        style = WordyTypography.titleLarge,
         fontSize = 18.sp,
-        color = WordleColor.colors.textPrimary
+        color = WordyColor.colors.textPrimary
     )
 }

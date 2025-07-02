@@ -11,9 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.domain.model.data.DictionaryItem
-import com.sinya.projects.wordle.screen.home.HomeUiState
 import com.sinya.projects.wordle.utils.getDefinitionWithFallback
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class DictionaryViewModel(
@@ -53,7 +51,7 @@ class DictionaryViewModel(
             }
             is DictionaryUiEvent.OnReloadedDefinition -> {
                 viewModelScope.launch {
-                    val description = getDefinitionWithFallback(event.word, event.context)
+                    val description = event.context.getDefinitionWithFallback(event.word)
                     Log.d("database", description)
                     db.offlineDictionaryDao().insertOrUpdateDescription(db.wordDao().getWordId(event.word), description)
                     loadDictionary()

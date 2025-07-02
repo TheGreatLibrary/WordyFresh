@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.features.Avatar
 import com.sinya.projects.wordle.ui.features.ImageButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 
 @Preview
 @Composable
@@ -33,13 +33,13 @@ fun MainHeader(
             modifier = Modifier
                 .size(42.dp)
                 .clip(CircleShape)
-                .border(2.dp, WordleColor.colors.primary, CircleShape),
+                .border(2.dp, WordyColor.colors.primary, CircleShape),
             imageUri = avatarUri,
             onClick = onAvatarClick
         )
         ImageButton(
             image = R.drawable.home_mail,
-            modifierIcon = Modifier.size(32.dp),
+            modifierImage = Modifier.size(32.dp),
             onClick = onEmailClick
         )
     }

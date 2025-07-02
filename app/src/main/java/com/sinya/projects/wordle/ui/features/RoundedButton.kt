@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleShapes
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
 
 @Composable
 fun RoundedButton(
@@ -17,12 +17,16 @@ fun RoundedButton(
     modifier: Modifier,
     colors: ButtonColors,
     onClick: () -> Unit,
-    contentPadding : PaddingValues,
+    contentPadding: PaddingValues,
     body: @Composable RowScope.() -> Unit
 ) {
     Button(
-        modifier = modifier.shadow(elevation = elevation.dp, spotColor = WordleColor.colors.shadowColor, shape = WordleShapes.extraLarge),
-        shape = WordleShapes.extraLarge,
+        modifier = modifier.shadow(
+            elevation = elevation.dp,
+            spotColor = WordyColor.colors.shadowColor,
+            shape = WordyShapes.extraLarge
+        ),
+        shape = WordyShapes.extraLarge,
         colors = colors,
         onClick = onClick,
         contentPadding = contentPadding,

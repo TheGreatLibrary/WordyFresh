@@ -7,26 +7,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.ui.theme.Montserrat
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.gray400
 import com.sinya.projects.wordle.ui.theme.green400
-import com.sinya.projects.wordle.ui.theme.green800
 
 @Composable
 fun CustomTextField(
@@ -58,14 +57,14 @@ fun CustomTextField(
                     fontSize = 14.sp,
                     fontFamily = Montserrat,
                     fontWeight = FontWeight.Medium,
-                    color = if (isError) WordleColor.colors.secondary else WordleColor.colors.primary
+                    color = if (isError) WordyColor.colors.secondary else WordyColor.colors.primary
                 ),
-                cursorBrush = SolidColor(green800),
+                cursorBrush = SolidColor(WordyColor.colors.primary),
                 modifier = Modifier
                     .border(
                         width = 1.dp,
-                        color = if (isError) WordleColor.colors.secondary else color,
-                        shape = RoundedCornerShape(90.dp)
+                        color = if (isError) WordyColor.colors.secondary else color,
+                        shape = WordyShapes.extraLarge
                     )
                     .then(modifier),
                 decorationBox = { innerTextField ->
@@ -90,7 +89,7 @@ fun CustomTextField(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = errorMessage,
-                        color = WordleColor.colors.secondary,
+                        color = WordyColor.colors.secondary,
                         fontSize = 12.sp,
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Normal
@@ -115,7 +114,7 @@ fun CustomTextFieldWithLabel(
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        Text(label, color = WordleColor.colors.textPrimary, fontSize = 16.sp)
+        Text(label, color = WordyColor.colors.textPrimary, fontSize = 16.sp)
         CustomTextField(
             value = name,
             onValueChange = onValueChange,
@@ -123,7 +122,7 @@ fun CustomTextFieldWithLabel(
             modifier = modifier,
             isError = isError,
             errorMessage = error,
-            color = WordleColor.colors.primary
+            color = WordyColor.colors.primary
         )
     }
 }

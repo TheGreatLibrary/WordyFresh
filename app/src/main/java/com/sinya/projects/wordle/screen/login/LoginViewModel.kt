@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.sinya.projects.wordle.data.local.dao.ProfilesDao
+import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
 import com.sinya.projects.wordle.domain.model.entity.Profiles
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -92,35 +93,28 @@ class LoginViewModel(
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        if (validationForm()) {
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    supabase.auth.signInWith(Email) {
-                        this.email = _state.value.email
-                        this.password = _state.value.password
-                    }
-                    if (supabase.auth.currentUserOrNull() != null) {
-                        val profile = supabase
-                            .from("profiles")
-                            .select(columns = Columns.list("*")) {
-                                filter {
-                                    eq("id", supabase.auth.currentUserOrNull()!!.id)
-                                }
-                            }
-                            .decodeSingle<Profiles>()
+        if (!validationForm()) return
 
-                        profilesDao.insertProfile(
-                            Profiles(
-                                id = profile.id,
-                                nickname = profile.nickname,
-                                avatarUrl = profile.avatarUrl,
-                                createdAt = profile.createdAt
-                            )
-                        )
-                    }
-                    withContext(Dispatchers.Main) { onSuccess() }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) { onError(e.localizedMessage ?: "Ошибка входа") }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                supabase.auth.signInWith(Email) {
+                    this.email = _state.value.email
+                    this.password = _state.value.password
+                }
+
+                val user = supabase.auth.currentUserOrNull()
+                    ?: throw IllegalStateException("Ошибка авторизации: пользователь не найден")
+
+                val profile = SupabaseService.fetchProfile(user.id)
+                    ?: throw IllegalStateException("Профиль не найден. Возможно, регистрация была прервана.")
+
+                profilesDao.insertProfile(profile)
+
+                withContext(Dispatchers.Main) { onSuccess() }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onError(e.localizedMessage ?: "Ошибка входа")
                 }
             }
         }

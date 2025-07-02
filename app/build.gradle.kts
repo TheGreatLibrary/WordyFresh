@@ -1,9 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
     kotlin("plugin.serialization") version "2.0.0"
+}
+
+val localProperties = File(rootDir, "local.properties")
+val props = Properties().apply {
+    if (localProperties.exists()) {
+        load(localProperties.inputStream())
+    }
 }
 
 android {
@@ -18,6 +27,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "SUPABASE_URL",
+            "\"${props.getProperty("SUPABASE_URL") ?: ""}\""
+        )
+        buildConfigField(
+            "String",
+            "SUPABASE_API_KEY",
+            "\"${props.getProperty("SUPABASE_API_KEY") ?: ""}\""
+        )
     }
 
     packagingOptions {
@@ -44,6 +64,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

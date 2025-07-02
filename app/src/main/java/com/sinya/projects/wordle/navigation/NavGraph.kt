@@ -8,11 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
+import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
-import com.sinya.projects.wordle.data.remote.supabase.SupabaseClientHolder
 import com.sinya.projects.wordle.screen.achieve.AchieveScreen
 import com.sinya.projects.wordle.screen.dictionary.DictionaryScreen
+import com.sinya.projects.wordle.screen.edit.EditScreen
 import com.sinya.projects.wordle.screen.game.GameScreen
 import com.sinya.projects.wordle.screen.game.model.GameMode
 import com.sinya.projects.wordle.screen.home.HomeScreen
@@ -22,8 +24,10 @@ import com.sinya.projects.wordle.screen.language.AppLanguages
 import com.sinya.projects.wordle.screen.language.LanguageScreen
 import com.sinya.projects.wordle.screen.login.LoginScreen
 import com.sinya.projects.wordle.screen.onboarding.OnboardingPager
+import com.sinya.projects.wordle.screen.emailConfirm.EmailConfirmScreen
 import com.sinya.projects.wordle.screen.profile.ProfileScreen
 import com.sinya.projects.wordle.screen.register.RegisterScreen
+import com.sinya.projects.wordle.screen.resetPassword.ResetPasswordScreen
 import com.sinya.projects.wordle.screen.settings.SettingsScreen
 import com.sinya.projects.wordle.screen.statistic.StatisticScreen
 import com.sinya.projects.wordle.screen.theme.AppThemes
@@ -50,7 +54,7 @@ fun NavGraph(
     modifier: Modifier,
     snackbarHost: SnackbarHostState
 ) {
-    val supabase = SupabaseClientHolder.client
+    val supabase = WordyApplication.supabaseClient
     val coroutineScope = rememberCoroutineScope()
 
     NavHost(
@@ -113,8 +117,10 @@ fun NavGraph(
         composable<ScreenRoute.Game> { backStackEntry ->
             val game = backStackEntry.toRoute<ScreenRoute.Game>()
             val gameMode = GameMode.fromCode(game.mode)
-            val actualWordLength = (if (gameMode == GameMode.RANDOM) (4..11).random() else game.wordLength) ?: 5
-            val actualLang = if (gameMode == GameMode.RANDOM) listOf("ru", "en").random() else game.lang ?: "ru"
+            val actualWordLength =
+                (if (gameMode == GameMode.RANDOM) (4..11).random() else game.wordLength) ?: 5
+            val actualLang =
+                if (gameMode == GameMode.RANDOM) listOf("ru", "en").random() else game.lang ?: "ru"
 
             GameScreen(
                 mode = gameMode,
@@ -165,21 +171,12 @@ fun NavGraph(
                 supabase = supabase
             )
         }
-        composable<ScreenRoute.Login> {
-            LoginScreen(
+        composable<ScreenRoute.Edit> {
+            EditScreen(
                 navigateToBackStack = navigateToBackStack,
                 navigateTo = navigateTo,
-                supabase = supabase,
-                snackbarHost = snackbarHost
-            ) {
-                val session = supabase.auth.currentSessionOrNull()
-                if (session != null) {
-                    navHostController.navigate(ScreenRoute.Profile) {
-                        popUpTo(ScreenRoute.Login) { inclusive = true }
-                        popUpTo(ScreenRoute.Profile) { inclusive = true }
-                    }
-                }
-            }
+                supabase = supabase
+            )
         }
         composable<ScreenRoute.Register> {
             RegisterScreen(
@@ -201,6 +198,47 @@ fun NavGraph(
                     }
                 }
             }
+        }
+        composable<ScreenRoute.Login> {
+            LoginScreen(
+                navigateToBackStack = navigateToBackStack,
+                navigateTo = navigateTo,
+                supabase = supabase,
+                snackbarHost = snackbarHost
+            ) {
+                val session = supabase.auth.currentSessionOrNull()
+                if (session != null) {
+                    navHostController.navigate(ScreenRoute.Profile) {
+                        popUpTo(ScreenRoute.Login) { inclusive = true }
+                        popUpTo(ScreenRoute.Profile) { inclusive = true }
+                    }
+                }
+            }
+        }
+        composable<ScreenRoute.EmailConfirm> {
+            EmailConfirmScreen(
+                navigateTo = { navigateTo(ScreenRoute.ResetPassword) },
+                navigateToBackStack = navigateToBackStack,
+                supabase = supabase
+            )
+        }
+        composable<ScreenRoute.ResetPassword>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "wordy-fresh://reset-password"
+                }
+            )
+        ) {
+            ResetPasswordScreen(
+                supabase = supabase,
+                navigateToBackStack = { navigateTo(ScreenRoute.EmailConfirm) },
+                navigateToProfile = {
+                    navHostController.navigate(ScreenRoute.Profile) {
+                        popUpTo(ScreenRoute.ResetPassword) { inclusive = true }
+                        popUpTo(ScreenRoute.EmailConfirm) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

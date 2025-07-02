@@ -21,8 +21,8 @@ import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.game.GameUiEvent
 import com.sinya.projects.wordle.screen.game.GameUiState
 import com.sinya.projects.wordle.ui.features.ImageButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -45,14 +45,14 @@ fun GameHeader(
         Row(Modifier.weight(1f)) {
             ImageButton(
                 image = R.drawable.arrow_back,
-                modifierIcon = Modifier.size(32.dp),
-                colorFilter = ColorFilter.tint(WordleColor.colors.textPrimary),
+                modifierImage = Modifier.size(32.dp),
+                colorFilter = ColorFilter.tint(WordyColor.colors.textPrimary),
                 onClick = navigateToBackStack
             )
             if (state.result == R.string.placeholder) {
                 ImageButton(
                     image = R.drawable.game_lose,
-                    modifierIcon = Modifier.size(32.dp),
+                    modifierImage = Modifier.size(32.dp),
                     onClick = { onEvent(GameUiEvent.GameFinished(R.string.lose, true)) }
                 )
             }
@@ -72,8 +72,8 @@ fun GameHeader(
         ) {
             ImageButton(
                 image = R.drawable.nav_set,
-                modifierIcon = Modifier.size(32.dp),
-                colorFilter = ColorFilter.tint(WordleColor.colors.textPrimary),
+                modifierImage = Modifier.size(32.dp),
+                colorFilter = ColorFilter.tint(WordyColor.colors.textPrimary),
                 onClick = { navigateTo(ScreenRoute.SettingWithoutBar) }
             )
         }
@@ -111,8 +111,8 @@ private fun TimerDisplay(totalSeconds: Long) {
     Text(
         text = timeText,
         fontSize = 16.sp,
-        color = WordleColor.colors.textPrimary,
+        color = WordyColor.colors.textPrimary,
         modifier = Modifier.padding(16.dp),
-        style = WordleTypography.bodyMedium
+        style = WordyTypography.bodyMedium
     )
 }

@@ -9,7 +9,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 @Immutable
-data class WordleColors (
+data class WordyColors (
     val background: Color, // фоновый цвет для приложения
     val textPrimary: Color, // основной цвет текста для приложений
 
@@ -49,13 +49,17 @@ data class WordleColors (
     val backgroundFinishHiddenWord: Color,
     val textFinishHiddenWord: Color,
 
+    val backgroundAchieve: Color = gray900,
+    val foregroundAchievePlaceholder: Color,
+    val borderAchieve: Color,
+
     val primary: Color = green800, // главная нота приложения
     val backPrimary: Color = green600, // дополнительный цвет приложения
     val secondary: Color = red, // второстепенный
     val tertiary: Color = yellow, // третьестепенный
 )
 
-val LightWordleColors = WordleColors(
+val LightWordyColors = WordyColors(
     background = gray200,
     textPrimary = gray800,
 
@@ -73,10 +77,13 @@ val LightWordleColors = WordleColors(
     backgroundFinishHiddenWord = gray100,
     textFinishHiddenWord = white,
 
+    foregroundAchievePlaceholder = gray800,
+    borderAchieve = green600,
+
     textOnColorCard = white,
 )
 
-val DarkWordleColors = WordleColors(
+val DarkWordyColors = WordyColors(
     background = gray900,
     textPrimary = white,
 
@@ -94,30 +101,33 @@ val DarkWordleColors = WordleColors(
     backgroundFinishHiddenWord = gray800,
     textFinishHiddenWord = white,
 
+    foregroundAchievePlaceholder = gray600,
+    borderAchieve = green800,
+
     textOnColorCard = white,
 )
 
-val LocalWordleColors = staticCompositionLocalOf { LightWordleColors }
+val LocalWordyColors = staticCompositionLocalOf { LightWordyColors }
 
 @Composable
 fun WordleTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val wordleColors = if (darkTheme) DarkWordleColors else LightWordleColors
+    val wordyColors = if (darkTheme) DarkWordyColors else LightWordyColors
 
-    CompositionLocalProvider(LocalWordleColors provides wordleColors) {
+    CompositionLocalProvider(LocalWordyColors provides wordyColors) {
         MaterialTheme(
-            typography = WordleTypography,
-            shapes = WordleShapes,
+            typography = WordyTypography,
+            shapes = WordyShapes,
             content = content
         )
     }
 }
 
-object WordleColor {
-    val colors: WordleColors
+object WordyColor {
+    val colors: WordyColors
         @Composable
-        get() = LocalWordleColors.current
+        get() = LocalWordyColors.current
 }
 

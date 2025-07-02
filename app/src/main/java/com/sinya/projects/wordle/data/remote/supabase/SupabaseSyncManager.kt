@@ -19,13 +19,13 @@ import java.time.format.DateTimeFormatter
 object SupabaseSyncManager {
 
     suspend fun syncAllToLocal(context: Context, userId: String) {
-        if (!isInternetAvailable(context)) return
+        if (!context.isInternetAvailable()) return
 
         val db = WordyApplication.database
 //        val db = AppDatabase.getInstance(context)
 
         try {
-            val user = SupabaseService.fetchProfile(userId)
+            val user = SupabaseService.fetchProfile(userId) ?: return
             val dictionary = SupabaseService.fetchSyncDictionary(userId)
             val statistic = SupabaseService.fetchSyncStatistics(userId)
             val achievements = SupabaseService.fetchSyncAchievements(userId)
@@ -42,13 +42,13 @@ object SupabaseSyncManager {
     }
 
     suspend fun syncAllToSupabase(context: Context) {
-        if (!isInternetAvailable(context)) return
+        if (!context.isInternetAvailable()) return
 
         val db = WordyApplication.database
 //        val db = AppDatabase.getInstance(context)
 
         try {
-            val supabase = SupabaseClientHolder.client
+            val supabase = WordyApplication.supabaseClient
             val userId = supabase.auth.currentUserOrNull()?.id
             if (userId == null) {
                 Log.w("SupabaseSync", "User ID is null — возможно, пользователь не залогинен")

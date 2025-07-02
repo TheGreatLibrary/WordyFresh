@@ -11,8 +11,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.data.achievement.AchievementTrigger
-import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
+import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.local.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.screen.game.model.Cell
@@ -29,6 +29,9 @@ import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.yellow
 import com.sinya.projects.wordle.utils.getDefinitionWithFallback
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class GameViewModel(
@@ -36,12 +39,14 @@ class GameViewModel(
     wordLength: Int,
     lang: String,
     hiddenWord: String,
-    keyboardCode: Int,
-    ratingEnable: Boolean,
-    confettiEnable: Boolean,
+    keyboardFlow: Flow<Int>,
+    ratingFlow: Flow<Boolean>,
+    confettiFlow: Flow<Boolean>,
     private val context: Context,
     private val db: AppDatabase,
 ) : ViewModel() {
+
+    private var currentRatingEnabled: Boolean = false
 
     private val _state = mutableStateOf(GameUiState())
     val state: State<GameUiState> = _state
@@ -52,9 +57,9 @@ class GameViewModel(
             wordLength: Int,
             lang: String,
             hiddenWord: String,
-            keyboardCode: Int,
-            ratingEnable: Boolean,
-            confettiEnable: Boolean,
+            keyboardFlow: Flow<Int>,
+            ratingFlow: Flow<Boolean>,
+            confettiFlow: Flow<Boolean>,
             context: Context,
             db: AppDatabase
         ): ViewModelProvider.Factory {
@@ -65,9 +70,9 @@ class GameViewModel(
                         wordLength,
                         lang,
                         hiddenWord,
-                        keyboardCode,
-                        ratingEnable,
-                        confettiEnable,
+                        keyboardFlow,
+                        ratingFlow,
+                        confettiFlow,
                         context,
                         db
                     ) as T
@@ -77,27 +82,52 @@ class GameViewModel(
     }
 
     init {
-        _state.value = _state.value.copy(
-            mode = mode,
-            wordLength = wordLength,
-            lang = lang,
-            hiddenWord = hiddenWord,
-            ratingStatus = ratingEnable,
-            confettiStatus = confettiEnable,
-            keyboardCode = keyboardCode,
-        )
+        viewModelScope.launch {
+            launch {
+                keyboardFlow.collectLatest {
+                    Log.d("ffff1", it.toString())
+                    updateKeyboardCode(it)
+                }
+            }
+            launch {
+                confettiFlow.collectLatest {
+                    Log.d("ffff2", it.toString())
+                    _state.value = _state.value.copy(confettiStatus = it)
+                }
+            }
+            launch {
+                ratingFlow.collectLatest {
+                    Log.d("ffff3", it.toString())
+                    currentRatingEnabled = it
+                    if (_state.value.result != R.string.placeholder) {
+                        Log.d("ffff3", "меняем значение")
+                        _state.value = _state.value.copy(ratingStatus = currentRatingEnabled)
+                    }
+                }
+            }
+        }
 
-        if (mode == GameMode.SAVED) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            val ratingCode = if (mode == GameMode.FRIENDLY) db.wordDao().getWordRating(hiddenWord) else ratingFlow.first()
+
+            _state.value = _state.value.copy(
+                mode = mode,
+                wordLength = wordLength,
+                lang = lang,
+                hiddenWord = hiddenWord,
+                ratingStatus = ratingCode
+            )
+
+            if (mode == GameMode.SAVED) {
                 val game = AppDataStore.loadGame(context)
                 if (game != null) {
                     restoreGame(game)
                 } else {
                     onEvent(GameUiEvent.ShowFinishDialog(show = true))
                 }
+            } else {
+                startNewGame()
             }
-        } else {
-            startNewGame()
         }
     }
 
@@ -113,12 +143,12 @@ class GameViewModel(
                     result = event.message,
                     showFinishDialog = event.show
                 )
-                Log.d("пидр", "Меня вызвали чтобы финишировать!")
                 viewModelScope.launch {
                     AppDataStore.clearSavedGame(context)
                     addStatisticData(_state.value.result)
                     addWordDictionary(_state.value.hiddenWord)
-                    onTriggerAchievement(AchievementTrigger.GameFinishedTrigger(
+                    onTriggerAchievement(
+                        AchievementTrigger.GameFinishedTrigger(
                         isWin = _state.value.result == R.string.win,
                         mode = _state.value.mode,
                         lang = _state.value.lang,
@@ -198,11 +228,13 @@ class GameViewModel(
     }
 
     private fun reloadGame() {
+        Log.d("ffff", state.value.mode.toString())
         _state.value = _state.value.copy(
             showFinishDialog = false,
             focusedCell = 0,
             timePassed = 0,
-            result = R.string.placeholder
+            result = R.string.placeholder,
+            mode = GameMode.NORMAL
         )
 
         _state.value.gridState.forEach { cell ->
@@ -270,7 +302,7 @@ class GameViewModel(
 
     /** блок с генерацией клавиатуры */
 
-    fun updateKeyboardCode(newCode: Int) {
+    private fun updateKeyboardCode(newCode: Int) {
         if (_state.value.keyboardCode != newCode) {
             _state.value = _state.value.copy(keyboardCode = newCode)
             generateKeyboard()
@@ -757,7 +789,7 @@ class GameViewModel(
         val wordExists = db.offlineDictionaryDao().findWord(word)
 
         if (wordExists == null) {
-            val description = getDefinitionWithFallback(word, context)
+            val description = context.getDefinitionWithFallback(word)
             val wordId = db.wordDao().getWordId(word)
             db.offlineDictionaryDao()
                 .insertWord(

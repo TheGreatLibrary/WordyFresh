@@ -121,7 +121,7 @@ object AppDataStore {
     suspend fun getSettings(context: Context): AppSettings {
         val prefs = context.dataStore.data.first()
         return AppSettings(
-            languageCode = prefs[LANGUAGE_KEY] ?: getInitialAppLocale(context),
+            languageCode = prefs[LANGUAGE_KEY] ?: context.getInitialAppLocale(),
             isDarkTheme = prefs[DARK_MODE_KEY] ?: false
         )
     }

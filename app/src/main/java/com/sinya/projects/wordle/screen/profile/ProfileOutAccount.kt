@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.features.RoundedButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun ProfileOutAccount(navigateTo: (ScreenRoute) -> Unit,
@@ -39,16 +39,16 @@ fun ProfileOutAccount(navigateTo: (ScreenRoute) -> Unit,
         ) {
             Text(
                 text = stringResource(R.string.sync_to_save_stat),
-                color = WordleColor.colors.textPrimary,
-                style = WordleTypography.titleLarge,
+                color = WordyColor.colors.textPrimary,
+                style = WordyTypography.titleLarge,
                 fontSize = 21.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(15.dp))
             Text(
                 text = stringResource(R.string.play_with_friends),
-                color = WordleColor.colors.textCardSecondary,
-                style = WordleTypography.titleLarge,
+                color = WordyColor.colors.textCardSecondary,
+                style = WordyTypography.titleLarge,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center
             )
@@ -61,7 +61,7 @@ fun ProfileOutAccount(navigateTo: (ScreenRoute) -> Unit,
             RoundedButton(
                 modifier = Modifier
                     .fillMaxWidth(0.9f),
-                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = {
                     navigateTo(ScreenRoute.Register)
@@ -70,15 +70,15 @@ fun ProfileOutAccount(navigateTo: (ScreenRoute) -> Unit,
                 Text(
                     stringResource(R.string.sign_up),
                     fontSize = 18.sp,
-                    color = WordleColor.colors.textForActiveBtnMkI,
-                    style = WordleTypography.bodyMedium
+                    color = WordyColor.colors.textForActiveBtnMkI,
+                    style = WordyTypography.bodyMedium
                 )
             }
             Spacer(Modifier.height(19.dp))
             RoundedButton(
                 modifier = Modifier
                     .fillMaxWidth(0.9f),
-                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkII),
+                colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkII),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = {navigateTo(ScreenRoute.Login)
                 }
@@ -86,8 +86,8 @@ fun ProfileOutAccount(navigateTo: (ScreenRoute) -> Unit,
                 Text(
                     stringResource(R.string.sign_in),
                     fontSize = 18.sp,
-                    color = WordleColor.colors.textForActiveBtnMkII,
-                    style = WordleTypography.bodyMedium
+                    color = WordyColor.colors.textForActiveBtnMkII,
+                    style = WordyTypography.bodyMedium
                 )
             }
         }

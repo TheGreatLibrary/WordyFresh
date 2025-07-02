@@ -27,7 +27,7 @@ import com.sinya.projects.wordle.screen.onboarding.subscreen.PageFinish
 import com.sinya.projects.wordle.screen.onboarding.subscreen.PageRules
 import com.sinya.projects.wordle.screen.onboarding.subscreen.PageWelcome
 import com.sinya.projects.wordle.ui.features.ImageButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -64,8 +64,8 @@ fun OnboardingPager(
             ) {
                 ImageButton(
                     image = if (!currentIsDark) R.drawable.set_light else R.drawable.set_night,
-                    modifierIcon = Modifier.size(32.dp),
-                    colorFilter = ColorFilter.tint(WordleColor.colors.textPrimary),
+                    modifierImage = Modifier.size(32.dp),
+                    colorFilter = ColorFilter.tint(WordyColor.colors.textPrimary),
                     onClick = { toggleTheme(!currentIsDark) }
                 )
             }

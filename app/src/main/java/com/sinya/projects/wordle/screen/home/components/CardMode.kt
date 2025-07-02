@@ -31,9 +31,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleShapes
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.gray800
 import com.sinya.projects.wordle.ui.theme.white
 
@@ -48,9 +48,9 @@ fun CardMode(
 ) {
     Card(
         modifier = Modifier
-            .shadow(10.dp, spotColor = gray800, shape = WordleShapes.large)
+            .shadow(10.dp, spotColor = gray800, shape = WordyShapes.large)
             .then(modifier),
-        shape = WordleShapes.large,
+        shape = WordyShapes.large,
         colors = CardDefaults.cardColors(containerColor = color)
     ) {
         Column(
@@ -64,8 +64,8 @@ fun CardMode(
                 title,
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
-                color = WordleColor.colors.textOnColorCard,
-                style = WordleTypography.titleLarge
+                color = WordyColor.colors.textOnColorCard,
+                style = WordyTypography.titleLarge
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
@@ -85,16 +85,16 @@ fun CardMode(
                         .fillMaxWidth()
                         .height(22.dp)
                         .padding(horizontal = 17.dp),
-                    shape = WordleShapes.large,
-                    colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkII),
+                    shape = WordyShapes.large,
+                    colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkII),
                     onClick = onClick,
                     contentPadding = PaddingValues(vertical = 0.dp)
                 ) {
                     Text(
                         stringResource(R.string.play),
                         fontSize = 12.sp,
-                        color = WordleColor.colors.textForActiveBtnMkII,
-                        style = WordleTypography.bodyMedium
+                        color = WordyColor.colors.textForActiveBtnMkII,
+                        style = WordyTypography.bodyMedium
                     )
                 }
             }

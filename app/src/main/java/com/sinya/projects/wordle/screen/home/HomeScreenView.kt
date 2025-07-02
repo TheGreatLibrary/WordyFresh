@@ -23,11 +23,11 @@ import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.home.components.BottomSheet
 import com.sinya.projects.wordle.screen.home.components.MainContainers
 import com.sinya.projects.wordle.screen.home.components.MainHeader
-import com.sinya.projects.wordle.screen.home.components.friend_dialog.FriendModeDialog
+import com.sinya.projects.wordle.screen.home.friend_dialog.FriendModeDialog
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.Montserrat
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import java.util.concurrent.TimeUnit
 
 @SuppressLint("DefaultLocale")
@@ -66,7 +66,7 @@ fun HomeScreenView(
             if (state.savedGame != null) {
                 RoundedButton(
                     modifier = Modifier.fillMaxWidth(0.7f),
-                    colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                    colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                     contentPadding = PaddingValues(vertical = 5.dp, horizontal = 15.dp),
                     onClick = {
                         val savedGame = state.savedGame
@@ -82,7 +82,7 @@ fun HomeScreenView(
                         Text(
                             stringResource(R.string.continue_text),
                             fontSize = 16.sp,
-                            color = WordleColor.colors.textForActiveBtnMkI,
+                            color = WordyColor.colors.textForActiveBtnMkI,
                             style = TextStyle(
                                 lineHeight = 16.sp,
                                 fontFamily = Montserrat,
@@ -106,7 +106,7 @@ fun HomeScreenView(
                                 )
                             }",
                             fontSize = 12.sp,
-                            color = WordleColor.colors.textForActiveBtnMkI,
+                            color = WordyColor.colors.textForActiveBtnMkI,
                             style = TextStyle(
                                 lineHeight = 12.sp,
                                 fontFamily = Montserrat,
@@ -118,7 +118,7 @@ fun HomeScreenView(
             }
             RoundedButton(
                 modifier = Modifier.fillMaxWidth(0.7f),
-                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkII),
+                colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkII),
                 contentPadding = PaddingValues(vertical = 3.dp, horizontal = 15.dp),
                 onClick = { onEvent(HomeUiEvent.BottomSheetUploadMode(0))
                 }
@@ -126,8 +126,8 @@ fun HomeScreenView(
                 Text(
                     stringResource(R.string.new_game),
                     fontSize = 16.sp,
-                    color = WordleColor.colors.textForActiveBtnMkII,
-                    style = WordleTypography.bodyMedium
+                    color = WordyColor.colors.textForActiveBtnMkII,
+                    style = WordyTypography.bodyMedium
                 )
             }
         }

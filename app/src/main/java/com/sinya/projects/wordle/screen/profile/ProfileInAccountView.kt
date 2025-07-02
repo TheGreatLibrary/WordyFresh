@@ -38,8 +38,8 @@ import com.sinya.projects.wordle.ui.features.CardColumn
 import com.sinya.projects.wordle.ui.features.CustomCard
 import com.sinya.projects.wordle.ui.features.RoundedBackText
 import com.sinya.projects.wordle.ui.features.RowLink
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.white
 
 @Composable
@@ -63,7 +63,7 @@ fun ProfileInAccountView(
         Text(
             text = state.profile.nickname,
             fontSize = 20.sp,
-            color = WordleColor.colors.textPrimary,
+            color = WordyColor.colors.textPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth(0.6f),
@@ -133,15 +133,15 @@ fun ProfileInAccountView(
                         .padding(end = 9.dp)
                         .size(24.dp)
                         .clip(CircleShape)
-                        .background(color = WordleColor.colors.secondary)
+                        .background(color = WordyColor.colors.secondary)
                         .scale(0.75f),
                     colorFilter = ColorFilter.tint(white)
                 )
                 Text(
                     text = stringResource(R.string.exit),
                     fontSize = 15.sp,
-                    color = WordleColor.colors.secondary,
-                    style = WordleTypography.bodyMedium
+                    color = WordyColor.colors.secondary,
+                    style = WordyTypography.bodyMedium
                 )
             }
         }

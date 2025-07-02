@@ -16,7 +16,7 @@ import com.sinya.projects.wordle.screen.statistic.AppStatsModes
 import com.sinya.projects.wordle.screen.statistic.StatisticUiEvent
 import com.sinya.projects.wordle.screen.statistic.StatisticUiState
 import com.sinya.projects.wordle.ui.features.RoundedButton
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.gray600
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.white
@@ -49,7 +49,7 @@ fun ScrollHorizontalModes(
                 Text(
                     text = stringResource(mode.name),
                     fontSize = 14.sp,
-                    style = WordleTypography.bodyMedium
+                    style = WordyTypography.bodyMedium
                 )
             }
         }

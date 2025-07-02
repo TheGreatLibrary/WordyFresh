@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun NotRightWordDialog(
@@ -44,14 +44,14 @@ fun NotRightWordDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(color = WordleColor.colors.background)
+                    .background(color = WordyColor.colors.background)
                     .padding(horizontal = 15.dp, vertical = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     message,
-                    color = WordleColor.colors.textPrimary,
-                    style = WordleTypography.bodyLarge,
+                    color = WordyColor.colors.textPrimary,
+                    style = WordyTypography.bodyLarge,
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center
                 )

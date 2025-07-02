@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.features.CheckedIcon
 import com.sinya.projects.wordle.ui.features.Header
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -57,7 +57,7 @@ fun ThemeScreen(
                 if (index < themes.lastIndex) {
                     HorizontalDivider(
                         modifier = Modifier.fillMaxWidth(0.82f),
-                        color = WordleColor.colors.textCardSecondary,
+                        color = WordyColor.colors.textCardSecondary,
                         thickness = 1.dp
                     )
                 }
@@ -98,7 +98,7 @@ fun ThemeModeItem(
             Text(
                 text = nativeName,
                 style = MaterialTheme.typography.bodyLarge,
-                color = WordleColor.colors.textPrimary
+                color = WordyColor.colors.textPrimary
             )
         }
         CheckedIcon(isSelected)

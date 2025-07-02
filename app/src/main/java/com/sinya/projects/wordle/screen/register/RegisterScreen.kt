@@ -1,20 +1,21 @@
 package com.sinya.projects.wordle.screen.register
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sinya.projects.wordle.WordyApplication
-import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.navigation.ScreenRoute
+import com.sinya.projects.wordle.screen.register.subscreens.LoadingEmailConfirm
+import com.sinya.projects.wordle.screen.register.subscreens.RegisterForm
+import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.white
 import io.github.jan.supabase.SupabaseClient
 
@@ -26,31 +27,42 @@ fun RegisterScreen(
     snackbarHost: SnackbarHostState,
     onRegistered: () -> Unit
 ) {
-    val db = WordyApplication.database
-
     val viewModel: RegisterViewModel = viewModel(
-        factory = RegisterViewModel.provideFactory(db, supabase)
+        factory = RegisterViewModel.provideFactory(
+            WordyApplication.database,
+            supabase
+        )
     )
 
     val state = viewModel.state.value
 
-    LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let {
-            snackbarHost.showSnackbar(it)
-            viewModel.onEvent(RegisterUiEvent.ErrorDismissed)
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        when (state) {
+            is RegisterUiState.RegisterForm -> {
+                LaunchedEffect(state.errorMessage) {
+                    state.errorMessage?.let {
+                        snackbarHost.showSnackbar(it)
+                        viewModel.onEvent(RegisterUiEvent.ErrorDismissed)
+                    }
+                }
+
+                RegisterForm(
+                    navigateToBackStack = navigateToBackStack,
+                    navigateTo = navigateTo,
+                    onRegisterIn = onRegistered,
+                    state = state,
+                    onEvent = viewModel::onEvent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(white, WordyShapes.extraLarge)
+                        .padding(horizontal = 26.dp, vertical = 14.dp)
+                )
+            }
+
+            is RegisterUiState.LoadingConfirm -> LoadingEmailConfirm(email = state.email)
         }
     }
-
-    RegisterScreenView(
-        navigateToBackStack = navigateToBackStack,
-        navigateTo = navigateTo,
-        onRegisterIn = onRegistered,
-        state = viewModel.state.value,
-        onEvent = viewModel::onEvent,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(white, RoundedCornerShape(100))
-            .padding(horizontal = 32.dp, vertical = 16.dp)
-    )
 }
 

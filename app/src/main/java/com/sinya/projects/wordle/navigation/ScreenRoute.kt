@@ -4,9 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class ScreenRoute {
-    @Serializable data object Profile : ScreenRoute()
-    @Serializable data object Login : ScreenRoute()
-    @Serializable data object Register : ScreenRoute()
+    @Serializable data object Onboarding : ScreenRoute()
+    @Serializable data object Home : ScreenRoute()
+    @Serializable data object Statistic : ScreenRoute()
+    @Serializable data object Achieves : ScreenRoute()
+    @Serializable data object Dictionary : ScreenRoute()
+    @Serializable data object SettingWithBar : ScreenRoute()
+    @Serializable data object SettingWithoutBar : ScreenRoute()
 
     @Serializable
     data class Game(
@@ -16,14 +20,14 @@ sealed class ScreenRoute {
         val word: String? = "",
     ) : ScreenRoute()
 
-    @Serializable data object Onboarding : ScreenRoute()
-    @Serializable data object Home : ScreenRoute()
-    @Serializable data object Statistic : ScreenRoute()
-    @Serializable data object Achieves : ScreenRoute()
-    @Serializable data object Dictionary : ScreenRoute()
-    @Serializable data object SettingWithBar : ScreenRoute()
-    @Serializable data object SettingWithoutBar : ScreenRoute()
     @Serializable data object LanguageMode : ScreenRoute()
     @Serializable data object ThemeMode : ScreenRoute()
     @Serializable data object KeyboardMode : ScreenRoute()
+
+    @Serializable data object Profile : ScreenRoute()
+    @Serializable data object Edit : ScreenRoute()
+    @Serializable data object Register : ScreenRoute()
+    @Serializable data object Login : ScreenRoute()
+    @Serializable data object EmailConfirm : ScreenRoute()
+    @Serializable data object ResetPassword : ScreenRoute()
 }

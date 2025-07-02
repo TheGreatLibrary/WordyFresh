@@ -2,7 +2,6 @@ package com.sinya.projects.wordle.screen.home
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,17 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sinya.projects.wordle.WordyApplication
-import com.sinya.projects.wordle.data.achievement.AchievementTrigger
-import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
-import com.sinya.projects.wordle.data.repository.AvatarRepository
+import com.sinya.projects.wordle.data.local.repository.AvatarRepository
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.home.components.HomePlaceholder
 import com.sinya.projects.wordle.utils.sendSupportEmail
 import io.github.jan.supabase.SupabaseClient
-import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -56,7 +51,7 @@ fun HomeScreen(
                     state = state,
                     navigateTo = navigateTo,
                     sendEmail = {
-                        sendSupportEmail(context)
+                        context.sendSupportEmail()
                         viewModel.onEvent(HomeUiEvent.SendEmailSupport)
                     },
                     onEvent = state.onEvent

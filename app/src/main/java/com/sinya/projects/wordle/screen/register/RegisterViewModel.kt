@@ -1,32 +1,33 @@
 package com.sinya.projects.wordle.screen.register
 
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.sinya.projects.wordle.data.achievement.AchievementTrigger
-import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
-import com.sinya.projects.wordle.data.local.dao.ProfilesDao
+import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.local.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.database.AppDatabase
+import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
 import com.sinya.projects.wordle.domain.model.entity.Profiles
+import com.sinya.projects.wordle.ui.theme.white
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.postgrest.from
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
-import java.util.UUID
 
 class RegisterViewModel(
     private val supabase: SupabaseClient,
     private val db: AppDatabase
 ) : ViewModel() {
-    private val _state = mutableStateOf(RegisterUiState())
+
+    private val _state = mutableStateOf<RegisterUiState>(RegisterUiState.RegisterForm())
     val state: State<RegisterUiState> = _state
 
     companion object {
@@ -43,44 +44,55 @@ class RegisterViewModel(
     }
 
     fun onEvent(event: RegisterUiEvent) {
-        when(event) {
+        val currentState = _state.value
+        if (currentState !is RegisterUiState.RegisterForm) return
+
+        when (event) {
             is RegisterUiEvent.EmailChanged -> {
-                _state.value = _state.value.copy(email = event.value, isEmailError = false)
+                _state.value = currentState.copy(email = event.value, isEmailError = false)
             }
+
             is RegisterUiEvent.PasswordChanged -> {
-                _state.value = _state.value.copy(password = event.value, isPasswordError = false)
+                _state.value = currentState.copy(password = event.value, isPasswordError = false)
             }
+
             is RegisterUiEvent.NicknameChanged -> {
-                _state.value = _state.value.copy(nickname = event.value, isNickNameError = false)
+                _state.value = currentState.copy(nickname = event.value, isNickNameError = false)
             }
+
             is RegisterUiEvent.CheckboxStatusChanged -> {
-                _state.value = _state.value.copy(checkboxStatus = event.value, isCheckboxError = false)
+                _state.value = currentState.copy(checkboxStatus = event.value, isCheckboxError = false)
             }
+
             is RegisterUiEvent.RegisterClicked -> {
-                _state.value = _state.value.copy(
+                _state.value = currentState.copy(
                     isLoading = true,
                     errorMessage = null
                 )
                 registerUser(
                     onSuccess = {
-                        _state.value = _state.value.copy(
+                        _state.value = currentState.copy(
                             isLoading = false
                         )
                         event.success()
                         viewModelScope.launch {
-                            AchievementManager.onTrigger(AchievementTrigger.AccountRegistered, db.loadStats())
+                            AchievementManager.onTrigger(
+                                AchievementTrigger.AccountRegistered,
+                                db.loadStats()
+                            )
                         }
                     },
                     onError = {
-                        _state.value = _state.value.copy(
+                        _state.value = currentState.copy(
                             isLoading = false,
                             errorMessage = it
                         )
                     }
                 )
             }
+
             is RegisterUiEvent.ErrorDismissed -> {
-                _state.value = _state.value.copy(
+                _state.value = currentState.copy(
                     errorMessage = null
                 )
             }
@@ -91,82 +103,108 @@ class RegisterViewModel(
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        if (validationForm()) {
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    supabase.auth.signUpWith(Email) {
-                        this.email = _state.value.email
-                        this.password = _state.value.password
-                    }
-                    if (supabase.auth.currentUserOrNull() != null) {
-                        supabase.from("profiles").insert(
-                            Profiles(
-                                id = supabase.auth.currentUserOrNull()!!.id,
-                                nickname = _state.value.nickname,
-                                avatarUrl = "",
-                                createdAt = Clock.System.now().toString()
-                            )
-                        )
-                        db.profilesDao().insertProfile(
-                            Profiles(
-                                id = supabase.auth.currentUserOrNull()!!.id,
-                                nickname = _state.value.nickname,
-                                avatarUrl = "",
-                                createdAt = Clock.System.now().toString()
-                            )
-                        )
-                        withContext(Dispatchers.Main) { onSuccess() }
-                    }
-                    else {
-                        supabase.auth.signInWith(Email) {
-                            this.email = _state.value.email
-                            this.password = _state.value.password
-                        }
-                        supabase.from("profiles").insert(
-                            Profiles(
-                                id = supabase.auth.currentUserOrNull()?.id ?: UUID.randomUUID().toString(),
-                                nickname = _state.value.nickname,
-                                avatarUrl = "",
-                                createdAt = Clock.System.now().toString()
-                            )
-                        )
-                        db.profilesDao().insertProfile(
-                            Profiles(
-                                id = supabase.auth.currentUserOrNull()?.id ?: UUID.randomUUID().toString(),
-                                nickname = _state.value.nickname,
-                                avatarUrl = "",
-                                createdAt = Clock.System.now().toString()
-                            )
-                        )
-                        withContext(Dispatchers.Main) {
-                            onSuccess()
-                        }
-                    }
+        if (!validationForm()) return
 
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        onError(e.localizedMessage ?: "Ошибка регистрации")
-                    }
+        val formState = _state.value as? RegisterUiState.RegisterForm ?: return
+
+        // переходим во 2 фазу
+        _state.value = RegisterUiState.LoadingConfirm(
+            email = formState.email,
+            password = formState.password,
+            nickname = formState.nickname
+        )
+
+        val confirm = _state.value as? RegisterUiState.LoadingConfirm ?: return
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                supabase.auth.signUpWith(Email) {
+                    email = confirm.email
+                    password = confirm.password
+                }
+
+                pollUntilConfirmed(
+                    email = confirm.email,
+                    password = confirm.password,
+                    nickname = confirm.nickname,
+                    onSuccess = onSuccess,
+                    onError = onError
+                )
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _state.value = formState.copy(isLoading = false)
+                    onError(e.localizedMessage ?: "Ошибка регистрации")
                 }
             }
         }
     }
 
-    private fun validationForm() : Boolean {
-        _state.value = _state.value.copy(
-            email = _state.value.email.trim(),
-            password = _state.value.password.trim(),
-            nickname = _state.value.nickname.trim(),
+    private suspend fun pollUntilConfirmed(
+        email: String,
+        password: String,
+        nickname: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        Log.d("ААА", "еще раз!!!!!")
+        while(supabase.auth.currentUserOrNull()?.id==null) {
+            delay(2000)
+            Log.d("ААА", "еще раз!")
+            try {
+                supabase.auth.signInWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+
+                val user = supabase.auth.currentUserOrNull()
+                if (user != null) {
+                    val profile = Profiles(
+                        id = user.id,
+                        nickname = nickname,
+                        avatarUrl = "",
+                        createdAt = Clock.System.now().toString()
+                    )
+
+                    SupabaseService.insertNewProfile(profile)
+                    db.profilesDao().insertProfile(profile)
+
+                    withContext(Dispatchers.Main) {
+                        onSuccess()
+                    }
+                    return
+                }
+            } catch (_: Exception) { }
+        }
+
+        withContext(Dispatchers.Main) {
+            _state.value = RegisterUiState.RegisterForm(
+                email = email,
+                password = password,
+                nickname = nickname
+            )
+            onError("Email не был подтвержден. Попробуйте позже.")
+        }
+    }
+
+    private fun validationForm(): Boolean {
+        val formState = _state.value as? RegisterUiState.RegisterForm ?: return false
+
+        val trimmed = formState.copy(
+            email = formState.email.trim(),
+            password = formState.password.trim(),
+            nickname = formState.nickname.trim()
         )
 
-        _state.value = _state.value.copy(
-            isCheckboxError = !_state.value.checkboxStatus,
-            isEmailError = _state.value.email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(_state.value.email).matches(),
-            isPasswordError = _state.value.password.length<6,
-            isNickNameError = _state.value.nickname.isEmpty()
+        val updated = trimmed.copy(
+            isCheckboxError = !trimmed.checkboxStatus,
+            isEmailError = trimmed.email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(trimmed.email).matches(),
+            isPasswordError = trimmed.password.length < 6,
+            isNickNameError = trimmed.nickname.isEmpty()
         )
 
-        return !(_state.value.isPasswordError || _state.value.isEmailError ||
-                _state.value.isNickNameError || _state.value.isCheckboxError)
+        _state.value = updated
+
+        return !(updated.isPasswordError || updated.isEmailError ||
+                updated.isNickNameError || updated.isCheckboxError)
     }
 }

@@ -6,11 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.sinya.projects.wordle.data.achievement.AchievementTrigger
-import com.sinya.projects.wordle.data.achievement.objects.AchievementManager
+import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.local.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
-import com.sinya.projects.wordle.data.repository.AvatarRepository
+import com.sinya.projects.wordle.data.local.repository.AvatarRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
@@ -42,19 +42,30 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch {
-            try {
-                val userId = supabase.auth.currentUserOrNull()?.id
-                val avatar = if (userId != null) avatarRepo.downloadAvatar(userId) else null
+            val userId = supabase.auth.currentUserOrNull()?.id
+            if (userId != null) {
+                avatarRepo.downloadAvatar(userId) // первая загрузка
+                launch {
+                    avatarRepo.avatarUriFlow.collect { newUri ->
+                        val current = _state.value
+                        if (current is HomeUiState.Success) {
+                            _state.value = current.copy(avatarUri = newUri)
+                        }
+                    }
+                }
+            }
 
-                AppDataStore.getSavedGame(context).collect { savedGame ->
+            AppDataStore.getSavedGame(context).collect { savedGame ->
+                val current = _state.value
+                if (current is HomeUiState.Success) {
+                    _state.value = current.copy(savedGame = savedGame)
+                } else {
                     _state.value = HomeUiState.Success(
-                        avatarUri = avatar,
+                        avatarUri = avatarRepo.avatarUriFlow.value,
                         savedGame = savedGame,
                         onEvent = ::onEvent
                     )
                 }
-            } catch (e: Exception) {
-                _state.value = HomeUiState.Error("Ошибка загрузки данных: ${e.message}")
             }
         }
     }

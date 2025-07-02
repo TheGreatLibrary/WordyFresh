@@ -14,8 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.screen.game.components.WordCell
 import com.sinya.projects.wordle.screen.game.model.Cell
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun LetterRowDescription(cell: Cell, text: Int) {
@@ -33,15 +33,15 @@ fun LetterRowDescription(cell: Cell, text: Int) {
         )
         Text(
             text = "-",
-            style = WordleTypography.bodyMedium,
+            style = WordyTypography.bodyMedium,
             fontSize = 16.sp,
-            color = WordleColor.colors.textPrimary,
+            color = WordyColor.colors.textPrimary,
         )
         Text(
             text = stringResource(text),
-            style = WordleTypography.bodyMedium,
+            style = WordyTypography.bodyMedium,
             fontSize = 16.sp,
-            color = WordleColor.colors.textPrimary,
+            color = WordyColor.colors.textPrimary,
         )
     }
 }

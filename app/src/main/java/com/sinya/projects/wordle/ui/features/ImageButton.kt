@@ -12,23 +12,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.sinya.projects.wordle.ui.theme.WordyShapes
 
 @Composable
 fun ImageButton(
     image: Int,
     modifierBox: Modifier = Modifier.size(42.dp),
-    modifierIcon: Modifier = Modifier,
+    modifierImage: Modifier = Modifier,
     colorFilter: ColorFilter? = null,
     onClick: () -> Unit
 ) {
     Box(
-        modifier = modifierBox.clip(CircleShape).clickable { onClick() },
+        modifier = modifierBox
+            .clip(WordyShapes.extraLarge)
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painterResource(image),
             contentDescription = null,
-            modifier = modifierIcon,
+            modifier = modifierImage,
             colorFilter = colorFilter
         )
     }

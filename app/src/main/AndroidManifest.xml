@@ -5,11 +5,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"
-        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" tools:ignore="ScopedStorage" />
     <application
         android:name=".WordyApplication"
         android:allowBackup="true"
@@ -30,6 +27,25 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Deep link для подтверждения email -->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.VIEW"/>-->
+<!--                <category android:name="android.intent.category.DEFAULT"/>-->
+<!--                <category android:name="android.intent.category.BROWSABLE"/>-->
+<!--                <data-->
+<!--                    android:scheme="wordy-fresh"-->
+<!--                    android:host="email-confirmed" />-->
+<!--            </intent-filter>-->
+
+<!--            &lt;!&ndash; Deep link для сброса пароля &ndash;&gt;-->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="wordy-fresh"
+                    android:host="reset-password" />
             </intent-filter>
         </activity>
     </application>

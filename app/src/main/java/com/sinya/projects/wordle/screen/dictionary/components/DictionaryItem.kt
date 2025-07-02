@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.screen.dictionary.DictionaryUiEvent
 import com.sinya.projects.wordle.ui.features.CustomCard
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.red
 
@@ -63,8 +63,8 @@ fun DictionaryCard(
                 Text(
                     title,
                     fontSize = 14.sp,
-                    color = WordleColor.colors.textCardPrimary,
-                    style = WordleTypography.bodyLarge
+                    color = WordyColor.colors.textCardPrimary,
+                    style = WordyTypography.bodyLarge
                 )
                 Image(
                     painter = painterResource(R.drawable.arrow),
@@ -107,8 +107,8 @@ private fun DictionaryCardExpandedContent(
         Text(
             description.ifEmpty { stringResource(R.string.no_description) },
             fontSize = 14.sp,
-            color = WordleColor.colors.textCardPrimary,
-            style = WordleTypography.bodyMedium
+            color = WordyColor.colors.textCardPrimary,
+            style = WordyTypography.bodyMedium
         )
         Row(
             Modifier.padding(top = 10.dp),
@@ -124,7 +124,7 @@ private fun DictionaryCardExpandedContent(
                             R.string.share_text,
                             title,
                             description.ifEmpty { "" },
-                            "https://www.rustore.ru/catalog/app/com.sinya.example.wordle"
+                            "https://www.rustore.ru/catalog/app/com.sinya.projects.wordle"
                         ),
                         context
                     )

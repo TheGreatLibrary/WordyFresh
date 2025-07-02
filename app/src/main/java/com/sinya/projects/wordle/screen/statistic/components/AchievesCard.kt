@@ -3,7 +3,6 @@ package com.sinya.projects.wordle.screen.statistic.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,24 +22,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
-import com.sinya.projects.wordle.ui.features.CustomCard
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.ui.theme.green600
-import com.sinya.projects.wordle.ui.theme.green800
-import com.sinya.projects.wordle.ui.theme.white
+import com.sinya.projects.wordle.ui.features.AnimationCard
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun AchievesCard(
     navigateTo: (ScreenRoute) -> Unit
 ) {
-    CustomCard(
-        modifier = Modifier
+    AnimationCard(
+        modifier = Modifier,
+        onClick = { navigateTo(ScreenRoute.Achieves) }
     ) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .clickable { navigateTo(ScreenRoute.Achieves) }
                 .padding(horizontal = 25.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -49,26 +45,26 @@ fun AchievesCard(
                 painter = painterResource(R.drawable.stat_achieve),
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(color = green600)
-                    .border(2.dp, green800, CircleShape)
+                    .background(color = WordyColor.colors.backgroundAchieve)
+                    .border(2.dp, WordyColor.colors.borderAchieve, CircleShape)
                     .size(59.dp)
                     .scale(0.85f),
                 contentDescription = "achieve",
-                colorFilter = ColorFilter.tint(white)
+                colorFilter = ColorFilter.tint(WordyColor.colors.borderAchieve)
             )
             Text(
                 stringResource(R.string.achievements),
                 fontSize = 18.sp,
-                color = WordleColor.colors.textCardPrimary,
+                color = WordyColor.colors.textCardPrimary,
 
                 modifier = Modifier.fillMaxWidth(0.7f),
-                style = WordleTypography.bodyLarge
+                style = WordyTypography.bodyLarge
             )
             Image(
                 painter = painterResource(R.drawable.arrow),
                 modifier = Modifier.size(20.dp),
                 contentDescription = "Перейти",
-                colorFilter = ColorFilter.tint(green800)
+                colorFilter = ColorFilter.tint(WordyColor.colors.borderAchieve)
             )
         }
     }

@@ -7,13 +7,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sinya.projects.wordle.WordyApplication
-import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.theme.white
 import io.github.jan.supabase.SupabaseClient
@@ -26,10 +23,8 @@ fun LoginScreen(
     snackbarHost: SnackbarHostState,
     onLoggedIn: () -> Unit,
 ) {
-    val context = LocalContext.current
     val db = WordyApplication.database
 
-//    val db = remember { AppDatabase.getInstance(context) }
     val profileDao = db.profilesDao()
 
     val viewModel: LoginViewModel = viewModel(

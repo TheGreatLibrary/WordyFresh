@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.screen.statistic.components
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
@@ -26,9 +27,8 @@ import com.sinya.projects.wordle.screen.statistic.AppStatsModes
 import com.sinya.projects.wordle.screen.statistic.StatisticTypeContainer
 import com.sinya.projects.wordle.screen.statistic.StatisticUiState
 import com.sinya.projects.wordle.ui.features.CustomCard
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.utils.absTime
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun StatContainers(
@@ -131,10 +131,10 @@ fun StatContainers(
                 Text(
                     stringResource(R.string.stat_progress_title),
                     fontSize = 18.sp,
-                    color = WordleColor.colors.textCardPrimary,
+                    color = WordyColor.colors.textCardPrimary,
 
                     textAlign = TextAlign.Center,
-                    style = WordleTypography.bodyLarge
+                    style = WordyTypography.bodyLarge
                 )
             }
             HorizontalProgressBar(
@@ -170,4 +170,21 @@ fun StatContainers(
         }
     }
     Spacer(Modifier.height(9.dp))
+}
+
+@SuppressLint("DefaultLocale")
+private fun absTime(times: Long, countGame: Int): String {
+    if (countGame == 0) return "00:00" // избегаем деления на 0
+
+    val averageSeconds = times / countGame
+
+    val hours = averageSeconds / 3600
+    val minutes = (averageSeconds % 3600) / 60
+    val seconds = averageSeconds % 60
+
+    return if (hours > 0) {
+        String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    } else {
+        String.format("%02d:%02d", minutes, seconds)
+    }
 }

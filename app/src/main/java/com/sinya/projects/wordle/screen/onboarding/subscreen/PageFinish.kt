@@ -23,8 +23,8 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.screen.game.components.WordCell
 import com.sinya.projects.wordle.screen.game.model.Cell
 import com.sinya.projects.wordle.ui.features.RoundedButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.gray600
 import com.sinya.projects.wordle.ui.theme.green800
 
@@ -89,9 +89,9 @@ fun PageFinish(onFinish: () -> Unit = {}) {
         ) {
             Text(
                 text = stringResource(R.string.duplicate),
-                style = WordleTypography.titleLarge,
+                style = WordyTypography.titleLarge,
                 fontSize = 24.sp,
-                color = WordleColor.colors.textPrimary,
+                color = WordyColor.colors.textPrimary,
             )
             Row(
                 modifier = Modifier
@@ -112,9 +112,9 @@ fun PageFinish(onFinish: () -> Unit = {}) {
             }
             Text(
                 text = stringResource(R.string.duplicate_descr),
-                style = WordleTypography.bodyMedium,
+                style = WordyTypography.bodyMedium,
                 fontSize = 16.sp,
-                color = WordleColor.colors.textPrimary,
+                color = WordyColor.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
             Column(
@@ -157,9 +157,9 @@ fun PageFinish(onFinish: () -> Unit = {}) {
             }
             Text(
                 text = stringResource(R.string.finish_onboard),
-                style = WordleTypography.bodyLarge,
+                style = WordyTypography.bodyLarge,
                 fontSize = 16.sp,
-                color = WordleColor.colors.textPrimary,
+                color = WordyColor.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
         }
@@ -169,7 +169,7 @@ fun PageFinish(onFinish: () -> Unit = {}) {
         ) {
             RoundedButton(
                 modifier = Modifier.fillMaxWidth(0.7f),
-                colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 3.dp, horizontal = 15.dp),
                 onClick = {
                     onFinish()
@@ -178,8 +178,8 @@ fun PageFinish(onFinish: () -> Unit = {}) {
                 Text(
                     stringResource(R.string.open_the_game),
                     fontSize = 16.sp,
-                    color = WordleColor.colors.textForActiveBtnMkI,
-                    style = WordleTypography.bodyMedium
+                    color = WordyColor.colors.textForActiveBtnMkI,
+                    style = WordyTypography.bodyMedium
                 )
             }
         }

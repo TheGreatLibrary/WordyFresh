@@ -8,8 +8,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun AppVersionInfo() {
@@ -27,7 +27,7 @@ fun AppVersionInfo() {
     Text(
         "${stringResource(R.string.version)}: $versionName ($versionCode)",
         fontSize = 14.sp,
-        color = WordleColor.colors.textPrimary,
-        style = WordleTypography.bodyMedium
+        color = WordyColor.colors.textPrimary,
+        style = WordyTypography.bodyMedium
     )
 }

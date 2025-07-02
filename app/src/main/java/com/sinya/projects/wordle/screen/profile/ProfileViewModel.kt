@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
-import com.sinya.projects.wordle.data.repository.AvatarRepository
+import com.sinya.projects.wordle.data.local.repository.AvatarRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
@@ -50,7 +50,18 @@ class ProfileViewModel(
 
     private fun loadProfile() {
         viewModelScope.launch {
-            val userId = supabase.auth.currentUserOrNull()?.id
+            var userId = supabase.auth.currentUserOrNull()?.id
+
+            if (userId == null) {
+                try {
+                    supabase.auth.refreshCurrentSession()
+                    userId = supabase.auth.currentUserOrNull()?.id
+                } catch (e: Exception) {
+                    _state.value = ProfileUiState.NoAccount
+                    return@launch
+                }
+            }
+
             if (userId == null) {
                 _state.value = ProfileUiState.NoAccount
                 return@launch
@@ -61,9 +72,10 @@ class ProfileViewModel(
                 if (profile != null) {
                     _state.value = ProfileUiState.Success(
                         profile = profile,
-                        email  = getEmail(),
+                        email = getEmail(),
                         avatarUri = null,
-                        onEvent = ::onEvent)
+                        onEvent = ::onEvent
+                    )
                 } else {
                     _state.value = ProfileUiState.NoAccount
                 }

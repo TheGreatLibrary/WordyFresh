@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.sinya.projects.wordle.navigation.NavGraph
 import com.sinya.projects.wordle.navigation.ScreenRoute
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.utils.getRouteName
 import com.sinya.projects.wordle.utils.isInternetAvailable
 import kotlinx.coroutines.flow.StateFlow
@@ -60,6 +60,8 @@ fun MainActivityScreen(
         ScreenRoute.SettingWithoutBar::class.simpleName,
         ScreenRoute.Profile::class.simpleName,
         ScreenRoute.Login::class.simpleName,
+        ScreenRoute.EmailConfirm::class.simpleName,
+        ScreenRoute.ResetPassword::class.simpleName,
         ScreenRoute.Achieves::class.simpleName,
         ScreenRoute.Register::class.simpleName,
         ScreenRoute.Onboarding::class.simpleName
@@ -68,14 +70,14 @@ fun MainActivityScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = WordleColor.colors.background),
+            .background(color = WordyColor.colors.background),
         bottomBar = {
             if (withOutBottomBar) {
                 AddBlock(context)
             } else BottomNavigation(navController)
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = WordleColor.colors.background
+        containerColor = WordyColor.colors.background
     ) { innerPadding ->
 //        if (!withOutImage) Image(
 //            painter = painterResource(R.drawable.bg1),
@@ -103,7 +105,7 @@ fun MainActivityScreen(
 
 @Composable
 fun AddBlock(context: Context) {
-    if (isInternetAvailable(context)) {
+    if (context.isInternetAvailable()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()

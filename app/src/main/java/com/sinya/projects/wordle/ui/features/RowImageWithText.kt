@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,8 +16,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun RowImageWithText(
@@ -36,16 +36,16 @@ fun RowImageWithText(
             Modifier
                 .padding(end = 9.dp)
                 .size(24.dp)
-                .clip(CircleShape)
-                .background(color = WordleColor.colors.backgroundIcon)
+                .clip(WordyShapes.extraLarge)
+                .background(color = WordyColor.colors.backgroundIcon)
                 .scale(0.75f),
-            colorFilter = ColorFilter.tint(WordleColor.colors.foregroundIcon)
+            colorFilter = ColorFilter.tint(WordyColor.colors.foregroundIcon)
         )
         Text(
             title,
             fontSize = 15.sp,
-            color = WordleColor.colors.textCardPrimary,
-            style = WordleTypography.bodyMedium,
+            color = WordyColor.colors.textCardPrimary,
+            style = WordyTypography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

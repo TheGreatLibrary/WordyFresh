@@ -11,7 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.features.RoundedBackText
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 
 @Composable
 fun TextResult(
@@ -25,8 +25,8 @@ fun TextResult(
     ) {
         RoundedBackText(
             stringResource(result),
-            color = if (result == R.string.lose) WordleColor.colors.secondary
-            else WordleColor.colors.primary
+            color = if (result == R.string.lose) WordyColor.colors.secondary
+            else WordyColor.colors.primary
         )
     }
 }

@@ -14,7 +14,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 
 @Composable
 fun DictionaryImageButton(@DrawableRes image: Int, onClick: () -> Unit) {
@@ -23,11 +23,11 @@ fun DictionaryImageButton(@DrawableRes image: Int, onClick: () -> Unit) {
         contentDescription = null,
         modifier = Modifier
             .clip(RoundedCornerShape(5.dp))
-            .background(WordleColor.colors.backgroundIcon)
+            .background(WordyColor.colors.backgroundIcon)
             .size(28.dp)
             .clickable { onClick() }
             .scale(0.8f)
             .padding(2.dp),
-        colorFilter = ColorFilter.tint(WordleColor.colors.foregroundIcon)
+        colorFilter = ColorFilter.tint(WordyColor.colors.foregroundIcon)
     )
 }

@@ -22,8 +22,8 @@ import com.sinya.projects.wordle.screen.game.components.KeyboardKey
 import com.sinya.projects.wordle.screen.game.components.WordCell
 import com.sinya.projects.wordle.screen.game.model.Cell
 import com.sinya.projects.wordle.screen.game.model.Key
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.gray600
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.yellow
@@ -120,15 +120,15 @@ fun PageAttempts() {
         ) {
             Text(
                 text = stringResource(R.string.tryes_6),
-                style = WordleTypography.titleLarge,
+                style = WordyTypography.titleLarge,
                 fontSize = 24.sp,
-                color = WordleColor.colors.textPrimary,
+                color = WordyColor.colors.textPrimary,
             )
             Text(
                 text = stringResource(R.string.attemts_descr1),
-                style = WordleTypography.bodyMedium,
+                style = WordyTypography.bodyMedium,
                 fontSize = 16.sp,
-                color = WordleColor.colors.textPrimary,
+                color = WordyColor.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
             Column(
@@ -168,9 +168,9 @@ fun RichInstructionText() {
     ) {
         Text(
             stringResource(R.string.navigation_btns),
-            style = WordleTypography.bodyMedium,
+            style = WordyTypography.bodyMedium,
             fontSize = 16.sp,
-            color = WordleColor.colors.textPrimary,
+            color = WordyColor.colors.textPrimary,
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -184,9 +184,9 @@ fun RichInstructionText() {
             Text("-")
             Text(
                 stringResource(R.string.previos_btn),
-                style = WordleTypography.bodyMedium,
+                style = WordyTypography.bodyMedium,
                 fontSize = 16.sp,
-                color = WordleColor.colors.textPrimary
+                color = WordyColor.colors.textPrimary
             )
         }
         Row(
@@ -201,9 +201,9 @@ fun RichInstructionText() {
             Text("-")
             Text(
                 text = stringResource(R.string.next_btn),
-                style = WordleTypography.bodyMedium,
+                style = WordyTypography.bodyMedium,
                 fontSize = 16.sp,
-                color = WordleColor.colors.textPrimary
+                color = WordyColor.colors.textPrimary
             )
         }
     }

@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.sinya.projects.wordle.ui.theme.WordleColor
+import com.sinya.projects.wordle.ui.theme.WordyColor
 
 @Composable
 fun DotsIndicator(
@@ -25,7 +25,7 @@ fun DotsIndicator(
         modifier = Modifier.fillMaxWidth().padding(16.dp)
     ) {
         for (i in 0 until totalDots) {
-            val color = if (i == selectedIndex) WordleColor.colors.textPrimary else WordleColor.colors.textCardSecondary
+            val color = if (i == selectedIndex) WordyColor.colors.textPrimary else WordyColor.colors.textCardSecondary
             Box(
                 modifier = Modifier
                     .padding(4.dp)

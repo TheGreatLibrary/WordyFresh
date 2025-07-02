@@ -33,7 +33,6 @@ import androidx.lifecycle.lifecycleScope
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.screen.language.LocaleViewModel
 import com.sinya.projects.wordle.screen.theme.ThemeViewModel
-import com.sinya.projects.wordle.data.remote.supabase.SupabaseClientHolder
 import com.sinya.projects.wordle.data.remote.supabase.SupabaseSyncManager
 import com.sinya.projects.wordle.data.local.datastore.AppSettings
 import com.sinya.projects.wordle.navigation.ScreenRoute
@@ -51,10 +50,13 @@ class MainActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
     private val localeViewModel: LocaleViewModel by viewModels()
 
+    private val localAppSettings = compositionLocalOf<AppSettings> {
+        error("AppSettings not provided")
+    }
+
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SupabaseClientHolder.init()
         enableEdgeToEdge()
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -69,9 +71,9 @@ class MainActivity : ComponentActivity() {
         var lastStatus: SessionStatus? = null
 
 
-        if (isInternetAvailable(this)) {
+        if (isInternetAvailable()) {
             lifecycleScope.launch {
-                SupabaseClientHolder.client.auth.sessionStatus.collect { status ->
+                WordyApplication.supabaseClient.auth.sessionStatus.collect { status ->
                     if (status is SessionStatus.Authenticated && lastStatus !is SessionStatus.Authenticated) {
                         Log.d(
                             "SupabaseSyncManager",
@@ -165,11 +167,16 @@ class MainActivity : ComponentActivity() {
         var userId: String? = null
         // Делаем попытки до тех пор, пока не получим userId
         while (userId == null) {
-            userId = SupabaseClientHolder.client.auth.currentUserOrNull()?.id
+            userId = WordyApplication.supabaseClient.auth.currentUserOrNull()?.id
             delay(100) // Ждём 100 мс перед повторной проверкой
         }
         return userId
     }
+
+
+
+
+    /** работа с AppDataStore */
 
     private fun applyAppLocale(languageCode: String) {
         val locale = Locale(languageCode)
@@ -192,8 +199,4 @@ class MainActivity : ComponentActivity() {
             AppDataStore.setOnboardingMode(context = context, state = state)
         }
     }
-}
-
-val localAppSettings = compositionLocalOf<AppSettings> {
-    error("AppSettings not provided")
 }

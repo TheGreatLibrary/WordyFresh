@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.screen.game.model.Key
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.white
 import kotlinx.coroutines.launch
 
@@ -87,7 +87,7 @@ fun KeyboardKey(key: Key, onClick: () -> Unit, modifier: Modifier = Modifier) {
             else -> Text(
                 text = key.char.toString(),
                 fontSize = 20.sp,
-                style = WordleTypography.bodyMedium,
+                style = WordyTypography.bodyMedium,
                 color = white,
             )
         }

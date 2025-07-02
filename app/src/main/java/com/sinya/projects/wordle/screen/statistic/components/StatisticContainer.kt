@@ -3,7 +3,6 @@ package com.sinya.projects.wordle.screen.statistic.components
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,9 +30,10 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.screen.statistic.StatisticTypeContainer
+import com.sinya.projects.wordle.ui.features.AnimationCard
 import com.sinya.projects.wordle.ui.features.CustomCard
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleTypography
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.gray100
 import com.sinya.projects.wordle.ui.theme.green800
 import com.sinya.projects.wordle.ui.theme.red
@@ -46,26 +46,40 @@ fun StatisticContainer(
     fontSize2: TextUnit,
     modifier: Modifier = Modifier
 ) {
-    CustomCard(
-        Modifier
-            .fillMaxHeight()
-            .then(modifier)
-    ) {
-        when (type) {
+    when (type) {
             is StatisticTypeContainer.Count -> {
-                val animCount by animateIntAsState(
-                    targetValue = type.value,
-                    animationSpec = tween(500)
-                )
-                ColumnContent(animCount.toString(), description, fontSize, fontSize2)
+                CustomCard(
+                    Modifier
+                        .fillMaxHeight()
+                        .then(modifier)
+                ) {
+                    val animCount by animateIntAsState(
+                        targetValue = type.value,
+                        animationSpec = tween(500)
+                    )
+                    ColumnContent(animCount.toString(), description, fontSize, fontSize2)
+                }
             }
 
             is StatisticTypeContainer.Time -> {
-                ColumnContent(type.value, description, fontSize, fontSize2)
+                CustomCard(
+                    Modifier
+                        .fillMaxHeight()
+                        .then(modifier)
+                ) {
+                    ColumnContent(type.value, description, fontSize, fontSize2)
+                }
             }
 
             is StatisticTypeContainer.Percent -> {
                 var percentMode by remember { mutableStateOf(false) }
+
+                AnimationCard(
+                    modifier = modifier
+                        .fillMaxHeight()
+                        .then(modifier),
+                    onClick = { percentMode = !percentMode }
+                ) {
                 val value = type.value
                 val stat = type.statisticByMode
 
@@ -75,7 +89,6 @@ fun StatisticContainer(
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .clickable { percentMode = !percentMode }
                         .padding(horizontal = 12.dp, vertical = 15.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -120,15 +133,15 @@ fun StatisticContainer(
                             Text(
                                 progress,
                                 fontSize = fontSize,
-                                color = WordleColor.colors.textCardPrimary,
-                                style = WordleTypography.bodyLarge,
+                                color = WordyColor.colors.textCardPrimary,
+                                style = WordyTypography.bodyLarge,
                                 textAlign = TextAlign.Center
                             )
                             Text(
                                 if (!percentMode) "${stat.winGame}" else "${stat.countGame - stat.winGame}",
                                 fontSize = fontSize,
-                                color = WordleColor.colors.textCardPrimary,
-                                style = WordleTypography.bodyLarge,
+                                color = WordyColor.colors.textCardPrimary,
+                                style = WordyTypography.bodyLarge,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -138,8 +151,8 @@ fun StatisticContainer(
                         if (!percentMode) stringResource(R.string.percent_win)
                         else stringResource(R.string.percent_lose),
                         fontSize = fontSize2,
-                        color = WordleColor.colors.textCardPrimary,
-                        style = WordleTypography.bodyMedium,
+                        color = WordyColor.colors.textCardPrimary,
+                        style = WordyTypography.bodyMedium,
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -167,8 +180,8 @@ private fun ColumnContent(
         Text(
             mainText,
             fontSize = fontSize,
-            color = WordleColor.colors.textCardPrimary,
-            style = WordleTypography.bodyLarge,
+            color = WordyColor.colors.textCardPrimary,
+            style = WordyTypography.bodyLarge,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -176,8 +189,8 @@ private fun ColumnContent(
         Text(
             description,
             fontSize = fontSize2,
-            color = WordleColor.colors.textCardPrimary,
-            style = WordleTypography.bodyMedium,
+            color = WordyColor.colors.textCardPrimary,
+            style = WordyTypography.bodyMedium,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

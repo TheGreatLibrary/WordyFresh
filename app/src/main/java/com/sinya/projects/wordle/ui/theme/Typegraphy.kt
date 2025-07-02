@@ -23,7 +23,7 @@ val FiraSans = FontFamily(
 
 
 // Определяем типографику
-val WordleTypography = Typography(
+val WordyTypography = Typography(
 
     bodyLarge = TextStyle(
         fontFamily = Montserrat,

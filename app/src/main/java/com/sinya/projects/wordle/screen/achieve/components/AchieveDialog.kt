@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,10 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.sinya.projects.wordle.domain.model.data.AchieveItem
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleShapes
-import com.sinya.projects.wordle.ui.theme.WordleTypography
-
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun AchieveDialog(
@@ -40,66 +38,56 @@ fun AchieveDialog(
                 Modifier
                     .fillMaxWidth()
                     .background(
-                        color = WordleColor.colors.background,
-                        shape = WordleShapes.large
+                        color = WordyColor.colors.background,
+                        shape = WordyShapes.large
                     )
                     .padding(horizontal = 12.dp, vertical = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = getLocalizedString(achieveItem.title),
-                    style = WordleTypography.bodyMedium,
-                    color = WordleColor.colors.textPrimary,
+                    style = WordyTypography.titleLarge,
+                    color = WordyColor.colors.textPrimary,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Image(
+                    painter = painterResource(getDrawableId(achieveItem.image)),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .border(
+                            width = 2.dp,
+                            color = if (achieveItem.count < achieveItem.maxCount) WordyColor.colors.foregroundAchievePlaceholder else WordyColor.colors.borderAchieve,
+                            shape = CircleShape
+                        )
+                        .width(100.dp)
+                        .background(WordyColor.colors.backgroundAchieve)
+                        .padding(5.dp)
+                        .aspectRatio(1f),
+                    colorFilter = if (achieveItem.count < achieveItem.maxCount)
+                        ColorFilter.tint(WordyColor.colors.foregroundAchievePlaceholder)
+                    else null
+                )
+                Text(
+                    text = "${achieveItem.count}/${achieveItem.maxCount}",
+                    style = WordyTypography.bodyMedium,
+                    color = WordyColor.colors.textPrimary,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = getLocalizedString(achieveItem.description),
+                    style = WordyTypography.bodyMedium,
+                    color = WordyColor.colors.textPrimary,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center
                 )
-
-                if (achieveItem.count >= achieveItem.maxCount) {
-                    Image(
-                        painter = painterResource(getDrawableId(achieveItem.image)),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .border(2.dp, WordleColor.colors.tertiary, CircleShape)
-                            .width(100.dp)
-                            .background(WordleColor.colors.background)
-                            .padding(5.dp)
-                            .aspectRatio(1f),
-                        colorFilter = ColorFilter.tint(WordleColor.colors.tertiary)
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .border(2.dp, WordleColor.colors.textCardSecondary, CircleShape)
-                            .width(100.dp)
-                            .background(WordleColor.colors.backgroundCard)
-                            .padding(5.dp)
-                            .aspectRatio(1f)
-                    )
-                }
-
-                Text(
-                    text = "${achieveItem.count}/${achieveItem.maxCount}",
-                    style = WordleTypography.bodyMedium,
-                    color = WordleColor.colors.textPrimary,
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = getLocalizedString(achieveItem.description),
-                    style = WordleTypography.bodyMedium,
-                    color = WordleColor.colors.textPrimary,
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center
-                )
-
                 Text(
                     text = getLocalizedString(achieveItem.condition),
-                    style = WordleTypography.bodyMedium,
-                    color = WordleColor.colors.textCardSecondary,
+                    style = WordyTypography.bodyMedium,
+                    color = WordyColor.colors.textCardSecondary,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )

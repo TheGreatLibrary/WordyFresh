@@ -2,7 +2,7 @@ package com.sinya.projects.wordle.data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.sinya.projects.wordle.data.achievement.UserStats
+import com.sinya.projects.wordle.data.local.achievement.UserStats
 import com.sinya.projects.wordle.data.local.dao.AchievementsDao
 import com.sinya.projects.wordle.data.local.dao.OfflineAchievementsDao
 import com.sinya.projects.wordle.data.local.dao.OfflineDictionaryDao

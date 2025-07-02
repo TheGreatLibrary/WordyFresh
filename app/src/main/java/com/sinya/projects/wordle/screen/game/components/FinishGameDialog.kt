@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -27,11 +26,9 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.screen.game.GameUiEvent
 import com.sinya.projects.wordle.screen.game.GameUiState
 import com.sinya.projects.wordle.ui.features.RoundedButton
-import com.sinya.projects.wordle.ui.theme.WordleColor
-import com.sinya.projects.wordle.ui.theme.WordleShapes
-import com.sinya.projects.wordle.ui.theme.WordleTypography
-import com.sinya.projects.wordle.ui.theme.gray800
-import com.sinya.projects.wordle.ui.theme.green600
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
+import com.sinya.projects.wordle.ui.theme.WordyTypography
 import java.util.Locale
 
 @Composable
@@ -46,8 +43,8 @@ fun FinishGameDialog(
                 Modifier
                     .fillMaxWidth()
                     .background(
-                        color = WordleColor.colors.background,
-                        shape = WordleShapes.large
+                        color = WordyColor.colors.background,
+                        shape = WordyShapes.large
                     )
                     .padding(horizontal = 12.dp, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -55,29 +52,29 @@ fun FinishGameDialog(
             ) {
                 Text(
                     stringResource(state.result),
-                    color = WordleColor.colors.textPrimary,
-                    style = WordleTypography.titleLarge,
+                    color = WordyColor.colors.textPrimary,
+                    style = WordyTypography.titleLarge,
                     fontSize = 22.sp
                 )
                 Text(
                     text = stringResource(R.string.hiddent_word),
-                    color = WordleColor.colors.textPrimary,
-                    style = WordleTypography.bodyMedium,
+                    color = WordyColor.colors.textPrimary,
+                    style = WordyTypography.bodyMedium,
                     fontSize = 14.sp
                 )
                 Text(
                     state.hiddenWord,
-                    color = WordleColor.colors.textFinishHiddenWord,
-                    style = WordleTypography.titleLarge,
+                    color = WordyColor.colors.textFinishHiddenWord,
+                    style = WordyTypography.titleLarge,
                     fontSize = 32.sp,
                     modifier = Modifier
-                        .background(WordleColor.colors.backgroundFinishHiddenWord, shape = RoundedCornerShape(8.dp))
+                        .background(WordyColor.colors.backgroundFinishHiddenWord, shape = RoundedCornerShape(8.dp))
                         .padding(10.dp)
                 )
                 Text(
                     text = stringResource(R.string.parsing_word),
-                    color = WordleColor.colors.textLinkColor,
-                    style = WordleTypography.bodyMedium,
+                    color = WordyColor.colors.textLinkColor,
+                    style = WordyTypography.bodyMedium,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
@@ -90,21 +87,21 @@ fun FinishGameDialog(
                 )
                 RoundedButton(
                     modifier = Modifier.fillMaxWidth(0.7f),
-                    colors = ButtonDefaults.buttonColors(containerColor = WordleColor.colors.backgroundActiveBtnMkI),
+                    colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                     onClick = { onEvent(GameUiEvent.ReloadGame) },
                 ) {
                     Text(
                         text = stringResource(R.string.new_game),
-                        color = WordleColor.colors.textForActiveBtnMkI,
-                        style = WordleTypography.bodyMedium,
+                        color = WordyColor.colors.textForActiveBtnMkI,
+                        style = WordyTypography.bodyMedium,
                         fontSize = 18.sp
                     )
                 }
                 Text(
                     text = stringResource(R.string.put_enter_to_play),
-                    color = WordleColor.colors.textPrimary,
-                    style = WordleTypography.bodyMedium,
+                    color = WordyColor.colors.textPrimary,
+                    style = WordyTypography.bodyMedium,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center
                 )
