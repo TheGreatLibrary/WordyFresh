@@ -1,7 +1,7 @@
 package com.sinya.projects.wordle.data.local.achievement
 
 import com.sinya.projects.wordle.data.local.achievement.interfaces.AchievementCondition
-import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
 import com.sinya.projects.wordle.screen.game.model.GameMode
 
 sealed class AchievementTrigger {

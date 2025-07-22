@@ -67,13 +67,13 @@ fun FriendModeDialogView(
                         selected = state.selectedTab == 0,
                         onClick = { onEvent(FriendModeUiEvent.OnTabClick(0)) },
                         modifier = Modifier.weight(1f),
-                        text = "Загадать"
+                        text = stringResource(R.string.get_shifr_word)
                     )
                     CustomTab(
                         selected = state.selectedTab == 1,
                         onClick = { onEvent(FriendModeUiEvent.OnTabClick(1)) },
                         modifier = Modifier.weight(1f),
-                        text = "Отгадать"
+                        text = stringResource(R.string.put_shifr_word)
                     )
                 }
                 GetTabContent(

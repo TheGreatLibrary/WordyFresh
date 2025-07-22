@@ -66,7 +66,7 @@ class AvatarRepository(
         _avatarUriFlow.value = null
     }
 
-    private fun compressToWebP(uri: Uri, userId: String): File {
+    private fun compressToWebP(uri: Uri, userId: String, width: Int? = 500, height: Int? = 500): File {
         val inputStream = context.contentResolver.openInputStream(uri) ?: error("Failed to open input")
         val original = BitmapFactory.decodeStream(inputStream)
         inputStream.close()
@@ -80,7 +80,7 @@ class AvatarRepository(
 
         val squared = Bitmap.createBitmap(original, offsetX, offsetY, side, side)
 
-        // Теперь уменьшаем до нужного размера (например, 500x500)
+//        if (width != null && height!= null) {}
         val scaled = Bitmap.createScaledBitmap(squared, 500, 500, true)
 
         val file = File(context.filesDir, getAvatarFileName(userId))

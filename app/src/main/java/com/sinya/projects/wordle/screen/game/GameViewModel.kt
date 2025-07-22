@@ -19,8 +19,8 @@ import com.sinya.projects.wordle.screen.game.model.Cell
 import com.sinya.projects.wordle.screen.game.model.Game
 import com.sinya.projects.wordle.screen.game.model.GameSettings
 import com.sinya.projects.wordle.screen.game.model.Key
-import com.sinya.projects.wordle.domain.model.entity.OfflineDictionary
-import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.local.entity.OfflineDictionary
+import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
 import com.sinya.projects.wordle.screen.game.model.GameMode
 import com.sinya.projects.wordle.ui.theme.gray100
 import com.sinya.projects.wordle.ui.theme.gray30
@@ -741,25 +741,19 @@ class GameViewModel(
 
     private suspend fun addStatisticData(result: Int) {
             val modeId = when (_state.value.mode) {
-                GameMode.NORMAL -> "12f9d2ce-1234-4321-aaaa-000000000001"
-                GameMode.HARD -> "12f9d2ce-1234-4321-aaaa-000000000002"
-                GameMode.RANDOM -> "12f9d2ce-1234-4321-aaaa-000000000003"
-                GameMode.FRIENDLY -> "12f9d2ce-1234-4321-aaaa-000000000004"
-                else -> "12f9d2ce-1234-4321-aaaa-000000000001"
+                GameMode.NORMAL -> 0
+                GameMode.HARD -> 1
+                GameMode.RANDOM -> 2
+                GameMode.FRIENDLY -> 3
+                else -> 0
             }
             if (db.offlineStatisticDao().count() == 0) {
-                val modes = listOf(
-                    "12f9d2ce-1234-4321-aaaa-000000000001",
-                    "12f9d2ce-1234-4321-aaaa-000000000002",
-                    "12f9d2ce-1234-4321-aaaa-000000000003",
-                    "12f9d2ce-1234-4321-aaaa-000000000004"
-                )
+                val modes = listOf(0, 1, 2, 3)
                 val initialStats = modes.map { mode -> OfflineStatistic(modeId = mode) }
                 db.offlineStatisticDao().insertStatisticList(initialStats)
             } // инициализация, если статистика пустая (модернизировать)
 
-            val currentStatistic = db.offlineStatisticDao()
-                .getStatisticByMode(modeId) // получаем теукущую статистику по моду
+            val currentStatistic = db.offlineStatisticDao().getStatisticByMode(modeId) // получаем теукущую статистику по моду
             val win = result == R.string.win
 
             val currentStreak = if (win) currentStatistic.currentStreak + 1 else 0

@@ -18,7 +18,7 @@ interface WordDao {
     suspend fun deleteWords(words: List<String>)
 
     @Query("SELECT id FROM words WHERE word = :word")
-    suspend fun getWordId(word: String) : String
+    suspend fun getWordId(word: String) : Int
 
     @Query("SELECT EXISTS(SELECT 1 FROM words WHERE word = :word)")
     suspend fun exists(word: String): Boolean
@@ -28,5 +28,8 @@ interface WordDao {
 
     @Query("SELECT rating FROM words WHERE word = :word LIMIT 1")
     suspend fun getWordRating(word: String): Boolean
+
+    @Query("SELECT word FROM words WHERE id = :wordId")
+    suspend fun getWordById(wordId: Int): String
 }
 

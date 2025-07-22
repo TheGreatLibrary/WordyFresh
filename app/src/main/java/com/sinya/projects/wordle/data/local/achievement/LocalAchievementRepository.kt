@@ -4,7 +4,7 @@ import com.sinya.projects.wordle.data.local.achievement.interfaces.AchievementRe
 import com.sinya.projects.wordle.data.local.achievement.objects.ConditionFactory
 import com.sinya.projects.wordle.data.local.dao.AchievementsDao
 import com.sinya.projects.wordle.data.local.dao.OfflineAchievementsDao
-import com.sinya.projects.wordle.domain.model.entity.OfflineAchievements
+import com.sinya.projects.wordle.data.local.entity.OfflineAchievements
 
 
 class LocalAchievementRepository(

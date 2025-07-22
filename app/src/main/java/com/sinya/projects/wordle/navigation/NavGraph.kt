@@ -12,6 +12,7 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
+import com.sinya.projects.wordle.screen.settings.BackgroundSetting
 import com.sinya.projects.wordle.screen.achieve.AchieveScreen
 import com.sinya.projects.wordle.screen.dictionary.DictionaryScreen
 import com.sinya.projects.wordle.screen.edit.EditScreen
@@ -27,6 +28,7 @@ import com.sinya.projects.wordle.screen.onboarding.OnboardingPager
 import com.sinya.projects.wordle.screen.emailConfirm.EmailConfirmScreen
 import com.sinya.projects.wordle.screen.profile.ProfileScreen
 import com.sinya.projects.wordle.screen.register.RegisterScreen
+import com.sinya.projects.wordle.screen.resetEmail.ResetEmailScreen
 import com.sinya.projects.wordle.screen.resetPassword.ResetPasswordScreen
 import com.sinya.projects.wordle.screen.settings.SettingsScreen
 import com.sinya.projects.wordle.screen.statistic.StatisticScreen
@@ -43,6 +45,9 @@ fun NavGraph(
 
     lang: StateFlow<String>,
     changeLang: (String) -> Unit,
+
+    isFirstPlay: Boolean,
+    isActiveItem: BackgroundSetting,
 
     isDark: StateFlow<Boolean>,
     toggleTheme: (Boolean) -> Unit,
@@ -68,6 +73,12 @@ fun NavGraph(
             OnboardingPager(
                 changeLang = changeLang,
                 isDark = isDark,
+                isFirstPlay = isFirstPlay,
+                clearBackground = { context ->
+                    coroutineScope.launch {
+                        AppDataStore.clearBackground(context)
+                    }
+                },
                 toggleTheme = toggleTheme,
                 onFinish = {
                     toggleOnboard(true)
@@ -103,6 +114,8 @@ fun NavGraph(
                 navigateTo = navigateTo,
                 lang = lang,
                 isDark = isDark,
+                isActiveItem = isActiveItem,
+                toggleTheme = toggleTheme,
             )
         }
         composable<ScreenRoute.SettingWithoutBar> {
@@ -111,6 +124,8 @@ fun NavGraph(
                 navigateTo = navigateTo,
                 lang = lang,
                 isDark = isDark,
+                isActiveItem = isActiveItem,
+                toggleTheme = toggleTheme,
             )
         }
 
@@ -145,6 +160,11 @@ fun NavGraph(
                 navigateToBackStack = navigateToBackStack,
                 isDark = isDark,
                 themes = AppThemes.supported,
+                clearBackground = { context ->
+                    coroutineScope.launch {
+                        AppDataStore.clearBackground(context)
+                    }
+                },
                 toggleTheme = toggleTheme,
             )
         }
@@ -174,7 +194,7 @@ fun NavGraph(
         composable<ScreenRoute.Edit> {
             EditScreen(
                 navigateToBackStack = navigateToBackStack,
-                navigateTo = navigateTo,
+                navigateTo = { navigateTo(ScreenRoute.Profile) },
                 supabase = supabase
             )
         }
@@ -188,13 +208,11 @@ fun NavGraph(
                 val session = supabase.auth.currentSessionOrNull()
                 if (session != null) {
                     navHostController.navigate(ScreenRoute.Profile) {
-                        popUpTo(ScreenRoute.Register) { inclusive = true }
-                        popUpTo(ScreenRoute.Profile) { inclusive = true }
+                        popUpTo(0)
                     }
                 } else {
                     navHostController.navigate(ScreenRoute.Login) {
                         popUpTo(ScreenRoute.Register) { inclusive = true }
-                        popUpTo(ScreenRoute.Profile) { inclusive = true }
                     }
                 }
             }
@@ -209,8 +227,7 @@ fun NavGraph(
                 val session = supabase.auth.currentSessionOrNull()
                 if (session != null) {
                     navHostController.navigate(ScreenRoute.Profile) {
-                        popUpTo(ScreenRoute.Login) { inclusive = true }
-                        popUpTo(ScreenRoute.Profile) { inclusive = true }
+                        popUpTo(0)
                     }
                 }
             }
@@ -222,6 +239,23 @@ fun NavGraph(
                 supabase = supabase
             )
         }
+        composable<ScreenRoute.ResetEmail>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "wordy-fresh://reset-email"
+                }
+            )
+        ) {
+            ResetEmailScreen(
+                supabase = supabase,
+                navigateToBackStack = navigateToBackStack,
+                navigateToProfile = {
+                    navHostController.navigate(ScreenRoute.Profile) {
+                        popUpTo(0)
+                    }
+                }
+            )
+        }
         composable<ScreenRoute.ResetPassword>(
             deepLinks = listOf(
                 navDeepLink {
@@ -231,11 +265,10 @@ fun NavGraph(
         ) {
             ResetPasswordScreen(
                 supabase = supabase,
-                navigateToBackStack = { navigateTo(ScreenRoute.EmailConfirm) },
+                navigateToBackStack = navigateToBackStack,
                 navigateToProfile = {
                     navHostController.navigate(ScreenRoute.Profile) {
-                        popUpTo(ScreenRoute.ResetPassword) { inclusive = true }
-                        popUpTo(ScreenRoute.EmailConfirm) { inclusive = true }
+                        popUpTo(0)
                     }
                 }
             )

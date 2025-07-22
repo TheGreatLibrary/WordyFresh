@@ -23,9 +23,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     navigateToBackStack: () -> Unit,
+    isActiveItem: BackgroundSetting,
     navigateTo: (ScreenRoute) -> Unit,
     isDark: StateFlow<Boolean>,
-    lang: StateFlow<String>
+    lang: StateFlow<String>,
+    toggleTheme: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -41,8 +43,15 @@ fun SettingsScreen(
     val currentKeyboard = AppKeyboards.getByCode(codeKeyboard)
 
     SettingsScreenView(
-        isDark = currentTheme?: ThemeItem(false, R.string.light),
-        keyboardMode = currentKeyboard?: KeyboardItem(0, R.string.keyboard_wordle, R.string.keyboard_wordle, R.drawable.keyboard_wordle),
+        isDark = currentTheme ?: ThemeItem(false, R.string.light),
+        isActiveItem = isActiveItem,
+        toggleTheme = toggleTheme,
+        keyboardMode = currentKeyboard ?: KeyboardItem(
+            0,
+            R.string.keyboard_wordle,
+            R.string.keyboard_wordle,
+            R.drawable.keyboard_wordle
+        ),
         lang = currentLang,
         confetti = confettiEnabled,
         rating = ratingModeEnabled,
@@ -61,7 +70,10 @@ fun SettingsScreen(
         sendEmail = {
             context.sendSupportEmail()
             coroutineScope.launch {
-                AchievementManager.onTrigger(AchievementTrigger.SupportMessageSent, WordyApplication.database.loadStats())
+                AchievementManager.onTrigger(
+                    AchievementTrigger.SupportMessageSent,
+                    WordyApplication.database.loadStats()
+                )
             }
         }
     )

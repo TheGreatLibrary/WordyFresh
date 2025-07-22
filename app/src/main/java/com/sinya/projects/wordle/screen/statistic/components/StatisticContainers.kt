@@ -34,7 +34,7 @@ import com.sinya.projects.wordle.ui.theme.WordyTypography
 fun StatContainers(
     state: StatisticUiState.Success
 ) {
-    val statisticByMode = if (state.selectedMode == AppStatsModes.supported[0].uuid) {
+    val statisticByMode = if (state.selectedMode == AppStatsModes.supported[0].id) {
         val total = state.statisticList.reduce { acc, stat ->
             acc.copy(
                 countGame = acc.countGame + stat.countGame,
@@ -50,7 +50,7 @@ fun StatContainers(
                 sixthTry = acc.sixthTry + stat.sixthTry
             )
         }
-        total.copy(id = "summary", modeId = "all")
+        total.copy(modeId = -1)
     } else {
         val uuid = state.selectedMode
         state.statisticList.firstOrNull { it.modeId == uuid } ?: error("No stats for selected mode")

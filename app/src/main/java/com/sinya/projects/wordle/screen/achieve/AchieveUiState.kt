@@ -1,7 +1,5 @@
 package com.sinya.projects.wordle.screen.achieve
 
-import com.sinya.projects.wordle.domain.model.data.AchieveItem
-
 sealed class AchieveUiState {
     data object Loading : AchieveUiState()
     data class Success(

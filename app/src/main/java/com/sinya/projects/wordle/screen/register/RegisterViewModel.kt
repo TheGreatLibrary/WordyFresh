@@ -10,9 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
 import com.sinya.projects.wordle.data.local.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
-import com.sinya.projects.wordle.domain.model.entity.Profiles
-import com.sinya.projects.wordle.ui.theme.white
+import com.sinya.projects.wordle.data.supabase.SupabaseService
+import com.sinya.projects.wordle.data.supabase.entity.Profiles
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email

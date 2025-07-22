@@ -1,30 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Wordy Rare</string>
-    <string name="play">Play</string>
+    <string name="app_name">Wordy Fresh</string>
+
+    <!-- Режимы игры (карточки) -->
     <string name="friend_mode">Friendly Challenge</string>
     <string name="hard_mode">Hard\nMode</string>
     <string name="random_mode">Random Mode</string>
-    <string name="continue_text">Continue</string>
-    <string name="new_game">New Game</string>
-    <string name="statistic_screen">Stats</string>
+
+    <!-- Режимы игры (статистика и диалоговое окно) -->
     <string name="all_modes">All Modes</string>
     <string name="classic_mode">Classic</string>
     <string name="hard_m">Hard</string>
     <string name="random_m">Random</string>
     <string name="friend_m">Friendly</string>
+
+    <!-- Страницы -->
+    <string name="statistic_screen">Stats</string>
     <string name="settings_screen">Settings</string>
     <string name="achievements">Achievements</string>
     <string name="profile_screen">Profile</string>
-    <string name="sign_up">Sign Up</string>
-    <string name="change_lang">Language</string>
+    <string name="dictionary">Dictionary</string>
+    <string name="friends_screen">Friends</string>
+    <string name="home">Home</string>
+    <string name="rewrite_screen">Edit Profile</string>
+    <string name="notification_screen">Notifications</string>
+    <string name="about_app_screen">About the App</string>
+    <string name="policy_privacy">Privacy Policy</string>
+    <string name="terms_of_use">Terms of Use</string>
+    <string name="create_account">Create an Account</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="edit">Edit</string>
+    <string name="reset_email">Update Email</string>
+
+    <!-- Тема -->
     <string name="change_theme">Theme</string>
     <string name="light">Light</string>
     <string name="dark">Dark</string>
+
+    <!-- Язык -->
+    <string name="change_lang">Language</string>
+    <string name="russian">Russian</string>
+    <string name="english">English</string>
+
+    <!-- Клавиатура -->
     <string name="keyboard_classic">Classic</string>
     <string name="keyboard_wordle">Wordle</string>
     <string name="keyboard_reverse">Mirrored</string>
     <string name="keyboard_big_enter">Big Enter</string>
+
+
+    <string name="play">Play</string>
+    <string name="continue_text">Continue</string>
+    <string name="new_game">New Game</string>
+
+    <!-- Форма для регистраций -->
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign In</string>
+    <string name="check_your_mail">Please check your email</string>
+    <string name="put_email_of_account">Please enter your account email below to reset your password</string>
+    <string name="send_letter">Send Email</string>
+
+    <string name="put_new_password">Set your new password</string>
+    <string name="put_new_nickname">Set your new name!</string>
+    <string name="put_new_email">Enter your new email!</string>
+    <string name="welcome">Welcome back! We\'ve been waiting for you!</string>
+    <string name="put_string_and_play">Fill in the fields and dive into the game!</string>
+
+    <string name="sync_to_save_stat">Sync to save your statistics.</string>
+    <string name="play_with_friends">Play with friends and send them words right from the app!</string>
+    <string name="login_in_wordy">Log in to Wordy</string>
+
+   <string name="forgot_password">Forgot your password?</string>
+    <string name="or_login_with">Or sign in with</string>
+    <string name="no_account">Don’t have an account?</string>
+    <string name="or_sign_up_with">Or sign up with</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sing_in_1">Sign in!</string>
+    <string name="sign_up_1">Sign up!</string>
+    <string name="terms_and_privacy">I accept the %1$s and %2$s</string>
+    <string name="terms_of_use_clickable">Terms of Use</string>
+    <string name="privacy_policy_clickable">Privacy Policy</string>
+
+
+    <!-- Категории настроек -->
+    <string name="background_fon">Appearance</string>
     <string name="change_keyboard">Keyboard</string>
     <string name="guide">How to Play</string>
     <string name="start">Start</string>
@@ -35,86 +94,79 @@
     <string name="abuse_words">Explicit Words</string>
     <string name="send_to_support">Contact Support</string>
     <string name="version">Version</string>
-    <string name="dictionary">Dictionary</string>
-    <string name="put_text">Enter a word</string>
+
+
+    <!-- Статистика -->
     <string name="all_count_game">Games played</string>
     <string name="now_serial">Current streak</string>
     <string name="best_serial">Best streak</string>
     <string name="percent_win">Win rate</string>
     <string name="percent_lose">Lose rate</string>
-    <string name="home">Home</string>
     <string name="abs_time">Avg. time</string>
     <string name="stat_progress_title">Win guess distribution</string>
+
     <string name="confirm_delete">Confirm Deletion</string>
     <string name="text_dialog_delete_stat">Are you sure you want to clear the statistics? All local and synchronized data will be lost.</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
+
+
+
     <plurals name="letters_count">
         <item quantity="one">%d letter</item>
         <item quantity="other">%d letters</item>
     </plurals>
-    <string name="rewrite_screen">Edit Profile</string>
-    <string name="friends_screen">Friends</string>
-    <string name="notification_screen">Notifications</string>
-    <string name="about_app_screen">About the App</string>
-    <string name="policy_privacy">Privacy Policy</string>
-    <string name="terms_of_use">Terms of Use</string>
+
+    <!-- Категории профиля -->
+    <string name="password_recovery">Change Password</string>
+    <string name="email_recovery">Change Email</string>
     <string name="exit">Log Out</string>
-    <string name="sign_in">Sign In</string>
-    <string name="sync_to_save_stat">Sync to save your statistics.</string>
-    <string name="play_with_friends">Play with friends and send them words right from the app!</string>
-    <string name="login_in_wordy">Log in to Wordy</string>
-    <string name="welcome">Welcome back! We\'ve been waiting for you!</string>
-    <string name="password">Password</string>
-    <string name="forgot_password">Forgot your password?</string>
-    <string name="or_login_with">Or sign in with</string>
-    <string name="no_account">Don’t have an account?</string>
-    <string name="sign_up_1">Sign up!</string>
-    <string name="create_account">Create an Account</string>
-    <string name="put_string_and_play">Fill in the fields and dive into the game!</string>
-    <string name="name">Name</string>
-    <string name="scary_bober">Scary Beaver</string>
-    <string name="or_sign_up_with">Or sign up with</string>
-    <string name="already_have_account">Already have an account?</string>
-    <string name="sing_in_1">Sign in!</string>
 
-    <string name="terms_and_privacy">I accept the %1$s and %2$s</string>
-    <string name="terms_of_use_clickable">Terms of Use</string>
-    <string name="privacy_policy_clickable">Privacy Policy</string>
-
+    <!-- Словарь -->
+    <string name="put_text">Enter a word</string>
     <string name="share_text">What is %1$s? %2$s. I found it in Wordy Fresh — check it out here: %3$s</string>
     <string name="no_description">No definition found in the dictionary. Tap the first button to search online</string>
     <string name="shared_to">Share via</string>
     <string name="no_internet_error">Error: No internet connection</string>
     <string name="definition_not_found">Definition not found</string>
 
-    <string name="placeholder"> </string> <!-- Было "Слово не найдено" -->
+
+
+    <!-- Игра (конец партии)-->
     <string name="hard_hint_exact_position">Oops! The letter %1$s should be in position %2$d</string>
     <string name="hard_hint_letter_required">Don\'t forget! The word must include the letter %1$s</string>
+
     <string name="not_found_word">Hmm… That word doesn’t seem to exist</string>
     <string name="hiddent_word">The correct word was:</string>
     <string name="parsing_word">Curious what this word means?</string>
     <string name="put_enter_to_play">Or press Enter to play again</string>
+
+    <string name="placeholder"> </string>
     <string name="win">You win!</string>
     <string name="lose">Oops, not this time</string>
 
-    <string name="russian">Russian</string>
-    <string name="english">English</string>
+
+    <!-- окошко перед началом игры -->
     <string name="word_size">Word Length</string>
     <string name="language_of_game">Game Language</string>
     <string name="mode_of_game">Game Mode</string>
     <string name="hard_mode_horizontal">Hard Mode</string>
+
+    <!-- Дружеский режим окошко -->
+    <string name="get_shifr_word">Send a Word</string>
+    <string name="put_shifr_word">Guess a Word</string>
+    <string name="is_word_in_database_error">This word is not in the database!</string>
     <string name="put_word">Challenge your friend — come up with a word from 4 to 11 letters:</string>
     <string name="copy_shifr">Copy Code</string>
     <string name="put_shifr">Enter the code below to guess your friend’s word:</string>
     <string name="decode_word">Guess the Word</string>
     <string name="put_here">Type here!</string>
 
+    <!-- onboarding -->
+    <string name="skip">Skip</string>
     <string name="continue_in_lang">Continue in English</string>
-
     <string name="onboard_welcome">The perfect way to pass time while traveling or waiting!</string>
     <string name="start_learn">Start Tutorial</string>
-<!--    <string name="continue_in_lang">Continue in Russian</string> &lt;!&ndash; Эта строка у тебя динамическая, скорее всего &ndash;&gt;-->
     <string name="color_cell">The cell color is a hint</string>
     <string name="good_try">Correct!</string>
     <string name="not_bad_try">Right letter, wrong spot</string>
@@ -134,4 +186,117 @@
     <string name="duplicate_descr">Only one letter will be highlighted if it appears once in the word</string>
     <string name="duplicate">Duplicate Letter</string>
     <string name="open_the_game">Start the journey!</string>
+
+
+
+
+    <!-- label для текстовых полей-->
+    <string name="new_email">New Email</string>
+    <string name="new_nickname">New Name</string>
+    <string name="email">Email</string>
+    <string name="new_password">New Password</string>
+    <string name="repeat_new_password">Repeat New Password</string>
+    <string name="name">Name</string>
+    <string name="password">Password</string>
+
+    <!-- placeholder для текстовых полей -->
+    <string name="password_sample">f92F37fAX01Gef!</string>
+    <string name="email_sample">examle@gmail.com</string>
+    <string name="scary_bober">Scary Beaver</string>
+
+    <!-- ошибка для текстовых полей -->
+    <string name="is_password_error">Invalid password</string>
+    <string name="is_email_error">Invalid email</string>
+    <string name="is_name_error">Invalid name</string>
+
+
+    <!-- Категории достижений -->
+    <string name="padawan">Padawan</string>
+    <string name="dilettant">Amateur</string>
+    <string name="veteran">Veteran</string>
+    <string name="the_old">Old-Timer</string>
+
+    <!-- Падаван -->
+    <string name="achieve_first_word">First Word</string>
+    <string name="achieve_descr_first">Ma-ma? Pa-pa? Nope, it’s a Beaver.</string>
+    <string name="achieve_cond_first">Play 1 game</string>
+
+    <string name="achieve_normal">Ordinary</string>
+    <string name="achieve_descr_normal">Couldn\'t you come up with something more original?</string>
+    <string name="achieve_cond_normal">Guess 1 word in Normal mode</string>
+
+    <string name="achieve_hardcore">Hardcore Player</string>
+    <string name="achieve_descr_hardcore">Shattered mind and tons of losses — but oh, what a reward!</string>
+    <string name="achieve_cond_hardcore">Guess 1 word in Hard mode</string>
+
+    <string name="achieve_random_debut">Random Debut</string>
+    <string name="achieve_descr_random">He used to be just a normal beaver once</string>
+    <string name="achieve_cond_random">Guess 1 word in Random mode</string>
+
+    <string name="achieve_friend_mode">You\'re No Friend of Mine!</string>
+    <string name="achieve_descr_friend">Did they guess your word back, though?</string>
+    <string name="achieve_cond_friend">Guess 1 word in Friendly mode</string>
+
+    <!-- Любитель -->
+    <string name="achieve_winner">Winner</string>
+    <string name="achieve_descr_win">Feels good to win, doesn’t it?</string>
+    <string name="achieve_cond_win">Win 20 games</string>
+
+    <string name="achieve_loser">Dodep</string>
+    <string name="achieve_descr_lose">Next time for sure!</string>
+    <string name="achieve_cond_lose">Lose 10 games</string>
+
+    <string name="achieve_wordlefilia">WordleFilia</string>
+    <string name="achieve_descr_addict">Can’t stop playing, huh?</string>
+    <string name="achieve_cond_addict">Play 50 games</string>
+
+    <string name="achieve_registered">System Pawn</string>
+    <string name="achieve_descr_registered">Now I’m watching you!</string>
+    <string name="achieve_cond_registered">Register an account</string>
+
+    <string name="achieve_scholar_1">Scholar I</string>
+    <string name="achieve_descr_scholar_1">What’s that up your sleeve — a secret dictionary?</string>
+    <string name="achieve_cond_scholar_1">Build a dictionary with 50 words</string>
+
+    <!-- Опытный -->
+    <string name="achieve_streak_10">Serial Maniac</string>
+    <string name="achieve_descr_streak">Might be time to see a psychiatrist…</string>
+    <string name="achieve_cond_streak">Reach a current streak of 10</string>
+
+    <string name="achieve_lucky">Lucky One</string>
+    <string name="achieve_descr_lucky">Maybe it’s time to try the lottery :3</string>
+    <string name="achieve_cond_lucky">Guess a word on the first try. Friendly mode doesn\'t count!</string>
+
+    <string name="achieve_scholar_2">Scholar II</string>
+    <string name="achieve_descr_scholar_2">Your vocabulary outmatches the entire alphabet!</string>
+    <string name="achieve_cond_scholar_2">Build a dictionary with 150 words</string>
+
+    <string name="achieve_speedster">Speedster</string>
+    <string name="achieve_descr_speedster">Whoa there, cowboy. Slow down!</string>
+    <string name="achieve_cond_speedster">Guess a word in under 30 seconds</string>
+
+    <string name="achieve_evil_genius">Evil Genius</string>
+    <string name="achieve_descr_genius">You do have a plan… right?</string>
+    <string name="achieve_cond_genius">Lose 5 games in a row</string>
+
+    <!-- Олд -->
+    <string name="achieve_grinder">Grinder</string>
+    <string name="achieve_descr_grinder">A polyglot? A polygraph? Who are you, warrior?</string>
+    <string name="achieve_cond_grinder">Guess all words in the game</string>
+
+    <string name="achieve_elephant">Elephant</string>
+    <string name="achieve_descr_elephant">A true patriot</string>
+    <string name="achieve_cond_elephant">Guess all Russian words</string>
+
+    <string name="achieve_tester">Tester</string>
+    <string name="achieve_descr_tester">Time to apply for QA jobs…</string>
+    <string name="achieve_cond_tester">Send a message to support</string>
+
+    <string name="achieve_picnic">Picnic</string>
+    <string name="achieve_descr_picnic">Is this like that image website?</string>
+    <string name="achieve_cond_picnic">Guess the word… which one?</string>
+
+    <string name="achieve_secret">\?\?\?</string>
+    <string name="achieve_descr_secret">Real ones know</string>
+    <string name="achieve_cond_secret">Guess the word @#$*%!</string>
 </resources>

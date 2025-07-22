@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.screen.theme
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,10 +20,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.ui.features.CheckedIcon
 import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -34,9 +37,11 @@ fun ThemeScreen(
     navigateToBackStack: () -> Unit,
     isDark: StateFlow<Boolean>,
     themes: List<ThemeItem>,
+    clearBackground: (Context) -> Unit,
     toggleTheme: (Boolean) -> Unit,
 ) {
     val currentIsDark by isDark.collectAsState()
+    val context = LocalContext.current
 
     Column(
         Modifier
@@ -52,7 +57,10 @@ fun ThemeScreen(
                 ThemeModeItem(
                     nativeName = stringResource(themes[index].nameRes),
                     isSelected = themes[index].isDark == currentIsDark,
-                    onClick = { toggleTheme(themes[index].isDark) }
+                    onClick = {
+                        clearBackground(context)
+                        toggleTheme(themes[index].isDark)
+                    }
                 )
                 if (index < themes.lastIndex) {
                     HorizontalDivider(
@@ -73,6 +81,7 @@ private fun ThemeScreenPreview() {
         navigateToBackStack = { },
         isDark = MutableStateFlow(true),
         themes = AppThemes.supported,
+        clearBackground = { },
         toggleTheme = { },
     )
 }

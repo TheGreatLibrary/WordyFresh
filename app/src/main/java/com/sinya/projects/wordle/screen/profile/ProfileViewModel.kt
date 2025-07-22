@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
+import com.sinya.projects.wordle.data.supabase.SupabaseService
 import com.sinya.projects.wordle.data.local.repository.AvatarRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth

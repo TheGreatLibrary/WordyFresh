@@ -56,7 +56,7 @@ fun AuthFooter(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.social_google),
+                    painter = painterResource(R.drawable.stat_achieve),
                     contentDescription = null,
                     modifier = Modifier.size(25.dp)
                 )
@@ -122,7 +122,7 @@ private fun RowSocialAuth(
         ),
     ) {
         ImageButton(
-            image = R.drawable.social_google,
+            image = R.drawable.stat_achieve,
             modifierBox = Modifier
                 .shadow(
                     elevation = 7.dp,
@@ -134,7 +134,7 @@ private fun RowSocialAuth(
             modifierImage = Modifier.fillMaxSize(0.6f)
         ) { navigateTo() }
         ImageButton(
-            image = R.drawable.social_vk,
+            image = R.drawable.stat_achieve,
             modifierBox = Modifier
                 .shadow(
                     elevation = 7.dp,
@@ -146,7 +146,7 @@ private fun RowSocialAuth(
             modifierImage = Modifier.fillMaxSize(0.6f)
         ) { navigateTo() }
         ImageButton(
-            image = R.drawable.social_tg,
+            image = R.drawable.stat_achieve,
             modifierBox = Modifier
                 .shadow(
                     elevation = 7.dp,

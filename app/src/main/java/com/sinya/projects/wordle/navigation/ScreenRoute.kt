@@ -29,5 +29,6 @@ sealed class ScreenRoute {
     @Serializable data object Register : ScreenRoute()
     @Serializable data object Login : ScreenRoute()
     @Serializable data object EmailConfirm : ScreenRoute()
+    @Serializable data object ResetEmail : ScreenRoute()
     @Serializable data object ResetPassword : ScreenRoute()
 }

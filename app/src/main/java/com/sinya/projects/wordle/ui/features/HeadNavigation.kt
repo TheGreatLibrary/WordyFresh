@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,16 +22,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.WordyApplication
+import com.sinya.projects.wordle.data.supabase.SupabaseService
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
+import io.github.jan.supabase.auth.auth
 
 @Composable
 fun Header(
     title: String,
     trashVisible: Boolean = false,
     navigateTo: () -> Unit,
-    trashOnClick: () -> Unit = { },
+    trashOnClick: () -> Unit = {},
 ) {
     Row(
         Modifier.fillMaxWidth(),

@@ -25,7 +25,7 @@ fun WordInputSection(
     buttonText: String,
     modifier: Modifier,
     onButtonClick: () -> Unit,
-    errorText: String,
+    errorText: Int,
     isError: Boolean
 ) {
     Text(
@@ -40,7 +40,7 @@ fun WordInputSection(
         onValueChange = onTextFieldChange,
         modifier = modifier,
         isError = isError,
-        errorMessage = errorText,
+        errorMessage = stringResource(errorText),
         color = WordyColor.colors.primary
     )
     Spacer(Modifier.height(15.dp))

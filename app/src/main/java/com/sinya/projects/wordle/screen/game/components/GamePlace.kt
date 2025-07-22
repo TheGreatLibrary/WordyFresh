@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.screen.game.GameUiEvent
 import com.sinya.projects.wordle.screen.game.GameUiState
-import com.sinya.projects.wordle.screen.game.GameViewModel
 
 @Composable
 fun GamePlace(

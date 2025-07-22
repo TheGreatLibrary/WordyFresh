@@ -45,7 +45,7 @@ fun PageWelcome(
                 color = WordyColor.colors.textPrimary,
             )
             Image(
-                painter = painterResource(R.drawable.icon_app),
+                painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth(0.5f)
             )

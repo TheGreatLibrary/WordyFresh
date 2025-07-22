@@ -16,9 +16,6 @@ val Montserrat = FontFamily(
 
 val FiraSans = FontFamily(
     Font(R.font.fira_sans_medium, FontWeight.Medium),
-    Font(R.font.fira_sans_regular, FontWeight.W400),
-    Font(R.font.fira_sans_bold, FontWeight.Bold),
-    Font(R.font.fira_sans_semibold, FontWeight.SemiBold),
 )
 
 
@@ -38,14 +35,13 @@ val WordyTypography = Typography(
     titleLarge = TextStyle(
         fontFamily = FiraSans,
         fontWeight = FontWeight.Medium,
-        letterSpacing = 0.2.sp,
     ), // заголовок в шапке игры и онбординге
 
     labelSmall = TextStyle(
         color = green600,
         fontSize = 14.sp,
         fontFamily = Montserrat,
-        fontWeight = FontWeight.W600,
+        fontWeight = FontWeight.SemiBold,
         textDecoration = TextDecoration.Underline,
     ), // стиль ссылок
 )

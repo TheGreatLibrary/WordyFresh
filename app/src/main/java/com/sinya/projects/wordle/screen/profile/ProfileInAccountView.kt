@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.domain.model.entity.Profiles
+import com.sinya.projects.wordle.data.supabase.entity.Profiles
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.profile.components.AvatarPicker
 import com.sinya.projects.wordle.ui.features.CardColumn
@@ -73,26 +73,41 @@ fun ProfileInAccountView(
         Spacer(Modifier.height(2.dp))
         CardColumn {
             RowLink(
+                title = stringResource(R.string.email_recovery),
+                mode = "",
+                icon = R.drawable.prof_rewrite,
+                icon2 = R.drawable.arrow,
+                navigateTo = { navigateTo(ScreenRoute.ResetEmail) }
+            )
+            RowLink(
                 title = stringResource(R.string.rewrite_screen),
                 mode = "",
                 icon = R.drawable.prof_rewrite,
                 icon2 = R.drawable.arrow,
-                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
+                navigateTo = { navigateTo(ScreenRoute.Edit) }
             )
             RowLink(
-                title = stringResource(R.string.friends_screen),
+                title = stringResource(R.string.password_recovery),
                 mode = "",
-                icon = R.drawable.prof_friends,
+                icon = R.drawable.prof_rewrite,
                 icon2 = R.drawable.arrow,
-                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
+                navigateTo = { navigateTo(ScreenRoute.ResetPassword) }
             )
-            RowLink(
-                title = stringResource(R.string.notification_screen),
-                mode = "",
-                icon = R.drawable.prof_notify,
-                icon2 = R.drawable.arrow,
-                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
-            )
+
+//            RowLink(
+//                title = stringResource(R.string.friends_screen),
+//                mode = "",
+//                icon = R.drawable.prof_friends,
+//                icon2 = R.drawable.arrow,
+//                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
+//            )
+//            RowLink(
+//                title = stringResource(R.string.notification_screen),
+//                mode = "",
+//                icon = R.drawable.prof_notify,
+//                icon2 = R.drawable.arrow,
+//                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
+//            )
         }
         CardColumn {
             RowLink(

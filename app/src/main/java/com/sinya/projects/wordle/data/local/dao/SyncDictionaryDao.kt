@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.sinya.projects.wordle.domain.model.data.DictionaryItem
-import com.sinya.projects.wordle.domain.model.entity.SyncDictionary
+import com.sinya.projects.wordle.screen.dictionary.DictionaryItem
+import com.sinya.projects.wordle.data.supabase.entity.SyncDictionary
 
 @Dao
 interface SyncDictionaryDao {
@@ -21,12 +21,12 @@ interface SyncDictionaryDao {
     @Query("SELECT 1 FROM sync_dictionary d JOIN words w ON d.word_id=w.id WHERE w.word = :word")
     suspend fun findWord(word: String): Int?
 
-    @Query("SELECT d.id, w.word, d.description FROM sync_dictionary d JOIN words w ON d.word_id=w.id")
+    @Query("SELECT d.word_id as id, w.word, d.description FROM sync_dictionary d JOIN words w ON d.word_id=w.id")
     suspend fun getAllWords(): List<DictionaryItem>
 
     @Query("SELECT language FROM words WHERE word = :word")
     suspend fun getLangForWord(word: String): String?
 
     @Query("DELETE FROM sync_dictionary")
-    suspend fun clear()
+    suspend fun clearAll()
 }

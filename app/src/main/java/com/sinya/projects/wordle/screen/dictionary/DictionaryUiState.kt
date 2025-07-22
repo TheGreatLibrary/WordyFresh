@@ -1,7 +1,6 @@
 package com.sinya.projects.wordle.screen.dictionary
 
 import android.content.Context
-import com.sinya.projects.wordle.domain.model.data.DictionaryItem
 
 sealed class DictionaryUiState {
     data object Loading : DictionaryUiState()

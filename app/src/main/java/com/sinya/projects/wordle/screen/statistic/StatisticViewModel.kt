@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
-import com.sinya.projects.wordle.domain.model.entity.SyncStatistic
+import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.supabase.entity.SyncStatistic
 import kotlinx.coroutines.launch
 
 class StatisticViewModel(
@@ -51,12 +51,7 @@ class StatisticViewModel(
         viewModelScope.launch {
             try {
                 if (db.offlineStatisticDao().count() == 0) {
-                    val modes = listOf(
-                        "12f9d2ce-1234-4321-aaaa-000000000001",
-                        "12f9d2ce-1234-4321-aaaa-000000000002",
-                        "12f9d2ce-1234-4321-aaaa-000000000003",
-                        "12f9d2ce-1234-4321-aaaa-000000000004"
-                    )
+                    val modes = listOf(0, 1, 2, 3)
                     val initialStats = modes.map { mode -> OfflineStatistic(modeId = mode) }
                     db.offlineStatisticDao().insertStatisticList(initialStats)
                 }
@@ -69,7 +64,8 @@ class StatisticViewModel(
                     onEvent = ::onEvent,
                 )
             } catch (e: Exception) {
-                _state.value = StatisticUiState.Error("Ошибка загрузки данных: ${e.message}")
+                val list = db.offlineStatisticDao().getModes().joinToString { it.id.toString() + " " }
+                _state.value = StatisticUiState.Error("Ошибка загрузки данных: ${list}")
             }
         }
     }

@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.sinya.projects.wordle.domain.model.entity.OfflineAchievements
+import com.sinya.projects.wordle.data.local.entity.OfflineAchievements
 
 @Dao
 interface OfflineAchievementsDao {
@@ -13,7 +13,7 @@ interface OfflineAchievementsDao {
     suspend fun getAchievements(): List<OfflineAchievements>
 
     @Query("DELETE FROM offline_achievements")
-    suspend fun clear()
+    suspend fun clearAll()
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(row: OfflineAchievements)

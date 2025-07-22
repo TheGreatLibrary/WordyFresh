@@ -1,12 +1,13 @@
 package com.sinya.projects.wordle.screen.home.friend_dialog
 
+import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 
 data class FriendModeUiState(
     val selectedTab: Int = 0,
     val hiddenPlace: String = "",
     val guessedPlace: String = "",
-    val errorText: String = "Данного слова нет в базе данных!",
+    val errorText: Int = R.string.is_word_in_database_error,
     val isError: Boolean = false
 )
 

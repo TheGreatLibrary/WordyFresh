@@ -58,7 +58,7 @@ fun EmailConfirmScreenView(
             onValueChange = { onEvent(EmailConfirmUiEvent.EmailChanged(it)) },
             modifier = modifier,
             isError = state.isEmailError,
-            error = stringResource(R.string.email_error)
+            error = stringResource(R.string.is_email_error)
         )
         RoundedButton(
             modifier = Modifier.fillMaxWidth(0.9f),

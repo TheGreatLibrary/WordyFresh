@@ -20,7 +20,7 @@ fun HeaderConfirm() {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
-            text = stringResource(R.string.forgot_password_quest),
+            text = stringResource(R.string.forgot_password),
             style = WordyTypography.titleLarge,
             color = WordyColor.colors.textPrimary,
             fontSize = 22.sp,

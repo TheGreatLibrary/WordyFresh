@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sinya.projects.wordle.screen.achieve.components.getLocalizedString
 import com.sinya.projects.wordle.screen.statistic.AppStatsModes
 import com.sinya.projects.wordle.screen.statistic.StatisticUiEvent
 import com.sinya.projects.wordle.screen.statistic.StatisticUiState
@@ -26,8 +27,8 @@ fun ScrollHorizontalModes(
     state: StatisticUiState.Success,
     onEvent: (StatisticUiEvent) -> Unit
 ) {
-    if (state.selectedMode == AppStatsModes.supported[0].uuid) {
-        onEvent(StatisticUiEvent.SelectMode(AppStatsModes.supported[0].uuid))
+    if (state.selectedMode == AppStatsModes.supported[0].id) {
+        onEvent(StatisticUiEvent.SelectMode(AppStatsModes.supported[0].id))
     }
 
     LazyRow(
@@ -35,7 +36,7 @@ fun ScrollHorizontalModes(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(AppStatsModes.supported) { mode ->
-            val isSelected = mode.uuid == state.selectedMode
+            val isSelected = mode.id == state.selectedMode
 
             RoundedButton(
                 modifier = Modifier,
@@ -44,10 +45,10 @@ fun ScrollHorizontalModes(
                     contentColor = if (isSelected) white else gray600
                 ),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 15.dp),
-                onClick = { onEvent(StatisticUiEvent.SelectMode(mode.uuid)) },
+                onClick = { onEvent(StatisticUiEvent.SelectMode(mode.id)) },
             ) {
                 Text(
-                    text = stringResource(mode.name),
+                    text = getLocalizedString(mode.name),
                     fontSize = 14.sp,
                     style = WordyTypography.bodyMedium
                 )

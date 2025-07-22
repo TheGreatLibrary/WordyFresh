@@ -22,17 +22,17 @@ import io.github.jan.supabase.SupabaseClient
 @Composable
 fun EditScreen(
     navigateToBackStack: () -> Unit,
-    navigateTo: (ScreenRoute) -> Unit,
+    navigateTo: () -> Unit,
     supabase: SupabaseClient
 ) {
     val db = WordyApplication.database
     val viewModel: EditViewModel = viewModel(
-        factory = EditViewModel.provideFactory(db, supabase)
+        factory = EditViewModel.provideFactory(db.profilesDao(), supabase)
     )
 
     val state = viewModel.state.value
 
-    ResetPasswordScreenView(
+    EditScreenView(
         navigateToBackStack = navigateToBackStack,
         state = state,
         onEvent = viewModel::onEvent,
@@ -40,7 +40,7 @@ fun EditScreen(
             .fillMaxWidth()
             .background(white, WordyShapes.extraLarge)
             .padding(horizontal = 26.dp, vertical = 14.dp),
-        onReset = { }
+        onReset = navigateTo
     )
 }
 

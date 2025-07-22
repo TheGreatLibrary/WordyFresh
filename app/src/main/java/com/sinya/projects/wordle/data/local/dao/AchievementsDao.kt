@@ -2,7 +2,7 @@ package com.sinya.projects.wordle.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.sinya.projects.wordle.domain.model.data.AchieveItem
+import com.sinya.projects.wordle.screen.achieve.AchieveItem
 
 @Dao
 interface AchievementsDao {
@@ -24,6 +24,5 @@ interface AchievementsDao {
     """
     )
     suspend fun getAchievementsList(): List<AchieveItem>
-
 }
 

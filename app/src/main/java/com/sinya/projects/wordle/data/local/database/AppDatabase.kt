@@ -12,17 +12,17 @@ import com.sinya.projects.wordle.data.local.dao.SyncAchievementsDao
 import com.sinya.projects.wordle.data.local.dao.SyncDictionaryDao
 import com.sinya.projects.wordle.data.local.dao.SyncStatisticDao
 import com.sinya.projects.wordle.data.local.dao.WordDao
-import com.sinya.projects.wordle.domain.model.entity.Achievements
-import com.sinya.projects.wordle.domain.model.entity.CategoriesAchieves
-import com.sinya.projects.wordle.domain.model.entity.Modes
-import com.sinya.projects.wordle.domain.model.entity.OfflineAchievements
-import com.sinya.projects.wordle.domain.model.entity.OfflineDictionary
-import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
-import com.sinya.projects.wordle.domain.model.entity.Profiles
-import com.sinya.projects.wordle.domain.model.entity.SyncAchievements
-import com.sinya.projects.wordle.domain.model.entity.SyncDictionary
-import com.sinya.projects.wordle.domain.model.entity.SyncStatistic
-import com.sinya.projects.wordle.domain.model.entity.Words
+import com.sinya.projects.wordle.data.local.entity.Achievements
+import com.sinya.projects.wordle.data.local.entity.CategoriesAchieves
+import com.sinya.projects.wordle.data.local.entity.Modes
+import com.sinya.projects.wordle.data.local.entity.OfflineAchievements
+import com.sinya.projects.wordle.data.local.entity.OfflineDictionary
+import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.supabase.entity.Profiles
+import com.sinya.projects.wordle.data.supabase.entity.SyncAchievements
+import com.sinya.projects.wordle.data.supabase.entity.SyncDictionary
+import com.sinya.projects.wordle.data.supabase.entity.SyncStatistic
+import com.sinya.projects.wordle.data.local.entity.Words
 
 @Database(
     entities = [
@@ -53,13 +53,13 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun achievementsDao(): AchievementsDao
 
     suspend fun clearAll() {
-        profilesDao().clear()
-        offlineStatisticDao().clear()
-        offlineDictionaryDao().clear()
-        offlineAchievementsDao().clear()
-        syncAchievementsDao().clear()
-        syncDictionaryDao().clear()
-        syncStatisticDao().clear()
+        profilesDao().clearAll()
+        offlineStatisticDao().clearAll()
+        offlineDictionaryDao().clearAll()
+        offlineAchievementsDao().clearAll()
+        syncAchievementsDao().clearAll()
+        syncDictionaryDao().clearAll()
+        syncStatisticDao().clearAll()
     }
 
     suspend fun loadStats(): UserStats {

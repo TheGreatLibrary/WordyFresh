@@ -1,7 +1,7 @@
 package com.sinya.projects.wordle.screen.profile
 
 import android.net.Uri
-import com.sinya.projects.wordle.domain.model.entity.Profiles
+import com.sinya.projects.wordle.data.supabase.entity.Profiles
 
 sealed class ProfileUiState {
     data object Loading : ProfileUiState()

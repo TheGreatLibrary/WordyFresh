@@ -33,16 +33,13 @@ import androidx.lifecycle.lifecycleScope
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.screen.language.LocaleViewModel
 import com.sinya.projects.wordle.screen.theme.ThemeViewModel
-import com.sinya.projects.wordle.data.remote.supabase.SupabaseSyncManager
+import com.sinya.projects.wordle.data.supabase.SyncManager
 import com.sinya.projects.wordle.data.local.datastore.AppSettings
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.main.MainActivityScreen
 import com.sinya.projects.wordle.ui.theme.WordleTheme
-import com.sinya.projects.wordle.utils.isInternetAvailable
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -68,36 +65,14 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        var lastStatus: SessionStatus? = null
-
-
-        if (isInternetAvailable()) {
-            lifecycleScope.launch {
-                WordyApplication.supabaseClient.auth.sessionStatus.collect { status ->
-                    if (status is SessionStatus.Authenticated && lastStatus !is SessionStatus.Authenticated) {
-                        Log.d(
-                            "SupabaseSyncManager",
-                            "Сессия активирована — синхронизация началась."
-                        )
-                        syncWithSupabase() // Синхронизация данных
-                    }
-                    lastStatus = status
-                }
-            }
-        }
-
         setContent {
             val context = LocalContext.current
             var settings by remember { mutableStateOf<AppSettings?>(null) }
-            var startRoute by remember { mutableStateOf<ScreenRoute>(ScreenRoute.Home) }
 
             LaunchedEffect(Unit) {
                 val loadedSettings = AppDataStore.getSettings(context)
                 applyAppLocale(loadedSettings.languageCode)
-                setAppTheme(loadedSettings.isDarkTheme)
-                val onboardingMode = AppDataStore.getOnboardingMode(context).first()
-                startRoute = if (!onboardingMode) ScreenRoute.Onboarding else ScreenRoute.Home
-
+                setAppTheme(loadedSettings.isDark)
                 settings = loadedSettings
             }
 
@@ -116,10 +91,11 @@ class MainActivity : ComponentActivity() {
             }
 
             settings?.let {
-                WordleTheme(darkTheme = it.isDarkTheme) {
+                WordleTheme(darkTheme = it.isDark) {
                     CompositionLocalProvider(localAppSettings provides it) {
                         MainActivityScreen(
-                            startRoute = startRoute,
+                            isFirstPlay = it.isFirstPlay,
+                            startRoute = if (!it.isFirstPlay) ScreenRoute.Onboarding else ScreenRoute.Home,
                             toggleOnboard = { state -> toggleOnboard(context, state) },
                             lang = localeViewModel.language,
                             isDark = themeViewModel.isDarkMode,
@@ -134,7 +110,7 @@ class MainActivity : ComponentActivity() {
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.icon_app),
+                        painter = painterResource(R.drawable.ic_launcher_foreground),
                         contentDescription = null, modifier = Modifier.size(125.dp)
                     )
                 }
@@ -142,38 +118,31 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-//    override fun onStop() {
-//        super.onStop()
-//        lifecycleScope.launch {
-//            SupabaseSyncManager.syncAllToSupabase(this@MainActivity)
-//        }
-//    }
-
-//    override fun onResume() {
-//        super.onResume()
-//        lifecycleScope.launch {
-//            SupabaseSyncManager.syncAllToLocal(this@MainActivity)
-//        }
-//        Log.d("SupabaseSync", "Данные получены и синхронизированы!")
-//    }
-
-    private suspend fun syncWithSupabase() {
-        // Ждём пока аккаунт полностью активируется
-        val userId = waitForAuthSession() // Ожидаем получения userId
-        SupabaseSyncManager.syncAllToLocal(applicationContext, userId) // Синхронизируем с сервером
-    }
-
-    private suspend fun waitForAuthSession(): String {
-        var userId: String? = null
-        // Делаем попытки до тех пор, пока не получим userId
-        while (userId == null) {
-            userId = WordyApplication.supabaseClient.auth.currentUserOrNull()?.id
-            delay(100) // Ждём 100 мс перед повторной проверкой
+    override fun onStop() {
+        super.onStop()
+        lifecycleScope.launch {
+            try {
+                val userId = WordyApplication.supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
+                SyncManager.syncAllToSupabase(applicationContext, userId)
+                Log.d("SupabaseSync", "Данные успешно отправлены")
+            } catch (e: Exception) {
+                Log.e("SupabaseSync", "Ошибка отправки данных: ${e.localizedMessage}")
+            }
         }
-        return userId
     }
 
-
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            try {
+                val userId = WordyApplication.supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
+                SyncManager.syncAllToLocal(applicationContext, userId)
+                Log.d("SupabaseSync", "Данные получены и синхронизированы!")
+            } catch (e: Exception) {
+                Log.e("SupabaseSync", "Ошибка получения данных: ${e.localizedMessage}")
+            }
+        }
+    }
 
 
     /** работа с AppDataStore */

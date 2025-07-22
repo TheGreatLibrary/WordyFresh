@@ -7,6 +7,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.sinya.projects.wordle.screen.settings.BackgroundSetting
+import com.sinya.projects.wordle.screen.settings.BackgroundType
+import com.sinya.projects.wordle.screen.settings.BrushData
 import com.sinya.projects.wordle.screen.game.model.Game
 import com.sinya.projects.wordle.utils.getInitialAppLocale
 import kotlinx.coroutines.flow.Flow
@@ -27,8 +30,33 @@ object AppDataStore {
 
     private val LANGUAGE_KEY = stringPreferencesKey("language")
     private val LAST_GAME_STATE_KEY = stringPreferencesKey("last_game_state")
+    private val BACKGROUND_SETTING_KEY = stringPreferencesKey("background_setting")
 
     private val ONBOARDING_KEY = booleanPreferencesKey("onboarding")
+
+    // фоновое изображение
+    suspend fun setBackground(context: Context, setting: BackgroundSetting) {
+        context.dataStore.edit {
+            it[BACKGROUND_SETTING_KEY] = Json.encodeToString(setting)
+        }
+    }
+
+    suspend fun clearBackground(context: Context) {
+        context.dataStore.edit {
+            it.remove(BACKGROUND_SETTING_KEY)
+        }
+    }
+
+    fun getBackground(context: Context): Flow<BackgroundSetting?> =
+        context.dataStore.data.map { prefs ->
+            prefs[BACKGROUND_SETTING_KEY]?.let {
+                try {
+                    Json.decodeFromString<BackgroundSetting>(it)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
 
     // 🌙 Тема
     suspend fun setDarkMode(context: Context, isDark: Boolean) {
@@ -122,7 +150,14 @@ object AppDataStore {
         val prefs = context.dataStore.data.first()
         return AppSettings(
             languageCode = prefs[LANGUAGE_KEY] ?: context.getInitialAppLocale(),
-            isDarkTheme = prefs[DARK_MODE_KEY] ?: false
+            isDark = prefs[DARK_MODE_KEY] ?: false,
+            isFirstPlay = prefs[ONBOARDING_KEY] ?: false,
+            backgroundItem = prefs[BACKGROUND_SETTING_KEY] as? BackgroundSetting ?: BackgroundSetting(
+                type = BackgroundType.DEFAULT,
+                value = "light",
+                brushData = BrushData(listOf("", "")),
+                isDark = false
+            )
         )
     }
 

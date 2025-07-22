@@ -6,13 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.sinya.projects.wordle.data.local.dao.ProfilesDao
-import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
-import com.sinya.projects.wordle.domain.model.entity.Profiles
+import com.sinya.projects.wordle.data.supabase.SupabaseService
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

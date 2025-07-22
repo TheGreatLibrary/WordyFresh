@@ -1,11 +1,11 @@
 package com.sinya.projects.wordle.screen.statistic
 
-import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
 
 sealed class StatisticUiState {
     data object Loading : StatisticUiState()
     data class Success(
-        val selectedMode: String = AppStatsModes.supported[0].uuid,
+        val selectedMode: Int = AppStatsModes.supported[0].id,
         val statisticList: List<OfflineStatistic> = emptyList(),
         val onEvent: (StatisticUiEvent) -> Unit
     ) : StatisticUiState()
@@ -13,7 +13,7 @@ sealed class StatisticUiState {
 }
 
 sealed class StatisticUiEvent {
-    data class SelectMode(val modeId: String) : StatisticUiEvent()
+    data class SelectMode(val modeId: Int) : StatisticUiEvent()
     data object Reload : StatisticUiEvent()
 }
 

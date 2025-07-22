@@ -4,7 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.sinya.projects.wordle.domain.model.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.local.entity.Modes
+import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
 
 @Dao
 interface OfflineStatisticDao {
@@ -26,7 +27,7 @@ interface OfflineStatisticDao {
         WHERE mode_id = :modeId
     """)
     suspend fun updateStatisticMode(
-        modeId: String,
+        modeId: Int,
         countGame: Int,
         currentStreak: Int,
         bestStreak: Int,
@@ -50,17 +51,19 @@ interface OfflineStatisticDao {
     suspend fun count(): Int
 
     @Query("SELECT * FROM offline_statistic WHERE mode_id = :modeId")
-    suspend fun getStatisticByMode(modeId: String): OfflineStatistic
+    suspend fun getStatisticByMode(modeId: Int): OfflineStatistic
 
     @Query("SELECT * FROM offline_statistic")
     suspend fun getAllStatistic(): List<OfflineStatistic>
 
     @Query("DELETE FROM offline_statistic")
-    suspend fun clear()
+    suspend fun clearAll()
+
+    @Query("SELECT * FROM modes")
+    suspend fun getModes() : List<Modes>
 
     @Query("""
       SELECT
-        o.id                                    AS id,
         o.mode_id                               AS mode_id,
         o.count_game + COALESCE(s.count_game,0) AS count_game,
         o.current_streak + COALESCE(s.current_streak,0) AS current_streak,
@@ -80,8 +83,7 @@ interface OfflineStatisticDao {
 
     @Query("""
       SELECT 
-        0                              AS id,
-        'all'                          AS mode_id,
+        -1                        AS mode_id,
         SUM(o.count_game + COALESCE(s.count_game,0)) AS count_game,
         SUM(o.current_streak + COALESCE(s.current_streak,0)) AS current_streak,
         MAX( max(o.best_streak, COALESCE(s.best_streak,0)) ) AS best_streak,
