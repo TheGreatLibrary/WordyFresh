@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.sinya.projects.wordle.data.local.dao.ProfilesDao
-import com.sinya.projects.wordle.data.supabase.SupabaseService
+import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email

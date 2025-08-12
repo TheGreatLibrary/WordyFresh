@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sinya.projects.wordle.screen.register.subscreens.LoadingEmailConfirm
+import com.sinya.projects.wordle.utils.LoadingConfirmed
 import io.github.jan.supabase.SupabaseClient
 
 @Composable
@@ -26,7 +27,7 @@ fun EmailConfirmScreen(
                 state = state,
                 onEvent = viewModel::onEvent
             )
-            is EmailConfirmUiState.LoadingConfirm -> LoadingEmailConfirm(
+            is EmailConfirmUiState.LoadingConfirm -> LoadingConfirmed(
                 email = state.email
             )
         }

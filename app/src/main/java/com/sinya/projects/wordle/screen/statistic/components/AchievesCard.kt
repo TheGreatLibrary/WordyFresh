@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,12 +46,14 @@ fun AchievesCard(
                 painter = painterResource(R.drawable.stat_achieve),
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(color = WordyColor.colors.backgroundAchieve)
-                    .border(2.dp, WordyColor.colors.borderAchieve, CircleShape)
+                    .background(color = WordyColor.colors.backgroundIcon)
                     .size(59.dp)
                     .scale(0.85f),
                 contentDescription = "achieve",
-                colorFilter = ColorFilter.tint(WordyColor.colors.borderAchieve)
+                colorFilter = ColorFilter.tint(
+                    color = WordyColor.colors.foregroundIcon,
+                    blendMode = BlendMode.SrcIn
+                )
             )
             Text(
                 stringResource(R.string.achievements),

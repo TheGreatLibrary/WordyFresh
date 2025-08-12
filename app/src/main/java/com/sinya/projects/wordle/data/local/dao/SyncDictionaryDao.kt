@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.sinya.projects.wordle.screen.dictionary.DictionaryItem
-import com.sinya.projects.wordle.data.supabase.entity.SyncDictionary
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncDictionary
 
 @Dao
 interface SyncDictionaryDao {

@@ -13,14 +13,20 @@
     <string name="random_m">Случайный</string>
     <string name="friend_m">Дружеский</string>
 
+    <!-- Категории достижений -->
+    <string name="padawan">Падаван</string>
+    <string name="dilettant">Любитель</string>
+    <string name="veteran">Опытный</string>
+    <string name="the_old">Олд</string>
+
     <!-- Страницы -->
     <string name="create_account">Создание аккаунта</string>
-    <string name="reset_password">Восстановление пароля</string>
+    <string name="reset_password">Смена пароля</string>
     <string name="reset_email">Смена почты</string>
     <string name="edit">Редактирование</string>
     <string name="rewrite_screen">Редактировать профиль</string>
     <string name="notification_screen">Уведомления</string>
-    <string name="about_app_screen">О приложении</string>
+    <string name="about_app_screen">Об игре</string>
     <string name="policy_privacy">Политика конфиденциальности</string>
     <string name="terms_of_use">Условия использования</string>
     <string name="home">Главная</string>
@@ -207,13 +213,6 @@
     <string name="is_name_error">Некорректное значение Имени</string>
     <string name="is_password_error">Некорректное значение Пароля</string>
 
-
-    <!-- Категории достижений -->
-    <string name="padawan">Падаван</string>
-    <string name="dilettant">Любитель</string>
-    <string name="veteran">Опытный</string>
-    <string name="the_old">Олд</string>
-
     <!-- Падаван -->
     <string name="achieve_first_word">Первое слово</string>
     <string name="achieve_descr_first">Ма-ма? Па-па? Нет, Бобер.</string>
@@ -297,4 +296,15 @@
     <string name="achieve_secret">\?\?\?</string>
     <string name="achieve_descr_secret">Олды шарят</string>
     <string name="achieve_cond_secret">Отгадать слово @#$*%!</string>
+
+    <string name="send_mail">Отправить письмо</string>
+    <string name="save_result">Сохранить</string>
+    <string name="license">© 2025 Alexsander Limanskiy. Все права защищены.</string>
+
+    <string name="confirmation_email_sent">Мы отправили письмо для подтверждения на %1$s</string>
+    <string name="resend">Отправить повторно</string>
+    <string name="resend_again">Не получили письмо? Попробуем еще!</string>
+    <string name="resend_status_not_confirmed">Email не был подтвержден. Повторите позже.</string>
+    <string name="resend_status_sent">Письмо отправлено повторно.</string>
+    <string name="resend_status_error">Ошибка: не удалось отправить письмо</string>
 </resources>

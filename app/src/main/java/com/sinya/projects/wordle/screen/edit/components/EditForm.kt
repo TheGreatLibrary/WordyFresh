@@ -53,7 +53,7 @@ fun EditForm(
                 }
             ) {
                 Text(
-                    text = stringResource(R.string.sign_up),
+                    text = stringResource(R.string.save_result),
                     fontSize = 18.sp,
                     color = WordyColor.colors.textForActiveBtnMkI,
                     style = WordyTypography.bodyMedium

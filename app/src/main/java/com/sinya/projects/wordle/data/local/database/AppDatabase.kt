@@ -18,10 +18,10 @@ import com.sinya.projects.wordle.data.local.entity.Modes
 import com.sinya.projects.wordle.data.local.entity.OfflineAchievements
 import com.sinya.projects.wordle.data.local.entity.OfflineDictionary
 import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
-import com.sinya.projects.wordle.data.supabase.entity.Profiles
-import com.sinya.projects.wordle.data.supabase.entity.SyncAchievements
-import com.sinya.projects.wordle.data.supabase.entity.SyncDictionary
-import com.sinya.projects.wordle.data.supabase.entity.SyncStatistic
+import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncAchievements
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncDictionary
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
 import com.sinya.projects.wordle.data.local.entity.Words
 
 @Database(
@@ -52,14 +52,18 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun wordDao(): WordDao
     abstract fun achievementsDao(): AchievementsDao
 
-    suspend fun clearAll() {
-        profilesDao().clearAll()
+    suspend fun clearAllStatistic() {
         offlineStatisticDao().clearAll()
         offlineDictionaryDao().clearAll()
         offlineAchievementsDao().clearAll()
         syncAchievementsDao().clearAll()
         syncDictionaryDao().clearAll()
         syncStatisticDao().clearAll()
+    }
+
+    suspend fun clearAll() {
+        profilesDao().clearAll()
+        clearAllStatistic()
     }
 
     suspend fun loadStats(): UserStats {

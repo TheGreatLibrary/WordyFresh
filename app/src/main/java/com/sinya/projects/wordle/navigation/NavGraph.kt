@@ -12,6 +12,7 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.sinya.projects.wordle.WordyApplication
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
+import com.sinya.projects.wordle.screen.about.AboutScreen
 import com.sinya.projects.wordle.screen.settings.BackgroundSetting
 import com.sinya.projects.wordle.screen.achieve.AchieveScreen
 import com.sinya.projects.wordle.screen.dictionary.DictionaryScreen
@@ -184,6 +185,13 @@ fun NavGraph(
             )
         }
 
+        composable<ScreenRoute.About> {
+            AboutScreen(
+                navigateTo = navigateTo,
+                navigateToBackStack = navigateToBackStack
+            )
+        }
+
         composable<ScreenRoute.Profile> {
             ProfileScreen(
                 navigateToBackStack = navigateToBackStack,
@@ -198,7 +206,13 @@ fun NavGraph(
                 supabase = supabase
             )
         }
-        composable<ScreenRoute.Register> {
+        composable<ScreenRoute.Register>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "wordy-fresh://email-confirmed"
+                }
+            )
+        ) {
             RegisterScreen(
                 navigateToBackStack = navigateToBackStack,
                 navigateTo = navigateTo,
@@ -217,6 +231,7 @@ fun NavGraph(
                 }
             }
         }
+
         composable<ScreenRoute.Login> {
             LoginScreen(
                 navigateToBackStack = navigateToBackStack,

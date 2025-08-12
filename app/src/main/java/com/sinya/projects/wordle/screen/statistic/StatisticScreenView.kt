@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.WordyApplication
-import com.sinya.projects.wordle.data.supabase.SupabaseService
+import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.statistic.components.AchievesCard
 import com.sinya.projects.wordle.screen.statistic.components.ScrollHorizontalModes
@@ -37,7 +37,7 @@ fun StatisticScreenView(
             trashOnClick = {
                 coroutine.launch {
                     val user =  WordyApplication.supabaseClient.auth.currentUserOrNull()
-                    WordyApplication.database.clearAll()
+                    WordyApplication.database.clearAllStatistic()
                     if (user!=null) {
                         SupabaseService.clearAllUserData(user.id)
                     }

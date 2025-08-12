@@ -33,7 +33,7 @@ import androidx.lifecycle.lifecycleScope
 import com.sinya.projects.wordle.data.local.datastore.AppDataStore
 import com.sinya.projects.wordle.screen.language.LocaleViewModel
 import com.sinya.projects.wordle.screen.theme.ThemeViewModel
-import com.sinya.projects.wordle.data.supabase.SyncManager
+import com.sinya.projects.wordle.data.remote.supabase.SyncManager
 import com.sinya.projects.wordle.data.local.datastore.AppSettings
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.main.MainActivityScreen
@@ -118,18 +118,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        lifecycleScope.launch {
-            try {
-                val userId = WordyApplication.supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
-                SyncManager.syncAllToSupabase(applicationContext, userId)
-                Log.d("SupabaseSync", "Данные успешно отправлены")
-            } catch (e: Exception) {
-                Log.e("SupabaseSync", "Ошибка отправки данных: ${e.localizedMessage}")
-            }
-        }
-    }
+//    override fun onStop() {
+//        super.onStop()
+//        lifecycleScope.launch {
+//            try {
+//                val userId = WordyApplication.supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
+//                SyncManager.syncAllToSupabase(applicationContext, userId)
+//                Log.d("SupabaseSync", "Данные успешно отправлены")
+//            } catch (e: Exception) {
+//                Log.e("SupabaseSync", "Ошибка отправки данных: ${e.localizedMessage}")
+//            }
+//        }
+//    }
 
     override fun onResume() {
         super.onResume()

@@ -18,14 +18,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.WordyApplication
-import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.data.supabase.SupabaseService
+import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
+import com.sinya.projects.wordle.data.remote.supabase.sync.AchievementSync
+import com.sinya.projects.wordle.data.remote.supabase.sync.DictionarySync
 import com.sinya.projects.wordle.screen.achieve.components.AchievesBlock
+import com.sinya.projects.wordle.screen.dictionary.DictionaryUiEvent
 import com.sinya.projects.wordle.ui.features.Header
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
@@ -39,10 +42,17 @@ fun AchieveScreenView(
     navigateToBackStack: () -> Unit,
 ) {
     val coroutine = rememberCoroutineScope()
+    val context = LocalContext.current
     val pullToRefreshState = rememberPullToRefreshState()
+
     if (pullToRefreshState.isRefreshing) {
         LaunchedEffect(true) {
-            onEvent(AchieveUiEvent.OnRefreshList)
+            val user = WordyApplication.supabaseClient.auth.currentUserOrNull()
+            if (user!=null) {
+                AchievementSync.fromSupabase(context, user.id)
+                onEvent(AchieveUiEvent.OnRefreshList)
+                Log.d("AchievementSync", "Синхронизация завершена!")
+            }
             pullToRefreshState.endRefresh()
         }
     }
@@ -58,7 +68,7 @@ fun AchieveScreenView(
                         trashOnClick = {
                            coroutine.launch {
                                val user =  WordyApplication.supabaseClient.auth.currentUserOrNull()
-                               WordyApplication.database.clearAll()
+                               WordyApplication.database.clearAllStatistic()
                                if (user!=null) {
                                    SupabaseService.clearAllUserData(user.id)
                                }

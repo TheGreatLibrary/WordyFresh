@@ -1,7 +1,8 @@
 package com.sinya.projects.wordle.screen.profile
 
+import android.content.Context
 import android.net.Uri
-import com.sinya.projects.wordle.data.supabase.entity.Profiles
+import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 
 sealed class ProfileUiState {
     data object Loading : ProfileUiState()
@@ -18,5 +19,5 @@ sealed class ProfileUiState {
 sealed class ProfileUiEvent {
     data object LoadAvatar : ProfileUiEvent()
     data class UpdateAvatar(val uri: Uri) : ProfileUiEvent()
-    data object SignOut : ProfileUiEvent()
+    data class SignOut(val context: Context) : ProfileUiEvent()
 }

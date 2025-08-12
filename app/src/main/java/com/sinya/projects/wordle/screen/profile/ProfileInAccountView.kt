@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -31,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.data.supabase.entity.Profiles
+import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.screen.profile.components.AvatarPicker
 import com.sinya.projects.wordle.ui.features.CardColumn
@@ -48,6 +49,8 @@ fun ProfileInAccountView(
     state: ProfileUiState.Success,
     navigateTo: (ScreenRoute) -> Unit,
 ) {
+    val context = LocalContext.current
+
     Column(
         Modifier
             .fillMaxSize()
@@ -75,23 +78,30 @@ fun ProfileInAccountView(
             RowLink(
                 title = stringResource(R.string.email_recovery),
                 mode = "",
-                icon = R.drawable.prof_rewrite,
+                icon = R.drawable.prof_email,
                 icon2 = R.drawable.arrow,
                 navigateTo = { navigateTo(ScreenRoute.ResetEmail) }
             )
             RowLink(
                 title = stringResource(R.string.rewrite_screen),
                 mode = "",
-                icon = R.drawable.prof_rewrite,
+                icon = R.drawable.prof_edit,
                 icon2 = R.drawable.arrow,
                 navigateTo = { navigateTo(ScreenRoute.Edit) }
             )
             RowLink(
                 title = stringResource(R.string.password_recovery),
                 mode = "",
-                icon = R.drawable.prof_rewrite,
+                icon = R.drawable.prof_password,
                 icon2 = R.drawable.arrow,
                 navigateTo = { navigateTo(ScreenRoute.ResetPassword) }
+            )
+            RowLink(
+                title = stringResource(R.string.about_app_screen),
+                mode = "",
+                icon = R.drawable.prof_about,
+                icon2 = R.drawable.arrow,
+                navigateTo = { navigateTo(ScreenRoute.About) }
             )
 
 //            RowLink(
@@ -109,34 +119,11 @@ fun ProfileInAccountView(
 //                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
 //            )
         }
-        CardColumn {
-            RowLink(
-                title = stringResource(R.string.about_app_screen),
-                mode = "",
-                icon = R.drawable.prof_about,
-                icon2 = R.drawable.arrow,
-                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
-            )
-            RowLink(
-                title = stringResource(R.string.policy_privacy),
-                mode= "",
-                icon = R.drawable.prof_privacy,
-                icon2 = R.drawable.arrow,
-                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
-            )
-            RowLink(
-                title = stringResource(R.string.terms_of_use),
-                mode = "",
-                icon = R.drawable.prof_terms,
-                icon2 = R.drawable.arrow,
-                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
-            )
-        }
         Spacer(Modifier.height(1.dp))
         CustomCard(modifier = Modifier
             .clip(RoundedCornerShape(99.dp))
             .fillMaxWidth()
-            .clickable { state.onEvent(ProfileUiEvent.SignOut) }) {
+            .clickable { state.onEvent(ProfileUiEvent.SignOut(context)) }) {
             Row(
                 modifier = Modifier.padding(vertical = 11.dp, horizontal = 13.dp),
                 verticalAlignment = Alignment.CenterVertically

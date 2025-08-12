@@ -17,7 +17,10 @@ sealed class RegisterUiState {
         val email: String,
         val password: String,
         val nickname: String,
-        val errorMessage: String? = null
+        val errorMessage: Int? = null,
+        val resendStatus: Int? = null,
+        val resendState: Boolean = false,
+        val timer: Int = 60,
     )  : RegisterUiState()
 }
 
@@ -27,5 +30,8 @@ sealed class RegisterUiEvent {
     data class NicknameChanged(val value: String) : RegisterUiEvent()
     data class CheckboxStatusChanged(val value: Boolean) : RegisterUiEvent()
     data class RegisterClicked(val success: () -> Unit) : RegisterUiEvent()
+    data class ResendMail(val success: () -> Unit) : RegisterUiEvent()
+    data class ResendStateChange(val state: Boolean) : RegisterUiEvent()
+    data class TimerTic(val tic: Int) : RegisterUiEvent()
     data object ErrorDismissed : RegisterUiEvent()
 }

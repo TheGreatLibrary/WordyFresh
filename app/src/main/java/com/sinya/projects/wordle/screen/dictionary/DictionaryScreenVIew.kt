@@ -33,12 +33,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.WordyApplication
-import com.sinya.projects.wordle.data.supabase.SupabaseService
+import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
+import com.sinya.projects.wordle.data.remote.supabase.sync.DictionarySync
 import com.sinya.projects.wordle.screen.dictionary.components.DictionaryCard
 import com.sinya.projects.wordle.screen.dictionary.components.SearchContainer
 import com.sinya.projects.wordle.ui.features.Header
 import io.github.jan.supabase.auth.auth
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("UseOfNonLambdaOffsetOverload")
@@ -56,7 +56,12 @@ fun DictionaryScreenView(
 
     if (pullToRefreshState.isRefreshing) {
         LaunchedEffect(true) {
-            delay(1000)
+            val user = WordyApplication.supabaseClient.auth.currentUserOrNull()
+            if (user!=null) {
+                DictionarySync.fromSupabase(context, user.id)
+                onEvent(DictionaryUiEvent.OnRefreshList)
+                Log.d("DictionarySync", "Синхронизация завершена!")
+            }
             pullToRefreshState.endRefresh()
         }
     }
@@ -98,7 +103,7 @@ fun DictionaryScreenView(
                         trashOnClick = {
                             coroutine.launch {
                                 val user = WordyApplication.supabaseClient.auth.currentUserOrNull()
-                                WordyApplication.database.clearAll()
+                                WordyApplication.database.clearAllStatistic()
                                 if (user != null) {
                                     SupabaseService.clearAllUserData(user.id)
                                 } else Log.d(

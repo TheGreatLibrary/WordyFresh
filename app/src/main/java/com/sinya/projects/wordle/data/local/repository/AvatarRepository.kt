@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import com.sinya.projects.wordle.data.remote.supabase.SyncManager
+import com.sinya.projects.wordle.data.remote.supabase.sync.ProfileSync
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.NotFoundRestException
 import io.github.jan.supabase.storage.storage

@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.screen.profile
 
+import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -7,8 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.data.supabase.SupabaseService
+import com.sinya.projects.wordle.data.remote.supabase.SupabaseService
 import com.sinya.projects.wordle.data.local.repository.AvatarRepository
+import com.sinya.projects.wordle.data.remote.supabase.SyncManager
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
@@ -42,7 +44,7 @@ class ProfileViewModel(
 
     fun onEvent(event: ProfileUiEvent) {
         when(event) {
-            is ProfileUiEvent.SignOut -> signOut()
+            is ProfileUiEvent.SignOut -> signOut(event.context)
             is ProfileUiEvent.UpdateAvatar -> updateAvatar(event.uri)
             is ProfileUiEvent.LoadAvatar -> loadAvatar()
         }
@@ -85,9 +87,10 @@ class ProfileViewModel(
         }
     }
 
-    private fun signOut() {
+    private fun signOut(context: Context) {
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
+            SyncManager.syncAllToSupabase(context = context, userId)
             avatarRepo.deleteLocal(userId)
             db.clearAll()
             supabase.auth.signOut()
@@ -104,6 +107,7 @@ class ProfileViewModel(
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
             val newAvatar = avatarRepo.uploadAvatar(userId, uri)
+            db.profilesDao().updateImageProfile("avatar_$userId.webp", userId)
             val current = _state.value
             if (current is ProfileUiState.Success) {
                 _state.value = current.copy(avatarUri = newAvatar)

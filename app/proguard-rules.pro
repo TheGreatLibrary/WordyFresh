@@ -29,5 +29,9 @@
 -keep class io.github.jan.supabase.** { *; }
 -dontwarn io.github.jan.supabase.**
 
+
+# Защищаем sealed классы маршрутов
+-keep class com.sinya.projects.wordle.navigation.ScreenRoute { *; }
+
 # === Optional: keep line numbers in crash logs ===
 -keepattributes SourceFile,LineNumberTable

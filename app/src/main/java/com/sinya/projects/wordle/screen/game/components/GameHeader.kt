@@ -98,12 +98,16 @@ private fun GameTimer(
         }
     }
 
-    TimerDisplay(state.timePassed)
+    Box(
+        modifier = Modifier.padding(16.dp)
+    ) {
+        TimerDisplay(state.timePassed)
+    }
 }
 
 @SuppressLint("DefaultLocale")
 @Composable
-private fun TimerDisplay(totalSeconds: Long) {
+fun TimerDisplay(totalSeconds: Long) {
     val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds).toInt()
     val seconds = totalSeconds % 60
     val timeText = String.format("%02d:%02d", minutes, seconds)
@@ -112,7 +116,6 @@ private fun TimerDisplay(totalSeconds: Long) {
         text = timeText,
         fontSize = 16.sp,
         color = WordyColor.colors.textPrimary,
-        modifier = Modifier.padding(16.dp),
         style = WordyTypography.bodyMedium
     )
 }

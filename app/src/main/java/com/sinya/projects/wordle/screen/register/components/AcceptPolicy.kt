@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -19,10 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.screen.register.RegisterUiEvent
 import com.sinya.projects.wordle.screen.register.RegisterUiState
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
+import com.sinya.projects.wordle.utils.openUrl
 
 @Composable
 fun AcceptPolicy(
@@ -30,6 +33,8 @@ fun AcceptPolicy(
     onEvent: (RegisterUiEvent) -> Unit,
 
 ) {
+    val context = LocalContext.current
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
@@ -46,7 +51,11 @@ fun AcceptPolicy(
             colorFilter = ColorFilter.tint(color = if (!state.isCheckboxError || state.checkboxStatus) WordyColor.colors.textPrimary
              else WordyColor.colors.secondary, blendMode = BlendMode.SrcIn)
         )
-        TermsText({}, {})
+        TermsText({
+            openUrl(context, LegalLinks.TERMS_OF_USE_URL)
+        }, {
+            openUrl(context, LegalLinks.PRIVACY_POLICY_URL)
+        })
     }
 }
 

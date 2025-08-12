@@ -9,6 +9,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sinya.projects.wordle.WordyApplication
@@ -34,12 +35,11 @@ fun RegisterScreen(
         )
     )
 
-    val state = viewModel.state.value
-
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        when (state) {
+
+        when (val state = viewModel.state.value) {
             is RegisterUiState.RegisterForm -> {
                 LaunchedEffect(state.errorMessage) {
                     state.errorMessage?.let {
@@ -61,7 +61,33 @@ fun RegisterScreen(
                 )
             }
 
-            is RegisterUiState.LoadingConfirm -> LoadingEmailConfirm(email = state.email)
+            is RegisterUiState.LoadingConfirm -> {
+                state.errorMessage?.let {
+                    val text = stringResource(it)
+                    LaunchedEffect(it) {
+                        snackbarHost.showSnackbar(text)
+                        viewModel.onEvent(RegisterUiEvent.ErrorDismissed)
+                    }
+                }
+
+                LoadingEmailConfirm(
+                    email = state.email,
+                    resendStatus = state.resendStatus,
+                    resendState = state.resendState,
+                    timer = state.timer,
+                    onResendClick = {
+                        viewModel.onEvent(RegisterUiEvent.ResendMail(onRegistered))
+                        viewModel.onEvent(RegisterUiEvent.ResendStateChange(false))
+                        viewModel.onEvent(RegisterUiEvent.TimerTic(60))
+                    },
+                    onTimerTic = { tic ->
+                        viewModel.onEvent(RegisterUiEvent.TimerTic(tic))
+                    },
+                    onTimerStop = {
+                        viewModel.onEvent(RegisterUiEvent.ResendStateChange(true))
+                    }
+                )
+            }
         }
     }
 }

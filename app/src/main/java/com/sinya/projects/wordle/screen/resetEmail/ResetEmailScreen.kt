@@ -19,6 +19,7 @@ import com.sinya.projects.wordle.screen.resetPassword.ResetPasswordUiState
 import com.sinya.projects.wordle.screen.resetPassword.ResetPasswordViewModel
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.white
+import com.sinya.projects.wordle.utils.LoadingConfirmed
 import com.sinya.projects.wordle.utils.findActivity
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -70,7 +71,7 @@ fun ResetEmailScreen(
                 onReset = navigateToProfile
             )
 
-            is ResetEmailUiState.LoadingConfirm -> LoadingEmailConfirm(
+            is ResetEmailUiState.LoadingConfirm -> LoadingConfirmed(
                 email = state.email
             )
         }

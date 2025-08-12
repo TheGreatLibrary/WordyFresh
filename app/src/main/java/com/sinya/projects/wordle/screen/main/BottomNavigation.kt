@@ -45,7 +45,7 @@ fun BottomNavigation(navController: NavController) {
 
     ) {
         listItems.forEach { item ->
-            val isSelected = currentRoute == item.route::class.simpleName
+            val isSelected = currentRoute == item.route.route
 
             Box(
                 modifier = Modifier

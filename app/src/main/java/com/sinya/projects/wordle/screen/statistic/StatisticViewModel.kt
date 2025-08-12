@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.AppDatabase
 import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
-import com.sinya.projects.wordle.data.supabase.entity.SyncStatistic
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
 import kotlinx.coroutines.launch
 
 class StatisticViewModel(

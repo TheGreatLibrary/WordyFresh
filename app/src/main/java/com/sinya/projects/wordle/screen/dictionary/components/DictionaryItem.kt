@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.screen.dictionary.DictionaryUiEvent
 import com.sinya.projects.wordle.ui.features.CustomCard
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -124,7 +125,7 @@ private fun DictionaryCardExpandedContent(
                             R.string.share_text,
                             title,
                             description.ifEmpty { "" },
-                            "https://www.rustore.ru/catalog/app/com.sinya.projects.wordle"
+                            LegalLinks.WORDY_APP_URL
                         ),
                         context
                     )

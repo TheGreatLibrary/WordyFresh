@@ -50,7 +50,6 @@ fun MainActivityScreen(
     toggleOnboard: (Boolean) -> Unit,
     lang: StateFlow<String>,
     changeLang: (String) -> Unit,
-//    isActiveItem: BackgroundSetting,
     isDark: StateFlow<Boolean>,
     toggleTheme: (Boolean) -> Unit,
 ) {
@@ -80,31 +79,31 @@ fun MainActivityScreen(
     }
 
     val withOutImage = currentRoute in listOf(
-        ScreenRoute.LanguageMode::class.simpleName,
-        ScreenRoute.ThemeMode::class.simpleName,
-        ScreenRoute.KeyboardMode::class.simpleName,
-        ScreenRoute.Profile::class.simpleName,
-        ScreenRoute.Login::class.simpleName,
-        ScreenRoute.Edit::class.simpleName,
-        ScreenRoute.ResetPassword::class.simpleName,
-        ScreenRoute.ResetEmail::class.simpleName,
-        ScreenRoute.EmailConfirm::class.simpleName,
-        ScreenRoute.ResetPassword::class.simpleName,
-        ScreenRoute.Register::class.simpleName,
-        ScreenRoute.Onboarding::class.simpleName
+        ScreenRoute.LanguageMode.route,
+        ScreenRoute.ThemeMode.route,
+        ScreenRoute.KeyboardMode.route,
+        ScreenRoute.Profile.route,
+        ScreenRoute.Login.route,
+        ScreenRoute.Edit.route,
+        ScreenRoute.ResetPassword.route,
+        ScreenRoute.ResetEmail.route,
+        ScreenRoute.EmailConfirm.route,
+        ScreenRoute.ResetPassword.route,
+        ScreenRoute.Register.route,
+        ScreenRoute.Onboarding.route,
+        ScreenRoute.About.route
     )
 
     val withOutBottomBar = currentRoute in listOf(
-        ScreenRoute.Game::class.simpleName,
-        ScreenRoute.Achieves::class.simpleName,
-        ScreenRoute.SettingWithoutBar::class.simpleName,
+        ScreenRoute.Game(0).route,
+        ScreenRoute.Achieves.route,
+        ScreenRoute.SettingWithoutBar.route,
     ) || withOutImage
 
     Box(modifier = Modifier
         .fillMaxSize()
         .background(color = WordyColor.colors.background)) {
 
-        // ✅ Подложка-фон (градиент или изображение)
         if (!withOutImage) backgroundSetting?.let { setting ->
             when (setting.type) {
                 BackgroundType.GRADIENT -> {

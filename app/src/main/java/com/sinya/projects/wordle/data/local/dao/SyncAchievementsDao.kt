@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.sinya.projects.wordle.data.supabase.entity.SyncAchievements
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncAchievements
 
 @Dao
 interface SyncAchievementsDao {

@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.dao.ProfilesDao
-import com.sinya.projects.wordle.data.supabase.entity.Profiles
+import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from

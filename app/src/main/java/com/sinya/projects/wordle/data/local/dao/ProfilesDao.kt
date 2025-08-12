@@ -5,14 +5,14 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.sinya.projects.wordle.data.supabase.entity.Profiles
+import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 
 @Dao
 interface ProfilesDao {
     @Query("SELECT id FROM profiles LIMIT 1")
     suspend fun getProfileId(): String
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProfile(user: Profiles)
 
     @Update
@@ -30,4 +30,13 @@ interface ProfilesDao {
 
     @Query("DELETE FROM profiles")
     suspend fun clearAll()
+
+    @Query(
+        """
+        UPDATE profiles 
+        SET avatar_url = :img 
+        WHERE id = :userId
+    """
+    )
+    suspend fun updateImageProfile(img: String, userId: String)
 }

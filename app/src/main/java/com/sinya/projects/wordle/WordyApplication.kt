@@ -6,7 +6,7 @@ import androidx.room.Room
 import com.sinya.projects.wordle.data.local.achievement.LocalAchievementRepository
 import com.sinya.projects.wordle.data.local.achievement.objects.AchievementManager
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.data.supabase.SyncManager
+import com.sinya.projects.wordle.data.remote.supabase.SyncManager
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
@@ -53,6 +53,8 @@ class WordyApplication : Application() {
 
     private suspend fun syncWithSupabase() {
         val userId = waitForAuthSession()
+        SyncManager.syncAllToSupabase(applicationContext, userId)
+        Log.d("SupabaseSync", "Данные успешно отправлены")
         SyncManager.syncAllToLocal(applicationContext, userId)
     }
 
