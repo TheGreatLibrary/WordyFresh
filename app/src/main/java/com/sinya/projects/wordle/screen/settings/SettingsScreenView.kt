@@ -145,7 +145,7 @@ fun SettingsScreenView(
 
             RowImageWithText(
                 modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                icon = R.drawable.dict_search,
+                icon = R.drawable.set_bg,
                 title = stringResource(R.string.background_fon)
             )
             LazyRow(

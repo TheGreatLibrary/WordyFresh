@@ -82,7 +82,7 @@ object AppDataStore {
     }
 
     fun getConfettiMode(context: Context): Flow<Boolean> =
-        context.dataStore.data.map { it[CONFETTI_KEY] ?: false }
+        context.dataStore.data.map { it[CONFETTI_KEY] ?: true }
 
 
     // 🌐 Язык
