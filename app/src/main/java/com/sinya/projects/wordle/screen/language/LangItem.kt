@@ -1,7 +1,0 @@
-package com.sinya.projects.wordle.screen.language
-
-data class LangItem(
-    val code: String,         // "ru", "en", etc.
-    val nativeName: String,   // "Русский"
-    val englishName: String   // "Russian"
-)

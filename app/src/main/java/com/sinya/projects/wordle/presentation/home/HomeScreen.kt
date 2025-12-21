@@ -1,0 +1,150 @@
+package com.sinya.projects.wordle.presentation.home
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sinya.projects.wordle.domain.enums.GameMode
+import com.sinya.projects.wordle.navigation.ScreenRoute
+import com.sinya.projects.wordle.presentation.home.components.NewGameBottomSheet
+import com.sinya.projects.wordle.presentation.home.components.ContinueGameButton
+import com.sinya.projects.wordle.presentation.home.components.HomePlaceholder
+import com.sinya.projects.wordle.presentation.home.components.MainContainers
+import com.sinya.projects.wordle.presentation.home.components.MainHeader
+import com.sinya.projects.wordle.presentation.home.components.NewGameButton
+import com.sinya.projects.wordle.presentation.home.friendSheet.FriendBottomSheet
+import com.sinya.projects.wordle.utils.sendSupportEmail
+
+@Composable
+fun HomeScreen(
+    navigateTo: (ScreenRoute) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .consumeWindowInsets(WindowInsets.statusBars)
+            .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 50.dp),
+    ) {
+        when (state) {
+            HomeUiState.Loading -> HomePlaceholder()
+
+            is HomeUiState.Success -> HomeScreenView(
+                state = state as HomeUiState.Success,
+                navigateTo = navigateTo,
+                sendEmail = {
+                    context.sendSupportEmail()
+                    viewModel.onEvent(HomeEvent.SendEmailSupport)
+                },
+                onEvent = viewModel::onEvent
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeScreenView(
+    state: HomeUiState.Success,
+    navigateTo: (ScreenRoute) -> Unit,
+    sendEmail: () -> Unit,
+    onEvent: (HomeEvent) -> Unit
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+            onEvent(HomeEvent.OnErrorShown)
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column {
+                MainHeader(
+                    avatarUri = state.avatarUri,
+                    onAvatarClick = { navigateTo(ScreenRoute.Profile) },
+                    onEmailClick = sendEmail
+                )
+                MainContainers(
+                    onFriendClick = {
+                        onEvent(HomeEvent.FriendDialogUploadVisible(true))
+                    },
+                    onHardClick = {
+                        onEvent(HomeEvent.BottomSheetUploadMode(mode = GameMode.HARD))
+                    },
+                    onRandomClick = { navigateTo(ScreenRoute.Game(mode = GameMode.RANDOM.id)) },
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                state.savedGame?.let {
+                    ContinueGameButton(
+                        savedGame = it,
+                        onClick = {
+                            navigateTo(
+                                ScreenRoute.Game(
+                                    mode = GameMode.SAVED.id,
+                                    wordLength = it.length,
+                                    lang = it.lang,
+                                    word = it.targetWord
+                                )
+                            )
+                        }
+                    )
+                }
+                NewGameButton(
+                    onClick = { onEvent(HomeEvent.BottomSheetUploadMode(GameMode.NORMAL)) }
+                )
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        )
+    }
+
+    if (state.showFriendBottomSheet) {
+        FriendBottomSheet(
+            navigateTo = navigateTo,
+            onDismissRequest = { onEvent(HomeEvent.FriendDialogUploadVisible(false)) }
+        )
+    }
+
+    if (state.showGameBottomSheet) {
+        NewGameBottomSheet(
+            onClickGame = navigateTo,
+            onDismissRequest = { onEvent(HomeEvent.BottomSheetUploadVisible(false)) },
+            initialMode = state.modeGame
+        )
+    }
+}

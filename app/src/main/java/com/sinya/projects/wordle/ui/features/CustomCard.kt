@@ -25,7 +25,7 @@ fun CustomCard(modifier: Modifier, body: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = Modifier
             .shadow(
-                elevation = 10.dp,
+                elevation = 8.dp,
                 spotColor = WordyColor.colors.shadowColor,
                 shape = WordyShapes.small
             )

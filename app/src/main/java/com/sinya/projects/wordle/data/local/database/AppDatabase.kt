@@ -2,27 +2,26 @@ package com.sinya.projects.wordle.data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.sinya.projects.wordle.data.local.achievement.UserStats
-import com.sinya.projects.wordle.data.local.dao.AchievementsDao
-import com.sinya.projects.wordle.data.local.dao.OfflineAchievementsDao
-import com.sinya.projects.wordle.data.local.dao.OfflineDictionaryDao
-import com.sinya.projects.wordle.data.local.dao.OfflineStatisticDao
-import com.sinya.projects.wordle.data.local.dao.ProfilesDao
-import com.sinya.projects.wordle.data.local.dao.SyncAchievementsDao
-import com.sinya.projects.wordle.data.local.dao.SyncDictionaryDao
-import com.sinya.projects.wordle.data.local.dao.SyncStatisticDao
-import com.sinya.projects.wordle.data.local.dao.WordDao
-import com.sinya.projects.wordle.data.local.entity.Achievements
-import com.sinya.projects.wordle.data.local.entity.CategoriesAchieves
-import com.sinya.projects.wordle.data.local.entity.Modes
-import com.sinya.projects.wordle.data.local.entity.OfflineAchievements
-import com.sinya.projects.wordle.data.local.entity.OfflineDictionary
-import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.local.database.dao.AchievementsDao
+import com.sinya.projects.wordle.data.local.database.dao.OfflineAchievementsDao
+import com.sinya.projects.wordle.data.local.database.dao.OfflineDictionaryDao
+import com.sinya.projects.wordle.data.local.database.dao.OfflineStatisticDao
+import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
+import com.sinya.projects.wordle.data.local.database.dao.SyncAchievementsDao
+import com.sinya.projects.wordle.data.local.database.dao.SyncDictionaryDao
+import com.sinya.projects.wordle.data.local.database.dao.SyncStatisticDao
+import com.sinya.projects.wordle.data.local.database.dao.WordDao
+import com.sinya.projects.wordle.data.local.database.entity.Achievements
+import com.sinya.projects.wordle.data.local.database.entity.CategoriesAchieves
+import com.sinya.projects.wordle.data.local.database.entity.Modes
+import com.sinya.projects.wordle.data.local.database.entity.OfflineAchievements
+import com.sinya.projects.wordle.data.local.database.entity.OfflineDictionary
+import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncAchievements
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncDictionary
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
-import com.sinya.projects.wordle.data.local.entity.Words
+import com.sinya.projects.wordle.data.local.database.entity.Words
 
 @Database(
     entities = [
@@ -51,25 +50,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun syncStatisticDao(): SyncStatisticDao
     abstract fun wordDao(): WordDao
     abstract fun achievementsDao(): AchievementsDao
-
-    suspend fun clearAllStatistic() {
-        offlineStatisticDao().clearAll()
-        offlineDictionaryDao().clearAll()
-        offlineAchievementsDao().clearAll()
-        syncAchievementsDao().clearAll()
-        syncDictionaryDao().clearAll()
-        syncStatisticDao().clearAll()
-    }
-
-    suspend fun clearAll() {
-        profilesDao().clearAll()
-        clearAllStatistic()
-    }
-
-    suspend fun loadStats(): UserStats {
-        return UserStats(
-            statistic = offlineStatisticDao().getMergedSummary(),
-        )
-    }
 }
 

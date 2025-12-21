@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-08-04T10:54:43.619277900Z">
+        <DropdownSelection timestamp="2025-12-04T18:39:56.634359700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\sz240\.android\avd\5.1_WVGA_API_27.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\sz240\.android\avd\2.7_QVGA_API_27.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -20,6 +20,9 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="SettingsViewPreview">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="FinishBottomSheet">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

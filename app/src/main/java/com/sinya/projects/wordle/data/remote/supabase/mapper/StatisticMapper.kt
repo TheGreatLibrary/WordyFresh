@@ -1,6 +1,6 @@
 package com.sinya.projects.wordle.data.remote.supabase.mapper
 
-import com.sinya.projects.wordle.data.local.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
 import com.sinya.projects.wordle.utils.getCurrentTime
 

@@ -20,10 +20,6 @@ sealed class ScreenRoute(val route: String) {
         val word: String? = "",
     ) : ScreenRoute("Game")
 
-    @Serializable data object LanguageMode : ScreenRoute("LanguageMode")
-    @Serializable data object ThemeMode : ScreenRoute("ThemeMode")
-    @Serializable data object KeyboardMode : ScreenRoute("KeyboardMode")
-
     @Serializable data object About : ScreenRoute("About")
 
     @Serializable data object Profile : ScreenRoute("Profile")

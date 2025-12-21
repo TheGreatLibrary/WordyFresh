@@ -1,0 +1,129 @@
+package com.sinya.projects.wordle.domain.source
+
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
+import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
+import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.user.UserInfo
+import io.github.jan.supabase.postgrest.from
+import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
+
+interface SupabaseProfileDataSource {
+    suspend fun fetchProfile(userId: String): Profiles?
+    suspend fun updateProfile(profile: Profiles): Result<Unit>
+    suspend fun updateImagePath(urlPath: String, id: String): Result<Unit>
+    suspend fun updateNickname(nickname: String, id: String): Result<Unit>
+    suspend fun syncToSupabase(userId: String): Result<Unit>
+    suspend fun syncFromSupabase(userId: String): Result<Profiles?>
+}
+
+class SupabaseProfileDataSourceImpl @Inject constructor(
+    private val supabaseClient: SupabaseClient,
+    private val profilesDao: ProfilesDao
+) : SupabaseProfileDataSource {
+
+    override suspend fun fetchProfile(userId: String): Profiles? {
+        return withContext(Dispatchers.IO) {
+            try {
+                supabaseClient
+                    .from("profiles")
+                    .select { filter { eq("id", userId) } }
+                    .decodeSingleOrNull<Profiles>()
+            } catch (e: Exception) {
+                Log.e("SupabaseProfileDataSource", "Error fetching profile", e)
+                null
+            }
+        }
+    }
+
+    override suspend fun updateProfile(profile: Profiles): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val json = Json { encodeDefaults = true }
+                val payload = json.encodeToJsonElement(profile).jsonObject
+
+                supabaseClient.from("profiles").upsert(payload)
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Log.e("SupabaseProfileDataSource", "Error updating profile", e)
+                Result.failure(e)
+            }
+        }
+    }
+
+
+
+    override suspend fun updateImagePath(urlPath: String, id: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                supabaseClient.from("profiles").update({ Profiles::avatarUrl setTo urlPath }) {
+                    filter { Profiles::id eq id }
+                }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Log.e("SupabaseProfileDataSource", "Error updating profile", e)
+                Result.failure(e)
+            }
+        }
+    }
+
+    override suspend fun updateNickname(nickname: String, id: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                supabaseClient.from("profiles").update({ Profiles::nickname setTo nickname }) {
+                    filter { Profiles::id eq id }
+                }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Log.e("SupabaseProfileDataSource", "Error updating profile", e)
+                Result.failure(e)
+            }
+        }
+    }
+
+    override suspend fun syncToSupabase(userId: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val profile = profilesDao.getProfileById(userId)
+                if (profile==null) Result.failure<Unit>(UserNotAuthenticatedException())
+
+                val json = Json { encodeDefaults = true }
+                val payload = json.encodeToJsonElement(profile).jsonObject
+
+                supabaseClient.from("profiles").upsert(payload)
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Log.e("SupabaseProfileDataSource", "Error syncing to Supabase", e)
+                Result.failure(e)
+            }
+        }
+    }
+
+    override suspend fun syncFromSupabase(userId: String): Result<Profiles?> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val profile = supabaseClient
+                    .from("profiles")
+                    .select { filter { eq("id", userId) } }
+                    .decodeSingleOrNull<Profiles>()
+
+                if (profile != null) {
+                    profilesDao.insertProfile(profile)
+                }
+
+                Result.success(profile)
+            } catch (e: Exception) {
+                Log.e("SupabaseProfileDataSource", "Error syncing from Supabase", e)
+                Result.failure(e)
+            }
+        }
+    }
+}

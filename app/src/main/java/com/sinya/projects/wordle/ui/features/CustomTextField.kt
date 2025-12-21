@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.ui.theme.Montserrat
@@ -86,16 +86,16 @@ fun CustomTextField(
             )
             if (!errorMessage.isNullOrBlank()) {
                 if (isError) {
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
                     Text(
                         text = errorMessage,
                         color = WordyColor.colors.secondary,
                         fontSize = 12.sp,
                         fontFamily = Montserrat,
-                        fontWeight = FontWeight.Normal
+                        fontWeight = FontWeight.Normal,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                }
-                else Spacer(modifier = Modifier.height(20.dp))
+                } else Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }

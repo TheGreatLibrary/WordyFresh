@@ -17,6 +17,7 @@ fun RoundedButton(
     modifier: Modifier,
     colors: ButtonColors,
     onClick: () -> Unit,
+    enabled: Boolean = true,
     contentPadding: PaddingValues,
     body: @Composable RowScope.() -> Unit
 ) {
@@ -26,6 +27,7 @@ fun RoundedButton(
             spotColor = WordyColor.colors.shadowColor,
             shape = WordyShapes.extraLarge
         ),
+        enabled = enabled,
         shape = WordyShapes.extraLarge,
         colors = colors,
         onClick = onClick,

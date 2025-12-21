@@ -3,7 +3,7 @@ package com.sinya.projects.wordle.data.remote.supabase.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import com.sinya.projects.wordle.data.local.entity.Words
+import com.sinya.projects.wordle.data.local.database.entity.Words
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

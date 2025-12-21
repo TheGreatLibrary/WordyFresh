@@ -23,9 +23,10 @@ fun ImageButton(
     onClick: () -> Unit
 ) {
     Box(
-        modifier = modifierBox
+        modifier = Modifier
             .clip(WordyShapes.extraLarge)
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .then(modifierBox),
         contentAlignment = Alignment.Center
     ) {
         Image(

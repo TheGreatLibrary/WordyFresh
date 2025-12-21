@@ -1,151 +1,55 @@
 package com.sinya.projects.wordle
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.view.WindowInsets.Type.systemBars
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.lifecycleScope
-import com.sinya.projects.wordle.data.local.datastore.AppDataStore
-import com.sinya.projects.wordle.screen.language.LocaleViewModel
-import com.sinya.projects.wordle.screen.theme.ThemeViewModel
-import com.sinya.projects.wordle.data.remote.supabase.SyncManager
-import com.sinya.projects.wordle.data.local.datastore.AppSettings
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sinya.projects.wordle.data.local.datastore.DataStoreViewModel
+import com.sinya.projects.wordle.data.remote.supabase.SyncViewModel
+import com.sinya.projects.wordle.navigation.MainActivityScreen
 import com.sinya.projects.wordle.navigation.ScreenRoute
-import com.sinya.projects.wordle.screen.main.MainActivityScreen
+import com.sinya.projects.wordle.ui.features.SplashScreen
 import com.sinya.projects.wordle.ui.theme.WordleTheme
-import io.github.jan.supabase.auth.auth
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val themeViewModel: ThemeViewModel by viewModels()
-    private val localeViewModel: LocaleViewModel by viewModels()
 
-    private val localAppSettings = compositionLocalOf<AppSettings> {
-        error("AppSettings not provided")
-    }
-
-    @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsetsControllerCompat(window, window.decorView).apply {
-                hide(android.view.WindowInsets.Type.systemBars())
-                systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        }
+        setupWindowInsets()
 
         setContent {
-            val context = LocalContext.current
-            var settings by remember { mutableStateOf<AppSettings?>(null) }
+            val dataStoreViewModel: DataStoreViewModel = hiltViewModel()
+            val syncViewModel: SyncViewModel = hiltViewModel()
 
-            LaunchedEffect(Unit) {
-                val loadedSettings = AppDataStore.getSettings(context)
-                applyAppLocale(loadedSettings.languageCode)
-                setAppTheme(loadedSettings.isDark)
-                settings = loadedSettings
-            }
+            val darkMode by dataStoreViewModel.darkMode.collectAsState()
+            val language by dataStoreViewModel.language.collectAsState()
+            val onboardingCompleted by dataStoreViewModel.onboardingCompleted.collectAsStateWithLifecycle()
 
-            LaunchedEffect(Unit) {
-                themeViewModel.themeChanged.collect {
-                    delay(150)
-                    (context as? Activity)?.recreate()
-                }
-            }
+            applyAppLocale(language)
 
-            LaunchedEffect(Unit) {
-                localeViewModel.languageChanged.collect {
-                    delay(150)
-                    (context as? Activity)?.recreate()
-                }
-            }
-
-            settings?.let {
-                WordleTheme(darkTheme = it.isDark) {
-                    CompositionLocalProvider(localAppSettings provides it) {
-                        MainActivityScreen(
-                            isFirstPlay = it.isFirstPlay,
-                            startRoute = if (!it.isFirstPlay) ScreenRoute.Onboarding else ScreenRoute.Home,
-                            toggleOnboard = { state -> toggleOnboard(context, state) },
-                            lang = localeViewModel.language,
-                            isDark = themeViewModel.isDarkMode,
-                            toggleTheme = { state -> themeViewModel.toggleTheme(state) },
-                            changeLang = { lang -> localeViewModel.changeLanguage(lang) },
-                        )
-                    }
-                }
-            } ?: run {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_foreground),
-                        contentDescription = null, modifier = Modifier.size(125.dp)
-                    )
+            WordleTheme(darkTheme = darkMode) {
+                when (onboardingCompleted) {
+                    null -> SplashScreen()
+                    true -> MainActivityScreen(startRoute = ScreenRoute.Home, setLanguage = ::applyAppLocale)
+                    false -> MainActivityScreen(startRoute = ScreenRoute.Onboarding, setLanguage = ::applyAppLocale)
                 }
             }
         }
     }
-
-//    override fun onStop() {
-//        super.onStop()
-//        lifecycleScope.launch {
-//            try {
-//                val userId = WordyApplication.supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
-//                SyncManager.syncAllToSupabase(applicationContext, userId)
-//                Log.d("SupabaseSync", "Данные успешно отправлены")
-//            } catch (e: Exception) {
-//                Log.e("SupabaseSync", "Ошибка отправки данных: ${e.localizedMessage}")
-//            }
-//        }
-//    }
-
-    override fun onResume() {
-        super.onResume()
-        lifecycleScope.launch {
-            try {
-                val userId = WordyApplication.supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
-                SyncManager.syncAllToLocal(applicationContext, userId)
-                Log.d("SupabaseSync", "Данные получены и синхронизированы!")
-            } catch (e: Exception) {
-                Log.e("SupabaseSync", "Ошибка получения данных: ${e.localizedMessage}")
-            }
-        }
-    }
-
-
-    /** работа с AppDataStore */
 
     private fun applyAppLocale(languageCode: String) {
         val locale = Locale(languageCode)
@@ -156,16 +60,15 @@ class MainActivity : ComponentActivity() {
         resources.updateConfiguration(config, resources.displayMetrics)
     }
 
-    private fun setAppTheme(isDark: Boolean) {
-        AppCompatDelegate.setDefaultNightMode(
-            if (isDark) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
-    }
-
-    private fun toggleOnboard(context: Context, state: Boolean) {
-        lifecycleScope.launch {
-            AppDataStore.setOnboardingMode(context = context, state = state)
+    @SuppressLint("WrongConstant")
+    private fun setupWindowInsets() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                hide(systemBars())
+                systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
         }
     }
 }

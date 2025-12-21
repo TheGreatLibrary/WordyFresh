@@ -11,27 +11,27 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-suspend fun Context.getDefinitionWithFallback(word: String): String {
-    return withContext(Dispatchers.IO) {
-        if (!isInternetAvailable()) {
-            return@withContext getString(R.string.no_internet_error)
-        }
-
-        val encodedWord = URLEncoder.encode(word.lowercase(), "UTF-8")
-        val lang = WordyApplication.database.offlineDictionaryDao().getLangForWord(word) ?: "ru"
-
-        // 1. Пробуем Wikipedia
-        val wikipediaResult = getFromWikipedia(encodedWord, lang)
-        if (!wikipediaResult.isNullOrBlank()) return@withContext wikipediaResult
-
-//        // 2. Пробуем Wiktionary
-//        val wiktionaryResult = getFromWiktionary(encodedWord, lang)
-//        if (!wiktionaryResult.isNullOrBlank()) return@withContext wiktionaryResult
-
-        // 3. Если ничего не нашли
-        return@withContext getString(R.string.definition_not_found) // "Определение не найдено"
-    }
-}
+//suspend fun Context.getDefinitionWithFallback(word: String): String {
+//    return withContext(Dispatchers.IO) {
+//        if (!isInternetAvailable()) {
+//            return@withContext getString(R.string.no_internet_error)
+//        }
+//
+//        val encodedWord = URLEncoder.encode(word.lowercase(), "UTF-8")
+//        val lang = WordyApplication.database.offlineDictionaryDao().getLangForWord(word) ?: "ru"
+//
+//        // 1. Пробуем Wikipedia
+//        val wikipediaResult = getFromWikipedia(encodedWord, lang)
+//        if (!wikipediaResult.isNullOrBlank()) return@withContext wikipediaResult
+//
+////        // 2. Пробуем Wiktionary
+////        val wiktionaryResult = getFromWiktionary(encodedWord, lang)
+////        if (!wiktionaryResult.isNullOrBlank()) return@withContext wiktionaryResult
+//
+//        // 3. Если ничего не нашли
+//        return@withContext getString(R.string.definition_not_found) // "Определение не найдено"
+//    }
+//}
 
 private fun getFromWikipedia(encodedWord: String, lang: String): String? {
     return try {

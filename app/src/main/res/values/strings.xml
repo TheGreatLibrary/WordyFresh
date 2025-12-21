@@ -45,7 +45,7 @@
     <!-- Язык -->
     <string name="change_lang">Язык</string>
     <string name="russian">Русский</string>
-    <string name="english">Английский</string>
+    <string name="english">English</string>
 
     <!-- Клавиатура -->
     <string name="keyboard_classic">Классика</string>
@@ -141,8 +141,7 @@
     <string name="hard_hint_letter_required">Не забудь! В слове должна быть буква %1$s</string>
 
     <string name="not_found_word">Такого слова нет</string>
-    <string name="hiddent_word">Правильный ответ:</string>
-    <string name="parsing_word">Хочешь узнать, что это слово означает?</string>
+    <string name="hidden_word">Правильный ответ:</string>
     <string name="put_enter_to_play">Или нажми Enter, чтобы сыграть снова</string>
 
     <string name="placeholder"> </string>
@@ -161,11 +160,15 @@
     <string name="get_shifr_word">Загадать</string>
     <string name="put_shifr_word">Отгадать</string>
     <string name="is_word_in_database_error">Данного слова нет в базе данных!</string>
-    <string name="put_word">Брось вызов другу - загадай ему слово от 4 до 11 букв:</string>
-    <string name="copy_shifr">Скопировать шифр</string>
-    <string name="put_shifr">Введи шифр ниже, чтобы отгадать слово от друга:</string>
-    <string name="decode_word">Отгадать слово</string>
     <string name="put_here">Введите здесь!</string>
+
+    <string name="cipher_copied">Шифр скопирован в буфер обмена!</string>
+    <string name="enter_word_to_encode">Введите слово для создания шифра</string>
+    <string name="enter_cipher_to_decode">Введите шифр для начала игры</string>
+    <string name="word_placeholder">Например: СОБАКА</string>
+    <string name="cipher_placeholder">Вставьте шифр</string>
+    <string name="get_cipher">Получить шифр</string>
+    <string name="invalid_cipher_error">Неверный шифр или слово не найдено</string>
 
 
     <!-- onboarding -->
@@ -307,4 +310,15 @@
     <string name="resend_status_not_confirmed">Email не был подтвержден. Повторите позже.</string>
     <string name="resend_status_sent">Письмо отправлено повторно.</string>
     <string name="resend_status_error">Ошибка: не удалось отправить письмо</string>
+    <string name="we_send_mail_to_confirm">Мы отправили письмо для подтверждения на %1$s</string>
+    <string name="saved_game">Сохраненная игра</string>
+    <string name="start_game">Начать</string>
+
+    <string name="achieve_is_unlocked">Достижение разблокировано!</string>
+    <string name="avg_time">Сред. время</string>
+    <string name="current_streak">Тек. серия</string>
+    <string name="current_mode">Тек. режим</string>
+    <string name="per_win">Пр. побед</string>
+    <string name="parsing_word">Узнать значение слова →</string>
+    <string name="share_button_text">Что такое %1$s? %2$s. Я узнал об этом в Wordy Fresh в результате игры:\n\n%3$s\n\nПрисоединяйся: %4$s</string>
 </resources>

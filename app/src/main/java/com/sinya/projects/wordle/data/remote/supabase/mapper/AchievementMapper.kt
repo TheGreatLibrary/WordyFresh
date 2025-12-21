@@ -1,6 +1,6 @@
 package com.sinya.projects.wordle.data.remote.supabase.mapper
 
-import com.sinya.projects.wordle.data.local.entity.OfflineAchievements
+import com.sinya.projects.wordle.data.local.database.entity.OfflineAchievements
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncAchievements
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncDictionary
 import com.sinya.projects.wordle.utils.getCurrentTime
