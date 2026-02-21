@@ -1,7 +1,5 @@
 package com.sinya.projects.wordle.data.remote.web
 
-import java.util.Locale
-
 object LegalLinks {
     const val PRIVACY_POLICY_URL = "https://picnic-bk.ru/alex/wordy_fresh/privacy_policy.html"
     const val TERMS_OF_USE_URL = "https://picnic-bk.ru/alex/wordy_fresh/terms_of_use.html"

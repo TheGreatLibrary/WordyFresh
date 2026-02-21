@@ -14,16 +14,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.datastore.DataStoreViewModel
 import com.sinya.projects.wordle.data.local.datastore.SavedGameState
+import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.enums.GameState
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.game.components.CustomKeyboard
@@ -32,7 +31,6 @@ import com.sinya.projects.wordle.presentation.game.components.GamePlace
 import com.sinya.projects.wordle.presentation.game.components.NotRightWordDialog
 import com.sinya.projects.wordle.presentation.game.components.ReactiveConfetti
 import com.sinya.projects.wordle.presentation.game.components.TextResult
-import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishBottomSheet
 import kotlinx.coroutines.delay
 

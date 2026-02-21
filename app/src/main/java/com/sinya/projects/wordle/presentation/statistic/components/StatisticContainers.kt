@@ -1,6 +1,5 @@
 package com.sinya.projects.wordle.presentation.statistic.components
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween

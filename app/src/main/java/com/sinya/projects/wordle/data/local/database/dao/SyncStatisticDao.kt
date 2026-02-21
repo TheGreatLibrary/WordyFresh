@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
 
 @Dao
