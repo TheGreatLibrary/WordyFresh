@@ -94,12 +94,8 @@ fun StatisticContainers(
         )
 
         StatisticTimeCard(
-            timeText = if (statisticByMode.countGame == 0) {
-                "--"
-            } else {
-                formatAverageTime(animatedTime.toLong(), statisticByMode.countGame)
-            },
-            description = stringResource(R.string.abs_time),
+            timeText = animatedTime,
+            countGame = statisticByMode.countGame,
             fontSize = 26.sp,
             descriptionSize = 11.sp,
             modifier = Modifier.weight(1f)
@@ -109,22 +105,6 @@ fun StatisticContainers(
     AttemptsProgressCard(statisticByMode)
 
     Spacer(Modifier.height(9.dp))
-}
-
-@SuppressLint("DefaultLocale")
-private fun formatAverageTime(totalSeconds: Long, countGame: Int): String {
-    if (countGame == 0) return "00:00"
-
-    val averageSeconds = totalSeconds / countGame
-    val hours = averageSeconds / 3600
-    val minutes = (averageSeconds % 3600) / 60
-    val seconds = averageSeconds % 60
-
-    return if (hours > 0) {
-        String.format("%02d:%02d:%02d", hours, minutes, seconds)
-    } else {
-        String.format("%02d:%02d", minutes, seconds)
-    }
 }
 
 @Composable

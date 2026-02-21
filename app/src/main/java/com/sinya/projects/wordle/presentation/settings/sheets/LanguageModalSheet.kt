@@ -74,7 +74,9 @@ fun LanguageModalSheet(
                         onClick = { onLanguageSelect(it.code) }
                     )
                     Text(
-                        text = Locale(it.code).displayName,
+                        text = Locale(it.code).displayName.replaceFirstChar { char ->
+                            char.uppercaseChar()
+                        },
                         style = MaterialTheme.typography.bodyLarge,
                         color = WordyColor.colors.textPrimary
                     )

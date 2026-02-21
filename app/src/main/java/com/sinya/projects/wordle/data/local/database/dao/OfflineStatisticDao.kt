@@ -27,32 +27,15 @@ interface OfflineStatisticDao {
             sixth_try = :sixthTry
         WHERE mode_id = :modeId
     """)
-    suspend fun updateStatisticMode(
-        modeId: Int,
-        countGame: Int,
-        currentStreak: Int,
-        bestStreak: Int,
-        winGame: Int,
-        sumTime: Long,
-        firstTry: Int,
-        secondTry: Int,
-        thirdTry: Int,
-        fourthTry: Int,
-        fifthTry: Int,
-        sixthTry: Int
+    suspend fun updateStatisticMode(modeId: Int, countGame: Int, currentStreak: Int, bestStreak: Int,
+        winGame: Int, sumTime: Long, firstTry: Int, secondTry: Int, thirdTry: Int, fourthTry: Int, fifthTry: Int, sixthTry: Int
     )
 
     @Update
-    suspend fun updateStatistic(statistic: OfflineStatistic)
+    suspend fun updateStatistic(statistic: OfflineStatistic): Int
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertStatisticList(stats: List<OfflineStatistic>)
-
-//    @Insert
-//    suspend fun insertStatisticList(list: List<OfflineStatistic>)
-
-    @Query("SELECT COUNT(*) FROM offline_statistic")
-    suspend fun getCountRows(): Int
 
     @Query("SELECT * FROM offline_statistic WHERE mode_id = :modeId")
     suspend fun getStatisticByMode(modeId: Int): OfflineStatistic?

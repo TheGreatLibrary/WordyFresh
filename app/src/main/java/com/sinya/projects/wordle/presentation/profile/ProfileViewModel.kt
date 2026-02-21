@@ -136,14 +136,12 @@ class ProfileViewModel @Inject constructor(
     private fun loadAvatar() = viewModelScope.launch {
         val currentState = _state.value as? ProfileUiState.Success ?: return@launch
 
+        getAvatarUseCase(currentState.profile.id)
+
         getAvatarUseCase.observeAvatar().collect { newUri ->
-            newUri.let {
-                Log.d("ProfileVM", "Аватар подгружаем")
-                getAvatarUseCase(currentState.profile.id)
-            }
             _state.update { state ->
                 if (state is ProfileUiState.Success) {
-                    Log.d("ProfileVM", "Аватар загружен $newUri")
+                    Log.d("ProfileVM", "Аватар обновлён: $newUri")
                     state.copy(avatarUri = newUri)
                 } else {
                     state

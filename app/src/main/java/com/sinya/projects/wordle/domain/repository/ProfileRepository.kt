@@ -7,7 +7,6 @@ import com.sinya.projects.wordle.domain.error.InvalidSendMailException
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseProfileDataSource
-import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.user.UserInfo
 import jakarta.inject.Inject
 

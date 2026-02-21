@@ -1,6 +1,9 @@
 package com.sinya.projects.wordle.domain.source
 
+import android.util.Log
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
+import com.sinya.projects.wordle.domain.error.DefinitionNotFoundException
+import com.sinya.projects.wordle.domain.error.NoInternetException
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,11 +44,11 @@ class WikipediaDataSource @Inject constructor() : DictionaryDataSource {
                             return@withContext Result.success(text)
                         }
 
-                        return@withContext Result.failure(Exception("Definition not found"))
+                        return@withContext Result.failure(DefinitionNotFoundException())
                     }
-                } ?: Result.failure(Exception("Connection failed"))
-            } catch (e: Exception) {
-                Result.failure(e)
+                } ?: Result.failure(NoInternetException())
+            } catch (_: Exception) {
+                Result.failure(NoInternetException())
             }
         }
     }

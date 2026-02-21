@@ -8,7 +8,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,39 +17,47 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.ui.features.UiText
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun NotRightWordDialog(
-    message: String,
-    paddingValue: PaddingValues
+    showNotFoundDialog: Boolean,
+    showHardModeHint: UiText?
 ) {
-    Dialog(
-        onDismissRequest = { },
-        properties = DialogProperties(
-            dismissOnClickOutside = false,
-            dismissOnBackPress = false
-        )
+    AnimatedVisibility(
+        visible = showNotFoundDialog || showHardModeHint != null,
+        enter = fadeIn(animationSpec = tween(200)) + scaleIn(initialScale = 0.8f),
+        exit = fadeOut(animationSpec = tween(150)) + scaleOut(targetScale = 0.9f),
+        modifier = Modifier.fillMaxSize() .background(Color.Black.copy(alpha = 0.4f)),
     ) {
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn(animationSpec = tween(200)) + scaleIn(initialScale = 0.8f),
-            exit = fadeOut(animationSpec = tween(150)) + scaleOut(targetScale = 0.9f)
+        val message = when {
+            showNotFoundDialog -> stringResource(R.string.not_found_word)
+            showHardModeHint != null -> showHardModeHint.asString()
+            else -> ""
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.85f)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(color = WordyColor.colors.background)
+                    .background(WordyColor.colors.background)
                     .padding(horizontal = 15.dp, vertical = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
+
                 Text(
                     message,
                     color = WordyColor.colors.textPrimary,

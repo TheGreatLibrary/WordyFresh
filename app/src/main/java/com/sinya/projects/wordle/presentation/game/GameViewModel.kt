@@ -14,7 +14,6 @@ import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.GetRandomWordUseCase
 import com.sinya.projects.wordle.domain.useCase.GetStatisticByModeUseCase
 import com.sinya.projects.wordle.domain.useCase.GetWordRatingUseCase
-import com.sinya.projects.wordle.domain.useCase.InsertWordInDictionaryUseCase
 import com.sinya.projects.wordle.domain.useCase.UpdateStatisticUseCase
 import com.sinya.projects.wordle.domain.useCase.WordExistsUseCase
 import com.sinya.projects.wordle.domain.model.Cell
@@ -28,6 +27,7 @@ import com.sinya.projects.wordle.domain.model.updateText
 import com.sinya.projects.wordle.domain.useCase.CheckHardModeRulesUseCase
 import com.sinya.projects.wordle.domain.useCase.GenerateKeyboardLayoutUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllStatisticsByModeUseCase
+import com.sinya.projects.wordle.domain.useCase.InsertOrUpdateDefinitionUseCase
 import com.sinya.projects.wordle.domain.useCase.ValidateWordColorsUseCase
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
 import com.sinya.projects.wordle.ui.features.UiText
@@ -65,7 +65,7 @@ class GameViewModel @AssistedInject constructor(
     private val checkHardModeRulesUseCase: CheckHardModeRulesUseCase,
 
     private val checkAchievementUseCase: CheckAchievementUseCase,
-    private val insertWordInDictionaryUseCase: InsertWordInDictionaryUseCase,
+    private val insertWordInDictionaryUseCase: InsertOrUpdateDefinitionUseCase,
     private val getStatisticByModeUseCase: GetStatisticByModeUseCase,
     private val getAllStatisticsByModeUseCase: GetAllStatisticsByModeUseCase,
     private val updateStatisticUseCase: UpdateStatisticUseCase,
@@ -569,6 +569,7 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private suspend fun buildFinishData(result: GameState) {
+        val hiddenWord = _state.value.hiddenWord
         _state.update {
             it.copy(
                 showFinishDialog = FinishStatisticGame(
@@ -592,8 +593,6 @@ class GameViewModel @AssistedInject constructor(
         val oldStat = getAllStatisticsByModeUseCase(currentState.mode.id).getOrNull()
             ?: OfflineStatistic(currentState.mode.id)
 
-        Log.d("Wor", oldStat.toString())
-
         val newStreak = if (isWin) oldStat.currentStreak + 1 else 0
         val newWinCount = if (isWin) oldStat.winGame + 1 else oldStat.winGame
         val countGame = oldStat.countGame
@@ -602,7 +601,7 @@ class GameViewModel @AssistedInject constructor(
 
         _state.update {
             it.copy(
-                showFinishDialog = _state.value.showFinishDialog!!.copy(
+                showFinishDialog = it.showFinishDialog?.copy(
                     countGame = newTotalGames,
                     percentWin = listOf(
                         if (countGame!=0) oldStat.winGame.toFloat() / oldStat.countGame else 0f,
@@ -628,6 +627,10 @@ class GameViewModel @AssistedInject constructor(
             )
         ).getOrNull() ?: emptyList()
 
+        Log.d("Achieves", "events count: ${achieveEvents.size}")
+        Log.d("Achieves", "events: $achieveEvents")
+
+
         val allAchieveChanges = achieveEvents.map { event ->
             when (event) {
                 is AchievementEvent.Unlocked -> event.achievement
@@ -635,19 +638,21 @@ class GameViewModel @AssistedInject constructor(
             }
         }
 
+        Log.d("Achieves", "changes: $allAchieveChanges")
+
         _state.update {
             it.copy(
-                showFinishDialog = _state.value.showFinishDialog!!.copy(
+                showFinishDialog = it.showFinishDialog?.copy(
                     achieves = allAchieveChanges,
                 )
             )
         }
 
-        val definition = insertWordInDictionaryUseCase(_state.value.hiddenWord).getOrNull() ?: ""
+        val definition = insertWordInDictionaryUseCase(hiddenWord).getOrNull() ?: ""
 
         _state.update {
             it.copy(
-                showFinishDialog = _state.value.showFinishDialog!!.copy(
+                showFinishDialog = it.showFinishDialog?.copy(
                     description = definition,
                 )
             )
@@ -690,28 +695,6 @@ class GameViewModel @AssistedInject constructor(
             },
             onFailure = {
                 Log.d("GameFinish", "Ошибка получения статистики текущей")
-            }
-        )
-    }
-
-    private suspend fun addWordDictionary(word: String) {
-        insertWordInDictionaryUseCase(word).fold(
-            onSuccess = {
-                Log.d("GameFinish", "Слово добавлено")
-            },
-            onFailure = {
-                Log.d("GameFinish", "Ошибка добавления слова: $it")
-            }
-        )
-    }
-
-    private suspend fun onTriggerAchievement(trigger: AchievementTrigger) {
-        checkAchievementUseCase.invoke(trigger).fold(
-            onSuccess = {
-                Log.d("GameAchieve", "Успешно!")
-            },
-            onFailure = {
-                Log.d("GameAchieve", it.toString())
             }
         )
     }

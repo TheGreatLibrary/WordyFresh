@@ -10,6 +10,8 @@ import io.github.jan.supabase.postgrest.from
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 
 interface SupabaseDictionaryDataSource {
     suspend fun fetchDictionary(userId: String): Result<List<SyncDictionary>>
@@ -44,7 +46,15 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
     override suspend fun upsertDictionary(dictionary: List<SyncDictionary>): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                supabaseClient.from("sync_dictionary").upsert(dictionary)
+                val json = Json { encodeDefaults = true }
+
+                val jsonList = dictionary.map {
+                    json.parseToJsonElement(json.encodeToString(it)).jsonObject
+                }
+
+                supabaseClient.from("sync_dictionary").upsert(jsonList) {
+                    onConflict = "user_id,word_id"
+                }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Log.e("SupabaseDictionaryDataSource", "Error upserting dictionary", e)
@@ -74,7 +84,9 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
                     .getDictionary()
                     .toSyncList(userId)
 
-                upsertDictionary(offline)
+                if (offline.isNotEmpty()) {
+                    upsertDictionary(offline).getOrThrow()
+                }
 
                 offlineDictionaryDao.clearAll()
 
@@ -90,7 +102,10 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val remote = fetchDictionary(userId).getOrThrow()
-                syncDictionaryDao.insertList(remote)
+                syncDictionaryDao.clearAll()
+                if (remote.isNotEmpty()) {
+                    syncDictionaryDao.insertList(remote)
+                }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Log.e("SupabaseDictionaryDataSource", "Error syncing from Supabase", e)

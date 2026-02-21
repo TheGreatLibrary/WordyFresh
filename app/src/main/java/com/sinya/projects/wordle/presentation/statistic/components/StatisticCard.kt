@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.presentation.statistic.components
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -67,23 +68,50 @@ fun StatisticCountCard(
 
 @Composable
 fun StatisticTimeCard(
-    timeText: String,
-    description: String,
+    timeText: Int,
+    countGame: Int,
     fontSize: TextUnit,
     descriptionSize: TextUnit,
     modifier: Modifier = Modifier
 ) {
-    CustomCard(
-        modifier = modifier.fillMaxHeight()
+    var showSumTime by remember { mutableStateOf(false) }
+
+    val displayCount = if (showSumTime) 1 else countGame
+
+    val progress = if (countGame == 0) {
+        "--"
+    } else {
+        formatAverageTime(timeText.toLong(), displayCount)
+    }
+    AnimationCard(
+        modifier = modifier.fillMaxHeight(),
+        onClick = { showSumTime = !showSumTime }
     ) {
         StatisticContent(
-            mainText = timeText,
-            description = description,
+            mainText = progress,
+            description = if (!showSumTime) stringResource(R.string.abs_time) else stringResource(R.string.sum_time),
             fontSize = fontSize,
             descriptionSize = descriptionSize
         )
     }
 }
+
+@SuppressLint("DefaultLocale")
+private fun formatAverageTime(totalSeconds: Long, countGame: Int): String {
+    if (countGame == 0) return "00:00"
+
+    val averageSeconds = totalSeconds / countGame
+    val hours = averageSeconds / 3600
+    val minutes = (averageSeconds % 3600) / 60
+    val seconds = averageSeconds % 60
+
+    return if (hours > 0) {
+        String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    } else {
+        String.format("%02d:%02d", minutes, seconds)
+    }
+}
+
 
 @Composable
 fun StatisticWinRateCard(

@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.domain.useCase
 
+import android.util.Log
 import com.sinya.projects.wordle.data.local.achievement.AchievementEvent
 import com.sinya.projects.wordle.data.local.achievement.AchievementEventBus
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
@@ -8,14 +9,17 @@ import com.sinya.projects.wordle.data.local.achievement.ConditionFactory
 import com.sinya.projects.wordle.domain.enums.TypeAchievement
 import com.sinya.projects.wordle.domain.repository.AchievementRepository
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class CheckAchievementUseCase @Inject constructor(
     private val achievementRepository: AchievementRepository,
     private val achievementEventBus: AchievementEventBus
 ) {
-    suspend operator fun invoke(trigger: AchievementTrigger): Result<List<AchievementEvent>> {
-        return try {
-            val achievements = achievementRepository.getAllAchievements()
+    suspend operator fun invoke(trigger: AchievementTrigger): Result<List<AchievementEvent>> = withContext(Dispatchers.IO) {
+        try {
+            val achievements = achievementRepository.getAllAchievements().getOrNull() ?: emptyList()
+            Log.d("Achieves", "loaded achievements: ${achievements.size}")
             val events = mutableListOf<AchievementEvent>()
 
             achievements.forEach { achieve ->

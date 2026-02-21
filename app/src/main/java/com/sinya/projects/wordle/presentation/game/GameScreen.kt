@@ -11,11 +11,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -158,8 +156,7 @@ private fun GameScreenView(
                 onEvent = onEvent
             )
         }
-        if (state.showNotFoundDialog) NotRightWordDialog(stringResource(R.string.not_found_word), paddingValues)
-        else if (state.showHardModeHint != null) NotRightWordDialog(state.showHardModeHint.asString(), paddingValues)
+        NotRightWordDialog(state.showNotFoundDialog, state.showHardModeHint)
         if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
     }
 }

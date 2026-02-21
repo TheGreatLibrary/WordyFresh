@@ -49,22 +49,13 @@ class AchieveViewModel @Inject constructor(
     }
 
     private fun loadAchievements() = viewModelScope.launch {
-        getAllAchievementUseCase().fold(
-            onSuccess = { list ->
-                _state.update {
-                    AchieveUiState.Success(
-                        achieveList = list.groupBy { it.categoryName }
-                    )
-                }
-            },
-            onFailure = { e ->
-                _state.update {
-                    AchieveUiState.Success(
-                        errorMessage = "Ошибка загрузки данных: ${e.message}"
-                    )
-                }
+        getAllAchievementUseCase().collect { list ->
+            _state.update {
+                AchieveUiState.Success(
+                    achieveList = list.groupBy { it.categoryName }
+                )
             }
-        )
+        }
     }
 
     private fun refreshAchievement() = viewModelScope.launch {
@@ -78,7 +69,7 @@ class AchieveViewModel @Inject constructor(
 
         syncAchievementUseCase().fold(
             onSuccess = {
-                loadAchievements()
+              //  loadAchievements()
             },
             onFailure = { exception ->
                 val errorMessage = when (exception) {
@@ -103,7 +94,6 @@ class AchieveViewModel @Inject constructor(
     private fun clearAllAchievement() = viewModelScope.launch {
         clearAllAchievementUseCase().fold(
             onSuccess = {
-                loadAchievements()
             },
             onFailure = { exception ->
                 _state.update { currentState ->

@@ -321,4 +321,5 @@
     <string name="per_win">Пр. побед</string>
     <string name="parsing_word">Узнать значение слова →</string>
     <string name="share_button_text">Что такое %1$s? %2$s. Я узнал об этом в Wordy Fresh в результате игры:\n\n%3$s\n\nПрисоединяйся: %4$s</string>
+    <string name="sum_time">Общее время</string>
 </resources>

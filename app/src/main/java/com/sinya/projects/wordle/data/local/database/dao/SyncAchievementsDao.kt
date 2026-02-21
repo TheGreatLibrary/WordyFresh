@@ -32,4 +32,12 @@ interface SyncAchievementsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrReplace(list: List<SyncAchievements>)
+
+    @Transaction
+    suspend fun replaceAll(list: List<SyncAchievements>) {
+        clearAll()
+        if (list.isNotEmpty()) {
+            insertOrReplace(list)
+        }
+    }
 }

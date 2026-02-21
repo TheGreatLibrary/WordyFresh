@@ -8,8 +8,8 @@ import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.model.DictionaryItem
 import com.sinya.projects.wordle.domain.useCase.ClearAllDictionaryUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllWordsUseCase
+import com.sinya.projects.wordle.domain.useCase.InsertOrUpdateDefinitionUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncDictionaryUseCase
-import com.sinya.projects.wordle.domain.useCase.UpdateWordDescriptionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.FlowPreview
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class DictionaryViewModel @Inject constructor(
     private val getAllWordsUseCase: GetAllWordsUseCase,
-    private val updateWordDescriptionUseCase: UpdateWordDescriptionUseCase,
+    private val updateWordDescriptionUseCase: InsertOrUpdateDefinitionUseCase,
     private val clearAllDictionaryUseCase: ClearAllDictionaryUseCase,
     private val syncDictionaryUseCase: SyncDictionaryUseCase
 ) : ViewModel() {
@@ -93,8 +93,8 @@ class DictionaryViewModel @Inject constructor(
     }
 
     private fun reloadDefinition(item: DictionaryItem) = viewModelScope.launch {
-        updateWordDescriptionUseCase(item).fold(
-            onSuccess = { loadDictionary() },
+        updateWordDescriptionUseCase(item.word).fold(
+            onSuccess = { /*loadDictionary()*/ },
             onFailure = { exception ->
                 updateIfSuccess {
                     it.copy(errorMessage = getErrorMessage(exception))
@@ -105,7 +105,7 @@ class DictionaryViewModel @Inject constructor(
 
     private fun clearAllDictionary() = viewModelScope.launch {
         clearAllDictionaryUseCase().fold(
-            onSuccess = { loadDictionary() },
+            onSuccess = { /*loadDictionary()*/ },
             onFailure = { exception ->
                 updateIfSuccess {
                     it.copy(errorMessage = "Ошибка очистки: ${exception.message}")
@@ -132,20 +132,18 @@ class DictionaryViewModel @Inject constructor(
     }
 
     private fun loadDictionary() = viewModelScope.launch {
-        getAllWordsUseCase().fold(
-            onSuccess = { words ->
+        getAllWordsUseCase().collect { words ->
+            if (_state.value is DictionaryUiState.Success) {
+                updateIfSuccess {
+                    it.copy(dictionaryList = words)
+                }
+            }
+            else {
                 _state.update {
                     DictionaryUiState.Success(dictionaryList = words)
                 }
-            },
-            onFailure = { exception ->
-                _state.update {
-                    DictionaryUiState.Success(
-                        errorMessage = "Ошибка загрузки данных: ${exception.message}"
-                    )
-                }
             }
-        )
+        }
     }
 
     /** доп. методы */

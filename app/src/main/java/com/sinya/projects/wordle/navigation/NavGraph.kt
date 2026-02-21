@@ -11,7 +11,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
-import com.sinya.projects.wordle.data.local.achievement.AchievementEventBus
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.presentation.about.AboutScreen

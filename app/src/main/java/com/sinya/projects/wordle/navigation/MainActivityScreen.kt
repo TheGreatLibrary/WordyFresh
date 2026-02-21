@@ -3,9 +3,7 @@ package com.sinya.projects.wordle.navigation
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -24,9 +22,9 @@ import androidx.navigation.NavDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sinya.projects.wordle.data.local.datastore.DataStoreViewModel
+import com.sinya.projects.wordle.domain.enums.BackgroundSettings
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.enums.TypeBackground
-import com.sinya.projects.wordle.domain.enums.BackgroundSettings
 import com.sinya.projects.wordle.ui.theme.WordyColor
 
 @Composable

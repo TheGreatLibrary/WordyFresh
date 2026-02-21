@@ -90,7 +90,10 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
 
                 val merged = mergeStatistics(remote, offline, userId)
 
-                upsertStatistics(merged)
+                if (merged.isNotEmpty()) {
+                    upsertStatistics(merged).getOrThrow()
+                }
+
                 offlineStatisticDao.clearAll()
 
                 Result.success(Unit)
@@ -105,17 +108,8 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val remote = fetchStatistics(userId).getOrThrow()
-                val local = syncStatisticDao.getAllStatistic()
-                val localMap = local.associateBy { it.modeId }
 
-                val filtered = remote.filter { remoteItem ->
-                    val localItem = localMap[remoteItem.modeId]
-                    localItem == null || remoteItem.updatedAt > localItem.updatedAt
-                }
-
-                if (filtered.isNotEmpty()) {
-                    syncStatisticDao.insertOrReplace(filtered)
-                }
+                syncStatisticDao.replaceAll(remote)
 
                 Result.success(Unit)
             } catch (e: Exception) {

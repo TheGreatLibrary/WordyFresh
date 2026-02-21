@@ -5,10 +5,10 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ClearAllDictionaryUseCase @Inject constructor(
+class InsertOrUpdateDefinitionUseCase @Inject constructor(
     private val repository: DictionaryRepository
 ) {
-    suspend operator fun invoke(): Result<Unit> = withContext(Dispatchers.IO) {
-        repository.clearAllDictionary()
+    suspend operator fun invoke(word: String): Result<String> = withContext(Dispatchers.IO) {
+        repository.fetchAndSaveDefinition(word)
     }
 }

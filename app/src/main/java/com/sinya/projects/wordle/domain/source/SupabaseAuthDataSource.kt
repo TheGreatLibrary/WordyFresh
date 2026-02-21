@@ -24,10 +24,10 @@ interface SupabaseAuthDataSource {
     suspend fun resetPassword(email: String)
     suspend fun updatePassword(password: String)
     suspend fun updateEmail(email: String)
+
     suspend fun parseSessionFromFragment(deepLinkUri: String): Result<UserSession>
     suspend fun importSession(session: UserSession): Result<Unit>
     suspend fun resendEmail(email: String): Result<Unit>
-
     suspend fun checkEmailExists(email: String): Result<Boolean>
 }
 
@@ -122,7 +122,6 @@ class SupabaseAuthDataSourceImpl @Inject constructor(
                 ).decodeAs<Boolean>()
 
             Result.success(result)
-
         } catch (e: Exception) {
             Result.failure(e)
         }

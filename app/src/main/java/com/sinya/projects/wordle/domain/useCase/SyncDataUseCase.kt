@@ -8,6 +8,8 @@ import com.sinya.projects.wordle.domain.repository.ProfileRepository
 import com.sinya.projects.wordle.domain.repository.StatisticRepository
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SyncDataUseCase @Inject constructor(
     private val authRepository: SupabaseAuthDataSource,
@@ -16,10 +18,10 @@ class SyncDataUseCase @Inject constructor(
     private val achievementsRepository: AchievementRepository,
     private val profileRepository: ProfileRepository,
 ) {
-    suspend operator fun invoke(): Result<Unit> {
-        return try {
+    suspend operator fun invoke(): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
             val userId = authRepository.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
+                ?: return@withContext Result.failure(UserNotAuthenticatedException())
 
             Log.d("SyncUseCase", "Синхронизация для пользователя: $userId")
 

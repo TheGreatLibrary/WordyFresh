@@ -1,6 +1,5 @@
 package com.sinya.projects.wordle.domain.repository
 
-import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.AchievementsDao
 import com.sinya.projects.wordle.data.local.database.dao.OfflineAchievementsDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncAchievementsDao
@@ -10,15 +9,26 @@ import com.sinya.projects.wordle.domain.model.AchieveItem
 import com.sinya.projects.wordle.domain.source.SupabaseAchievementDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 
 interface AchievementRepository {
-    suspend fun getAllAchievements(): List<AchieveItem>
-    suspend fun clearAllAchievement()
-    suspend fun clearLocal()
-    suspend fun unlockIncrement(id: Int)
+
+    // AchievementScreen
+    fun observeAchievements(): Flow<List<AchieveItem>>
+    suspend fun clearAllAchievement(): Result<Unit>
+
+    // AchieveManager
+    suspend fun getAllAchievements(): Result<List<AchieveItem>>
+    suspend fun resetCount(id: Int): Result<Unit>
+    suspend fun unlockIncrement(id: Int): Result<Unit>
+
+    // ProfileScreen
+    suspend fun clearLocal(): Result<Unit>
+
+    // SyncViewModel
     suspend fun syncFromSupabase(): Result<Unit>
     suspend fun syncFromLocal() : Result<Unit>
-    suspend fun resetCount(id: Int)
 }
 
 class AchievementRepositoryImpl @Inject constructor(
@@ -29,27 +39,70 @@ class AchievementRepositoryImpl @Inject constructor(
     private val supabaseAchievementDataSource: SupabaseAchievementDataSource
 ) : AchievementRepository {
 
-    override suspend fun clearAllAchievement() {
-        offlineAchievementsDao.clearAll()
+    // AchievementScreen
 
-        val user = supabaseAuthDataSource.getCurrentUser()
-        if (user != null) {
-            supabaseAchievementDataSource.clearAllAchievements(user.id)
-        } else {
-            Log.d("AchievementRepository", "User not authenticated, skipping remote clear")
+    override suspend fun clearAllAchievement(): Result<Unit> {
+        return try {
+            offlineAchievementsDao.clearAll()
+
+            val user = supabaseAuthDataSource.getCurrentUser()
+            if (user != null) supabaseAchievementDataSource.clearAllAchievements(user.id)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
-    override suspend fun clearLocal() {
-        offlineAchievementsDao.clearAll()
-        syncAchievementsDao.clearAll()
+    override fun observeAchievements(): Flow<List<AchieveItem>> {
+        return achievementsDao.observeAchievements().catch { emit(emptyList()) }
     }
 
-    override suspend fun getAllAchievements(): List<AchieveItem> {
-        val list = achievementsDao.getAchievementsList()
-        Log.d("ACCCC", list.toString())
-        return list
+    override suspend fun getAllAchievements(): Result<List<AchieveItem>> {
+        return try {
+            Result.success(achievementsDao.getAchievementsList())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
+
+    // AchievementManager (GameScreen)
+
+    override suspend fun unlockIncrement(id: Int): Result<Unit> {
+        return try {
+            val updated = offlineAchievementsDao.increment(id)
+            if (updated == 0) offlineAchievementsDao.insert(OfflineAchievements(achieveId = id, count = 1))
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun resetCount(id: Int): Result<Unit> {
+        return try {
+            offlineAchievementsDao.resetCount(id)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // ProfileScreen
+
+    override suspend fun clearLocal(): Result<Unit> {
+        return try {
+            offlineAchievementsDao.clearAll()
+            syncAchievementsDao.clearAll()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // SyncViewModel
 
     override suspend fun syncFromSupabase(): Result<Unit> {
         return try {
@@ -75,15 +128,6 @@ class AchievementRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
-
-    override suspend fun unlockIncrement(id: Int) {
-        val updated = offlineAchievementsDao.increment(id)
-        if (updated == 0) offlineAchievementsDao.insert(OfflineAchievements(achieveId = id, count = 1))
-    }
-
-    override suspend fun resetCount(id: Int) {
-        offlineAchievementsDao.resetCount(id)
     }
 }
 

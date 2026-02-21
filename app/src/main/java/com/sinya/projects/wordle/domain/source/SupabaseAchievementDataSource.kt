@@ -11,6 +11,8 @@ import io.github.jan.supabase.postgrest.from
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 
 interface SupabaseAchievementDataSource {
     suspend fun fetchAchievements(userId: String): Result<List<SyncAchievements>>
@@ -45,7 +47,19 @@ class SupabaseAchievementDataSourceImpl @Inject constructor(
     override suspend fun upsertAchievements(achievements: List<SyncAchievements>): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                supabaseClient.from("sync_achievements").upsert(achievements)
+                val json = Json { encodeDefaults = true }
+
+                val jsonList = achievements.map {
+                    val encoded = json.encodeToString(it)
+                    val obj = json.parseToJsonElement(encoded).jsonObject
+                    Log.d("SUPABASE_ACHIEVEMENTS", obj.toString())
+                    obj
+                }
+
+                supabaseClient.from("sync_achievements").upsert(jsonList) {
+                    onConflict = "user_id,achieve_id"
+                }
+
                 Result.success(Unit)
             } catch (e: Exception) {
                 Log.e("SupabaseAchievementsDataSource", "Error upserting achievements", e)
@@ -75,7 +89,9 @@ class SupabaseAchievementDataSourceImpl @Inject constructor(
                 val offline = offlineAchievementsDao.getAchievements()
                 val merged = mergeAchievements(remote, offline, userId)
 
-                upsertAchievements(merged)
+                if (merged.isNotEmpty()) {
+                    upsertAchievements(merged).getOrThrow()
+                }
 
                 offlineAchievementsDao.clearAll()
 
@@ -91,15 +107,8 @@ class SupabaseAchievementDataSourceImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val remote = fetchAchievements(userId).getOrThrow()
-                val local = syncAchievementsDao.getAll()
-                val localMap = local.associateBy { it.achieveId }
 
-                val filtered = remote.filter { remoteItem ->
-                    val localItem = localMap[remoteItem.achieveId]
-                    localItem == null || remoteItem.updatedAt > localItem.updatedAt
-                }
-
-                syncAchievementsDao.insertOrReplace(filtered)
+                syncAchievementsDao.replaceAll(remote)
                 Result.success(Unit)
             } catch (e: Exception) {
                 Log.e("SupabaseDictionaryDataSource", "Error syncing from Supabase", e)

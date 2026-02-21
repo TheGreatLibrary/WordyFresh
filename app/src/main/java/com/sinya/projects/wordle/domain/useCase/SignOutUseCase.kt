@@ -8,6 +8,8 @@ import com.sinya.projects.wordle.domain.repository.ProfileRepository
 import com.sinya.projects.wordle.domain.repository.StatisticRepository
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SignOutUseCase @Inject constructor(
     private val authRepository: SupabaseAuthDataSource,
@@ -17,10 +19,10 @@ class SignOutUseCase @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val avatarRepository: AvatarRepository
 ) {
-    suspend operator fun invoke(): Result<Unit> {
-        return try {
+    suspend operator fun invoke(): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
             val user = authRepository.getCurrentUser()
-                ?: return Result.success(Unit) // Уже вышли
+                ?: return@withContext Result.success(Unit) // Уже вышли
 
             // 1. Синхронизируем все данные в Supabase перед выходом
             statisticsRepository.syncFromLocal().getOrThrow()
@@ -37,12 +39,6 @@ class SignOutUseCase @Inject constructor(
             profileRepository.clearProfile()
 
             authRepository.signOut()
-
-            //            val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
-            //            SyncManager.syncAllToSupabase(userId)
-            //            avatarRepo.deleteLocal(userId)
-            //            db.clearAll()
-            //            supabase.auth.signOut()
 
             Result.success(Unit)
         } catch (e: Exception) {

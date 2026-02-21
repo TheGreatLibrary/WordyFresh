@@ -109,6 +109,7 @@
     <string name="percent_win">Win rate</string>
     <string name="percent_lose">Lose rate</string>
     <string name="abs_time">Avg. time</string>
+    <string name="sum_time">Total time</string>
     <string name="stat_progress_title">Win guess distribution</string>
 
     <string name="confirm_delete">Confirm Deletion</string>

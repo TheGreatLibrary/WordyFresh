@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
 
@@ -24,4 +25,11 @@ interface SyncStatisticDao {
     @Query("SELECT * FROM sync_statistic WHERE mode_id = :modeId")
     suspend fun getStatisticByMode(modeId: Int): SyncStatistic
 
+    @Transaction
+    suspend fun replaceAll(list: List<SyncStatistic>) {
+        clearAll()
+        if (list.isNotEmpty()) {
+            insertOrReplace(list)
+        }
+    }
 }

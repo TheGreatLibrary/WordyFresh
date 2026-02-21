@@ -1,16 +1,13 @@
 package com.sinya.projects.wordle.domain.source
 
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.postgrest.from
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
@@ -93,7 +90,7 @@ class SupabaseProfileDataSourceImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val profile = profilesDao.getProfileById(userId)
-                if (profile==null) Result.failure<Unit>(UserNotAuthenticatedException())
+                    ?: return@withContext Result.failure(UserNotAuthenticatedException())
 
                 val json = Json { encodeDefaults = true }
                 val payload = json.encodeToJsonElement(profile).jsonObject

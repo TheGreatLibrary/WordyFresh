@@ -1,6 +1,5 @@
 package com.sinya.projects.wordle.domain.repository
 
-import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.OfflineStatisticDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncStatisticDao
 import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
@@ -12,17 +11,24 @@ import com.sinya.projects.wordle.domain.source.SupabaseStatisticsDataSource
 import jakarta.inject.Inject
 
 interface StatisticRepository {
+    // StatisticScreen
     suspend fun getAllStatistic(): List<OfflineStatistic>
-    suspend fun getMergedSummary(): OfflineStatistic
     fun getTotalStatistic(list: List<OfflineStatistic>, mode: GameMode): OfflineStatistic
+    suspend fun clearAllStatistics(): Result<Unit>
+
+    suspend fun getMergedSummary(): OfflineStatistic /// !!!
+
+    // GameScreen
     suspend fun getStatisticByMode(mode: Int): OfflineStatistic?
     suspend fun getAllStatisticByMode(mode: Int) : OfflineStatistic
-    suspend fun clearAllStatistics()
-    suspend fun clearLocal()
+    suspend fun updateStatistic(updated: OfflineStatistic): Result<Int>
+
+    // ProfileScreen
+    suspend fun clearLocal(): Result<Unit>
+
+    // SyncViewModel
     suspend fun syncFromSupabase(): Result<Unit>
     suspend fun syncFromLocal(): Result<Unit>
-
-    suspend fun updateStatistic(updated: OfflineStatistic)
 
 }
 
@@ -33,12 +39,12 @@ class StatisticRepositoryImpl @Inject constructor(
     private val supabaseStatisticsDataSource: SupabaseStatisticsDataSource
 ) : StatisticRepository {
 
-    override suspend fun clearLocal() {
-        offlineStatisticDao.clearAll()
-        syncStatisticDao.clearAll()
-    }
+    // StatisticScreen
 
     override suspend fun getAllStatistic(): List<OfflineStatistic> {
+
+
+
         var offline = offlineStatisticDao.getAllStatistic()
         val sync = syncStatisticDao.getAllStatistic()
 
@@ -48,6 +54,17 @@ class StatisticRepositoryImpl @Inject constructor(
         }
         return mergeStatistics(offline, sync)
     }
+
+//    override suspend fun getAllStatistic(): List<OfflineStatistic> {
+//        var offline = offlineStatisticDao.getAllStatistic()
+//        val sync = syncStatisticDao.getAllStatistic()
+//
+//        if (offline.isEmpty()) {
+//            createBaseData()
+//            offline = offlineStatisticDao.getAllStatistic()
+//        }
+//        return mergeStatistics(offline, sync)
+//    }
 
     override suspend fun getMergedSummary(): OfflineStatistic {
         return offlineStatisticDao.getMergedSummary()
@@ -74,75 +91,23 @@ class StatisticRepositoryImpl @Inject constructor(
         }.copy(modeId = GameMode.ALL.id)
     }
 
-
-    override suspend fun getStatisticByMode(mode: Int): OfflineStatistic? {
-        var offline = offlineStatisticDao.getStatisticByMode(mode)
-
-        Log.d("Check", offline.toString())
-        if (offline == null) {
-            createBaseData()
-            offline = offlineStatisticDao.getStatisticByMode(mode)
-            Log.d("Check2", offline.toString())
-        }
-        return offline
-    }
-
-    override suspend fun getAllStatisticByMode(mode: Int): OfflineStatistic {
-        val offline = getStatisticByMode(mode) as OfflineStatistic
-        val online = syncStatisticDao.getStatisticByMode(mode)
-
-        val merge = mergeStatistic(offline, online)
-        Log.d("Wor", merge.toString())
-        return merge
-    }
-
-
-    override suspend fun clearAllStatistics() {
-        offlineStatisticDao.clearAll()
-
-        val user = supabaseAuthDataSource.getCurrentUser()
-        if (user != null) {
-            supabaseStatisticsDataSource.clearAllStatistics(user.id)
-        } else {
-            Log.d("StatisticRepository", "User not authenticated, skipping remote clear")
-        }
-    }
-
-    override suspend fun syncFromSupabase(): Result<Unit> {
+    override suspend fun clearAllStatistics(): Result<Unit> {
         return try {
-            val user = supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
+            offlineStatisticDao.clearAll()
 
-            supabaseStatisticsDataSource.syncFromSupabase(user.id)
+            val user = supabaseAuthDataSource.getCurrentUser()
+            if (user != null) supabaseStatisticsDataSource.clearAllStatistics(user.id)
 
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
-
-    override suspend fun syncFromLocal(): Result<Unit> {
-        return try {
-            val user = supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
-
-            supabaseStatisticsDataSource.syncToSupabase(user.id)
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun updateStatistic(updated: OfflineStatistic) {
-        offlineStatisticDao.updateStatistic(updated)
     }
 
     private suspend fun createBaseData() {
-        val supportedModes = GameMode.getStatsOfDataBase()
-            .map {
+        val supportedModes = GameMode.getStatsOfDataBase().map {
                 OfflineStatistic(modeId = it.id)
-            }
+        }
 
         offlineStatisticDao.insertStatisticList(supportedModes)
     }
@@ -178,5 +143,75 @@ class StatisticRepositoryImpl @Inject constructor(
             fifthTry = offline.fifthTry + sync.fifthTry,
             sixthTry = offline.sixthTry + sync.sixthTry,
         )
+    }
+
+    // GameScreen
+
+    override suspend fun updateStatistic(updated: OfflineStatistic): Result<Int> {
+        return try {
+            Result.success(offlineStatisticDao.updateStatistic(updated))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getStatisticByMode(mode: Int): OfflineStatistic? {
+        var offline = offlineStatisticDao.getStatisticByMode(mode)
+
+        if (offline == null) {
+            createBaseData()
+            offline = offlineStatisticDao.getStatisticByMode(mode)
+        }
+        return offline
+    }
+
+    override suspend fun getAllStatisticByMode(mode: Int): OfflineStatistic {
+        val offline = getStatisticByMode(mode) as OfflineStatistic
+        val online = syncStatisticDao.getStatisticByMode(mode)
+
+        val merge = mergeStatistic(offline, online)
+
+        return merge
+    }
+
+    // ProfileScreen
+
+    override suspend fun clearLocal(): Result<Unit> {
+        return try {
+            offlineStatisticDao.clearAll()
+            syncStatisticDao.clearAll()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // SyncViewModel
+
+    override suspend fun syncFromSupabase(): Result<Unit> {
+        return try {
+            val user = supabaseAuthDataSource.getCurrentUser()
+                ?: return Result.failure(UserNotAuthenticatedException())
+
+            supabaseStatisticsDataSource.syncFromSupabase(user.id)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun syncFromLocal(): Result<Unit> {
+        return try {
+            val user = supabaseAuthDataSource.getCurrentUser()
+                ?: return Result.failure(UserNotAuthenticatedException())
+
+            supabaseStatisticsDataSource.syncToSupabase(user.id)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.sinya.projects.wordle.presentation.profile
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
