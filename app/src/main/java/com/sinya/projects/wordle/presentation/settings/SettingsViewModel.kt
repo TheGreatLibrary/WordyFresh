@@ -3,7 +3,7 @@ package com.sinya.projects.wordle.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
-import com.sinya.projects.wordle.data.local.datastore.DataStoreManager
+import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.domain.enums.BackgroundSettings
 import com.sinya.projects.wordle.domain.enums.TypeKeyboards
 import com.sinya.projects.wordle.domain.enums.TypeLanguages
@@ -14,48 +14,36 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val dataStoreManager: DataStoreManager,
+    private val settingsEngine: SettingsEngine,
     private val checkAchievementUseCase: CheckAchievementUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(SettingsUiState())
+    private val _state = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
 
     init {
-        observeSettings()
+        loadData()
     }
 
-    private fun observeSettings() = viewModelScope.launch {
-        combine(
-            dataStoreManager.getBackground(),
-            dataStoreManager.getDarkMode(),
-            dataStoreManager.getLanguage(),
-            dataStoreManager.getKeyboardMode(),
-            dataStoreManager.getConfettiMode(),
-            dataStoreManager.getRatingWordMode()
-        ) { args: Array<*> ->
-            val background = args[0] as String
-            val dark = args[1] as Boolean
-            val lang = args[2] as String
-            val keyboard = args[3] as Int
-            val confetti = args[4] as Boolean
-            val rating = args[5] as Boolean
-
-            SettingsUiState(
-                backgroundSetting = BackgroundSettings.fromName(background),
-                currentTheme = TypeThemes.fromIsDark(dark),
-                currentLang = TypeLanguages.fromCode(lang),
-                currentKeyboard = TypeKeyboards.fromCode(keyboard),
-                confettiEnabled = confetti,
-                ratingModeEnabled = rating
+    private fun loadData() = viewModelScope.launch {
+        settingsEngine.uiState.map { config ->
+            SettingsUiState.Success(
+                backgroundSetting = BackgroundSettings.fromName(config.background),
+                currentTheme = TypeThemes.fromIsDark(config.dark),
+                currentLang = TypeLanguages.fromCode(config.language),
+                currentKeyboard = TypeKeyboards.fromCode(config.keyboardMode),
+                confettiEnabled = config.confetti,
+                ratingModeEnabled = config.ratingWords
             )
-        }.collect { _state.value = it }
+        }.collect { mapped ->
+            _state.value = mapped
+        }
     }
 
     fun onEvent(event: SettingsEvent) {
@@ -66,53 +54,32 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.ToggleRating -> setRating(event.enabled)
             is SettingsEvent.SetLanguage -> setLanguage(event.lang)
             is SettingsEvent.SetKeyboard -> setKeyboard(event.code)
-            is SettingsEvent.KeyboardSheetState -> {
-                _state.update { currentState ->
-                    currentState.copy(
-                        showKeyboardSheet = event.show
-                    )
-                }
-            }
-            is SettingsEvent.LanguageSheetState -> {
-                _state.update { currentState ->
-                    currentState.copy(
-                        showLanguageSheet = event.show
-                    )
-                }
-            }
+            is SettingsEvent.KeyboardSheetState -> updateIfSuccess { it.copy(showKeyboardSheet = event.show) }
+            is SettingsEvent.LanguageSheetState -> updateIfSuccess { it.copy(showLanguageSheet = event.show) }
+
             SettingsEvent.SendSupport -> onSupportClick()
             SettingsEvent.ClearBackground -> clearBackground()
         }
     }
 
-    private fun setKeyboard(keyState: Int) = viewModelScope.launch {
-        dataStoreManager.setKeyboardMode(keyState)
+    private fun setKeyboard(keyState: Int) = settingsEngine.setKeyboardMode(keyState)
+
+    private fun setLanguage(lang: String) = settingsEngine.setLang(lang)
+
+    private fun setRating(state: Boolean) = settingsEngine.setRatingWords(state)
+
+    private fun setConfetti(state: Boolean) = settingsEngine.setConfetti(state)
+
+    private fun clearBackground() = settingsEngine.clearBackground()
+
+    private fun setTheme(isDark: Boolean)  {
+        settingsEngine.clearBackground()
+        settingsEngine.setDark(isDark)
     }
 
-    private fun setLanguage(lang: String) = viewModelScope.launch {
-        dataStoreManager.setLanguage(lang)
-    }
-
-    private fun setRating(state: Boolean) = viewModelScope.launch {
-        dataStoreManager.setRatingWordMode(state)
-    }
-
-    private fun setConfetti(state: Boolean) = viewModelScope.launch {
-        dataStoreManager.setConfettiMode(state)
-    }
-
-    private fun clearBackground() = viewModelScope.launch {
-        dataStoreManager.clearBackground()
-    }
-
-    private fun setTheme(isDark: Boolean) = viewModelScope.launch {
-        dataStoreManager.clearBackground()
-        dataStoreManager.setDarkMode(isDark)
-    }
-
-    private fun setBackground(item: BackgroundSettings) = viewModelScope.launch {
-        dataStoreManager.setBackground(item)
-        dataStoreManager.setDarkMode(item.theme.isDark)
+    private fun setBackground(item: BackgroundSettings) {
+        settingsEngine.setBackground(item)
+        settingsEngine.setDark(item.theme.isDark)
     }
 
     private fun onSupportClick() {
@@ -122,6 +89,16 @@ class SettingsViewModel @Inject constructor(
                     onSuccess = { },
                     onFailure = { }
                 )
+        }
+    }
+
+    private fun updateIfSuccess(transform: (SettingsUiState.Success) -> SettingsUiState.Success) {
+        _state.update { currentState ->
+            if (currentState is SettingsUiState.Success) {
+                transform(currentState)
+            } else {
+                currentState
+            }
         }
     }
 }

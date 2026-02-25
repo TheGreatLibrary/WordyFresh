@@ -107,7 +107,6 @@ val DarkWordyColors = WordyColors(
     textOnColorCard = white,
 )
 
-val LocalWordyColors = staticCompositionLocalOf { LightWordyColors }
 
 @Composable
 fun WordleTheme(

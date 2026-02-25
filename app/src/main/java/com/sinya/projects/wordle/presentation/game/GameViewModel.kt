@@ -8,7 +8,8 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.achievement.AchievementEvent
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
 import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
-import com.sinya.projects.wordle.data.local.datastore.DataStoreManager
+import com.sinya.projects.wordle.data.local.datastore.SavedGameState
+import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.domain.enums.GameState
 import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.GetRandomWordUseCase
@@ -53,12 +54,11 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = GameViewModel.Factory::class)
 class GameViewModel @AssistedInject constructor(
     @Assisted("mode") private val mode: GameMode,
-    @Assisted("wordLength") private val wordLength: Int,
-    @Assisted("lang") private val lang: String,
+    @Assisted("wordLength") private val wordLength: Int?,
+    @Assisted("lang") private val lang: String?,
     @Assisted("hiddenWord") private val hiddenWord: String,
-    @Assisted("loadedGame") private val loadedGame: Game?,
 
-    private val dataStoreManager: DataStoreManager,
+    private val settingsEngine: SettingsEngine,
 
     private val generateKeyboardLayoutUseCase: GenerateKeyboardLayoutUseCase,
     private val validateWordColorsUseCase: ValidateWordColorsUseCase,
@@ -74,78 +74,88 @@ class GameViewModel @AssistedInject constructor(
     private val getWordRatingUseCase: GetWordRatingUseCase
 ) : ViewModel() {
 
+    private var timerJob: Job? = null
+
     private val _state = MutableStateFlow(GameUiState())
     val state: StateFlow<GameUiState> = _state.asStateFlow()
-
-    private var timerJob: Job? = null
 
     @AssistedFactory
     interface Factory {
         fun create(
             @Assisted("mode") mode: GameMode,
-            @Assisted("wordLength") wordLength: Int,
-            @Assisted("lang") lang: String,
+            @Assisted("wordLength") wordLength: Int?,
+            @Assisted("lang") lang: String?,
             @Assisted("hiddenWord") hiddenWord: String,
-            @Assisted("loadedGame") loadedGame: Game?
         ): GameViewModel
     }
 
-    /** инициализация */
-
     init {
         observeSettings()
-        initializeGame()
+        loadData()
     }
 
     private fun observeSettings() = viewModelScope.launch {
-        launch {
-            dataStoreManager.getKeyboardMode().collectLatest { code ->
-                Log.d("GameKeyboard", code.toString())
-                updateKeyboardLayout(code)
-            }
-        }
-        launch {
-            dataStoreManager.getConfettiMode().collectLatest { enabled ->
-                Log.d("GameConfetti", enabled.toString())
-                _state.update { it.copy(confettiStatus = enabled) }
-            }
-        }
-        launch {
-            if (mode == GameMode.FRIENDLY) {
-                getWordRatingUseCase(hiddenWord).fold(
-                    onSuccess = { rating ->
-                        updateRatingStatus(rating)
-                    },
-                    onFailure = { error ->
-                        Log.e("GameViewModel", "Failed to get word rating", error)
-                        updateRatingStatus(false)
-                    }
-                )
-            } else dataStoreManager.getRatingWordMode().collectLatest { enable ->
-                if (_state.value.result != GameState.IN_PROGRESS) {
-                    Log.d("GameRating", enable.toString())
-                    updateRatingStatus(enable)
+        settingsEngine.uiState.collectLatest { config ->
+            val ratingStatus = if (_state.value.result != GameState.IN_PROGRESS) {
+                when (mode) {
+                    GameMode.FRIENDLY -> getWordRatingUseCase(hiddenWord).getOrElse { config.ratingWords }
+                    GameMode.SAVED -> (config.lastGame as SavedGameState.Loaded).game?.settings?.ratingStatus ?: config.ratingWords
+                    else -> { config.ratingWords }
                 }
+            } else _state.value.ratingStatus
+
+            _state.update { current ->
+                current.copy(
+                    confettiStatus = config.confetti,
+                    ratingStatus = ratingStatus
+                )
             }
+            updateKeyboardLayout(config.keyboardMode)
         }
     }
 
-    private fun initializeGame() = viewModelScope.launch {
-        delay(100)
+    private fun loadData() = viewModelScope.launch {
+        val config = settingsEngine.uiState.value
+
+        val actualWordLength = when (mode) {
+            GameMode.RANDOM -> (4..11).random()
+            GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.length ?: 5
+            else -> wordLength ?: 5
+        }
+        val actualLang = when (mode) {
+            GameMode.RANDOM -> listOf("ru", "en").random()
+            GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.lang ?: "ru"
+            else -> lang ?: "ru"
+        }
+        val actualHiddenWord = when (mode) {
+            GameMode.FRIENDLY -> hiddenWord
+            GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.targetWord ?: ""
+            else -> ""
+        }
+
+        val actualMode = when(mode) {
+            GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.mode ?: mode
+            else -> mode
+        }
+
         _state.update {
             it.copy(
-                mode = mode,
-                wordLength = wordLength,
-                lang = lang,
-                hiddenWord = hiddenWord,
-                result = GameState.IN_PROGRESS
+                mode = actualMode,
+                wordLength = actualWordLength,
+                lang = actualLang,
+                hiddenWord = actualHiddenWord,
+                result = GameState.IN_PROGRESS,
+                confettiStatus = config.confetti,
+                keyboardCode = config.keyboardMode,
             )
         }
 
+        // 2. Запуск игры после инициализации стейта
         when (mode) {
             GameMode.SAVED -> {
-                if (loadedGame != null) {
-                    restoreGame(loadedGame)
+                val saved = (config.lastGame as? SavedGameState.Loaded)?.game
+                if (saved != null) {
+                    restoreGame(saved)
                     startTimer()
                 } else {
                     updateFinishDialog(
@@ -171,6 +181,8 @@ class GameViewModel @AssistedInject constructor(
             }
         }
     }
+
+
 
     /** изменение state */
 
@@ -204,10 +216,6 @@ class GameViewModel @AssistedInject constructor(
             _state.update { it.copy(keyboardCode = newCode) }
             generateKeyboard()
         }
-    }
-
-    private fun updateRatingStatus(state: Boolean) {
-        _state.update { it.copy(ratingStatus = state) }
     }
 
     private fun updateCellText(row: Int, col: Int, text: String) {
@@ -367,7 +375,7 @@ class GameViewModel @AssistedInject constructor(
                     _state.value.keyboardCode
                 ),
             )
-            dataStoreManager.saveGame(game)
+            settingsEngine.saveGame(game)
         }
     }
 
@@ -604,12 +612,12 @@ class GameViewModel @AssistedInject constructor(
                 showFinishDialog = it.showFinishDialog?.copy(
                     countGame = newTotalGames,
                     percentWin = listOf(
-                        if (countGame!=0) oldStat.winGame.toFloat() / oldStat.countGame else 0f,
+                        if (countGame != 0) oldStat.winGame.toFloat() / oldStat.countGame else 0f,
                         newWinCount.toFloat() / newTotalGames
                     ),
                     currentStreak = listOf(oldStat.currentStreak, newStreak),
                     avgTime = listOf(
-                        if (countGame!=0) oldStat.sumTime / countGame else 0,
+                        if (countGame != 0) oldStat.sumTime / countGame else 0,
                         newAvgTime
                     ),
                 )
@@ -661,7 +669,7 @@ class GameViewModel @AssistedInject constructor(
 
     private fun saveGameData(result: GameState) = viewModelScope.launch {
         launch { addStatisticData(result) }
-        launch { dataStoreManager.clearSavedGame() }
+        launch { settingsEngine.clearSavedGame() }
     }
 
     private suspend fun addStatisticData(result: GameState) {

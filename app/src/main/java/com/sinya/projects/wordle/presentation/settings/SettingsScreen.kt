@@ -1,19 +1,10 @@
 package com.sinya.projects.wordle.presentation.settings
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
@@ -22,16 +13,17 @@ import com.sinya.projects.wordle.presentation.settings.components.AppSettingsCar
 import com.sinya.projects.wordle.presentation.settings.components.AppVersionInfo
 import com.sinya.projects.wordle.presentation.settings.components.BackgroundSettingsCard
 import com.sinya.projects.wordle.presentation.settings.components.RowSwitch
+import com.sinya.projects.wordle.presentation.settings.components.SettingsPlaceholder
 import com.sinya.projects.wordle.presentation.settings.sheets.KeyboardModalSheet
 import com.sinya.projects.wordle.presentation.settings.sheets.LanguageModalSheet
 import com.sinya.projects.wordle.ui.features.CardColumn
-import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.ui.features.RowLink
+import com.sinya.projects.wordle.ui.features.ScreenColumn
 import com.sinya.projects.wordle.utils.sendSupportEmail
+import com.sinya.projects.wordle.utils.updateLocale
 
 @Composable
 fun SettingsScreen(
-    setLanguage: (String) -> Unit,
     navigateToOnboarding: () -> Unit,
     navigateToBackStack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
@@ -40,62 +32,64 @@ fun SettingsScreen(
     val context = LocalContext.current
     val backgrounds = remember { BackgroundSettings.entries }
 
-    SettingsScreenView(
-        state = state,
-        onEvent = viewModel::onEvent,
-        backgrounds = backgrounds,
-        navigateToBackStack = navigateToBackStack,
-        navigateToOnboarding = navigateToOnboarding,
-        sendEmail = {
-            context.sendSupportEmail()
-            viewModel.onEvent(SettingsEvent.SendSupport)
+    when(state) {
+        SettingsUiState.Loading -> {
+            SettingsPlaceholder(
+                navigateToBackStack = navigateToBackStack,
+                title = stringResource(R.string.settings_screen)
+            )
         }
-    )
 
-    if (state.showLanguageSheet) {
-        LanguageModalSheet(
-            currentLang = state.currentLang.code,
-            onLanguageSelect = { newLang ->
-                viewModel.onEvent(SettingsEvent.SetLanguage(newLang))
-                setLanguage(newLang)
-            },
-            onDismissRequest = { viewModel.onEvent(SettingsEvent.LanguageSheetState(false)) }
-        )
+        is SettingsUiState.Success -> {
+            SettingsScreenView(
+                state = state as SettingsUiState.Success,
+                onEvent = viewModel::onEvent,
+                backgrounds = backgrounds,
+                navigateToBackStack = navigateToBackStack,
+                navigateToOnboarding = navigateToOnboarding,
+                sendEmail = {
+                    context.sendSupportEmail()
+                    viewModel.onEvent(SettingsEvent.SendSupport)
+                }
+            )
+
+            if ((state as SettingsUiState.Success).showLanguageSheet) {
+                LanguageModalSheet(
+                    currentLang = (state as SettingsUiState.Success).currentLang.code,
+                    onLanguageSelect = { newLang ->
+                        viewModel.onEvent(SettingsEvent.SetLanguage(newLang))
+                        context.updateLocale(newLang)
+                    },
+                    onDismissRequest = { viewModel.onEvent(SettingsEvent.LanguageSheetState(false)) }
+                )
+            }
+
+            if ((state as SettingsUiState.Success).showKeyboardSheet) {
+                KeyboardModalSheet(
+                    currentKey = (state as SettingsUiState.Success).currentKeyboard.code,
+                    onKeyboardSelect = { viewModel.onEvent(SettingsEvent.SetKeyboard(it)) },
+                    onDismissRequest = { viewModel.onEvent(SettingsEvent.KeyboardSheetState(false)) }
+                )
+            }
+
+        }
     }
 
-    if (state.showKeyboardSheet) {
-        KeyboardModalSheet(
-            currentKey = state.currentKeyboard.code,
-            onKeyboardSelect = { viewModel.onEvent(SettingsEvent.SetKeyboard(it)) },
-            onDismissRequest = { viewModel.onEvent(SettingsEvent.KeyboardSheetState(false)) }
-        )
-    }
 }
-
 
 @Composable
 private fun SettingsScreenView(
-    state: SettingsUiState,
+    state: SettingsUiState.Success,
     onEvent: (SettingsEvent) -> Unit,
     backgrounds: List<BackgroundSettings>,
     navigateToBackStack: () -> Unit,
     navigateToOnboarding: () -> Unit,
     sendEmail: () -> Unit
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(start = 16.dp, top = 50.dp, end = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(9.dp)
+    ScreenColumn(
+        title = stringResource(R.string.settings_screen),
+        navigateBack = navigateToBackStack
     ) {
-        Header(
-            title = stringResource(R.string.settings_screen),
-            trashVisible = false,
-            navigateTo = navigateToBackStack
-        )
-        Spacer(Modifier)
-
         AppSettingsCard(
             currentTheme = state.currentTheme,
             currentLang = stringResource(state.currentLang.originName),

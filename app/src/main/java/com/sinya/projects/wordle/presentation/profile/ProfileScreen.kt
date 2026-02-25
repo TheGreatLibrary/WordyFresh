@@ -2,8 +2,13 @@ package com.sinya.projects.wordle.presentation.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -29,7 +34,10 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 16.dp, top = 50.dp, end = 16.dp),
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(WindowInsetsSides.Top)
+            )
+            .padding(start = 16.dp, end = 16.dp),
         verticalArrangement = Arrangement.Top
     ) {
         Header(

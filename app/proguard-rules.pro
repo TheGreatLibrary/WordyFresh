@@ -19,6 +19,7 @@
 
 # === DataStore ===
 -keep class androidx.datastore.** { *; }
+-keepclassmembers class com.sinya.projects.wordle.data.local.datastore.DataStoreManager { *; }
 -dontwarn androidx.datastore.**
 
 # === Ktor/Supabase/Serialization (если используешь kotlinx.serialization) ===

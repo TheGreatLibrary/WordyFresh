@@ -1,73 +1,79 @@
 package com.sinya.projects.wordle
 
-import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
-import android.view.WindowInsets.Type.systemBars
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.sinya.projects.wordle.data.local.datastore.DataStoreViewModel
-import com.sinya.projects.wordle.data.remote.supabase.SyncViewModel
-import com.sinya.projects.wordle.navigation.MainActivityScreen
+import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
+import com.sinya.projects.wordle.navigation.MainContent
 import com.sinya.projects.wordle.navigation.ScreenRoute
-import com.sinya.projects.wordle.ui.features.SplashScreen
+import com.sinya.projects.wordle.ui.theme.LocalSettingsEngine
 import com.sinya.projects.wordle.ui.theme.WordleTheme
+import com.sinya.projects.wordle.utils.updateLocale
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Locale
+import jakarta.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Inject lateinit var engine: SettingsEngine
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setupWindowInsets()
+
+        splash.setKeepOnScreenCondition {
+            engine.uiState.value.onboardingDone == null
+        }
+
+        applySystem()
 
         setContent {
-            val dataStoreViewModel: DataStoreViewModel = hiltViewModel()
-            val syncViewModel: SyncViewModel = hiltViewModel()
-
-            val darkMode by dataStoreViewModel.darkMode.collectAsState()
-            val language by dataStoreViewModel.language.collectAsState()
-            val onboardingCompleted by dataStoreViewModel.onboardingCompleted.collectAsStateWithLifecycle()
-
-            applyAppLocale(language)
-
-            WordleTheme(darkTheme = darkMode) {
-                when (onboardingCompleted) {
-                    null -> SplashScreen()
-                    true -> MainActivityScreen(startRoute = ScreenRoute.Home, setLanguage = ::applyAppLocale)
-                    false -> MainActivityScreen(startRoute = ScreenRoute.Onboarding, setLanguage = ::applyAppLocale)
-                }
-            }
+           App(engine)
         }
     }
 
-    private fun applyAppLocale(languageCode: String) {
-        val locale = Locale(languageCode)
-        Locale.setDefault(locale)
-        val config = resources.configuration
-        config.setLocale(locale)
-        @Suppress("DEPRECATION")
-        resources.updateConfiguration(config, resources.displayMetrics)
+    private fun applySystem() {
+        enableEdgeToEdge()
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.navigationBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
     }
 
-    @SuppressLint("WrongConstant")
-    private fun setupWindowInsets() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsetsControllerCompat(window, window.decorView).apply {
-                hide(systemBars())
-                systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    @Composable
+    private fun App(engine: SettingsEngine) {
+        val config by engine.uiState.collectAsStateWithLifecycle()
+
+        SideEffect {
+            WindowCompat.getInsetsController(window, window.decorView).apply {
+                isAppearanceLightStatusBars = !config.dark
+            }
+        }
+
+        LaunchedEffect(config.language) {
+            updateLocale(config.language)
+        }
+
+        CompositionLocalProvider(
+            LocalSettingsEngine provides engine
+        ) {
+            WordleTheme(darkTheme = config.dark) {
+                when (config.onboardingDone) {
+                    true -> MainContent(startRoute = ScreenRoute.Home)
+                    false -> MainContent(startRoute = ScreenRoute.Onboarding)
+                    null -> {}
+                }
             }
         }
     }

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
 import com.sinya.projects.wordle.data.local.datastore.DataStoreManager
+import com.sinya.projects.wordle.data.local.datastore.SavedGameState
+import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAvatarUseCase
@@ -12,16 +14,18 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val settingsEngine: SettingsEngine,
     private val authDataSource: SupabaseAuthDataSource,
     private val getAvatarUseCase: GetAvatarUseCase,
     private val checkAchievementUseCase: CheckAchievementUseCase,
-    private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -29,46 +33,27 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadInitialData()
-        observeAvatarChanges()
-        observeSavedGameChanges()
+        observeChanges()
     }
 
     private fun loadInitialData() = viewModelScope.launch {
         val userId = authDataSource.getCurrentUser()?.id
-
         if (userId != null) {
             getAvatarUseCase(userId)
         }
+    }
 
-        _state.update {
+    private fun observeChanges() = viewModelScope.launch {
+        combine(
+            getAvatarUseCase.observeAvatar(),
+            settingsEngine.uiState.map { it.lastGame }
+        ) { avatarUri, lastGame ->
             HomeUiState.Success(
-                avatarUri = getAvatarUseCase.observeAvatar().value,
-                savedGame = dataStoreManager.getSavedGame().first()
+                avatarUri = avatarUri,
+                savedGame = (lastGame as? SavedGameState.Loaded)?.game
             )
-        }
-    }
-
-    private fun observeAvatarChanges() = viewModelScope.launch {
-        getAvatarUseCase.observeAvatar().collect { newUri ->
-            _state.update { currentState ->
-                if (currentState is HomeUiState.Success) {
-                    currentState.copy(avatarUri = newUri)
-                } else {
-                    currentState
-                }
-            }
-        }
-    }
-
-    private fun observeSavedGameChanges() = viewModelScope.launch {
-        dataStoreManager.getSavedGame().collect { game ->
-            _state.update { currentState ->
-                if (currentState is HomeUiState.Success) {
-                    currentState.copy(savedGame = game)
-                } else {
-                    currentState
-                }
-            }
+        }.collect { newState ->
+            _state.update { newState }
         }
     }
 

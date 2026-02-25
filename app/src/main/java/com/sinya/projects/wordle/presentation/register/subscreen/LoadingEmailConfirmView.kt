@@ -3,9 +3,14 @@ package com.sinya.projects.wordle.presentation.register.subscreen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -54,6 +59,9 @@ fun LoadingEmailConfirmView(
     Column(
         Modifier
             .fillMaxSize()
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(WindowInsetsSides.Top)
+            )
             .padding(start = 16.dp, top = 140.dp, end = 16.dp, bottom = 50.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally

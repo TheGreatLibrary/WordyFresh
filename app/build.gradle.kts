@@ -25,8 +25,8 @@ android {
         applicationId = "com.sinya.projects.wordle"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.1.2"
+        versionCode = 7
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -82,6 +82,8 @@ android {
 }
 
 dependencies {
+    // splashScreen
+    implementation("androidx.core:core-splashscreen:1.2.0")
 
     // coil для загрузки изображений
     implementation("io.coil-kt:coil-compose:2.4.0")

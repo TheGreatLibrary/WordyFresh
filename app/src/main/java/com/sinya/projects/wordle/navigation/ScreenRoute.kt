@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.navigation
 
+import androidx.navigation.NavDestination
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,3 +31,27 @@ sealed class ScreenRoute(val route: String) {
     @Serializable data object ResetEmail : ScreenRoute("ResetEmail")
     @Serializable data object ResetPassword : ScreenRoute("ResetPassword")
 }
+
+val ROUTES_WITHOUT_IMAGE = setOf(
+    ScreenRoute.Profile::class.simpleName,
+    ScreenRoute.Login::class.simpleName,
+    ScreenRoute.Edit::class.simpleName,
+    ScreenRoute.ResetPassword::class.simpleName,
+    ScreenRoute.ResetEmail::class.simpleName,
+    ScreenRoute.EmailConfirm::class.simpleName,
+    ScreenRoute.Register::class.simpleName,
+    ScreenRoute.Onboarding::class.simpleName,
+    ScreenRoute.About::class.simpleName,
+)
+
+val ROUTES_WITHOUT_BOTTOM_BAR = setOf(
+    ScreenRoute.Game::class.simpleName,
+    ScreenRoute.Achieves::class.simpleName,
+    ScreenRoute.SettingWithoutBar::class.simpleName,
+)
+
+val NavDestination.simpleName: String?
+    get() = route
+        ?.substringAfterLast('.')
+        ?.substringBefore('/')
+        ?.substringBefore('?')

@@ -111,9 +111,7 @@ fun KeyboardModalSheet(
                 KeyboardModeItem(
                     keyboards = keyboards[page],
                     isSelected = pagerState.currentPage == page,
-                    onSelect = {
-
-                    }
+                    onSelect = {}
                 )
             }
         }

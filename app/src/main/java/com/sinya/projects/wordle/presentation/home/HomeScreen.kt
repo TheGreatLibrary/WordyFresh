@@ -4,10 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -43,8 +48,9 @@ fun HomeScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .consumeWindowInsets(WindowInsets.statusBars)
-            .padding(start = 16.dp, top = 50.dp, end = 16.dp, bottom = 50.dp),
+//            .consumeWindowInsets(WindowInsets.statusBars)
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .padding(start = 16.dp, end = 16.dp, bottom = 50.dp),
     ) {
         when (state) {
             HomeUiState.Loading -> HomePlaceholder()
