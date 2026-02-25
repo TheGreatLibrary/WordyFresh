@@ -4,13 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.SnackbarDuration
@@ -28,11 +23,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.navigation.ScreenRoute
-import com.sinya.projects.wordle.presentation.home.components.NewGameBottomSheet
 import com.sinya.projects.wordle.presentation.home.components.ContinueGameButton
 import com.sinya.projects.wordle.presentation.home.components.HomePlaceholder
 import com.sinya.projects.wordle.presentation.home.components.MainContainers
 import com.sinya.projects.wordle.presentation.home.components.MainHeader
+import com.sinya.projects.wordle.presentation.home.components.NewGameBottomSheet
 import com.sinya.projects.wordle.presentation.home.components.NewGameButton
 import com.sinya.projects.wordle.presentation.home.friendSheet.FriendBottomSheet
 import com.sinya.projects.wordle.utils.sendSupportEmail
