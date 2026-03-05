@@ -147,7 +147,7 @@ private fun SettingsScreenView(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.CenterStart
         ) {
-            AppVersionInfo()
+            AppVersionInfo(state.currentLang.code)
         }
     }
 }
