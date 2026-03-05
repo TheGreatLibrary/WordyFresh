@@ -5,12 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,7 +43,11 @@ fun AchieveScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     when (state) {
-        AchieveUiState.Loading -> AchievePlaceholder()
+        AchieveUiState.Loading -> AchievePlaceholder(
+            title = stringResource(R.string.achievements),
+            navigateToBackStack = navigateToBackStack,
+        )
+
         is AchieveUiState.Success -> AchieveScreenView(
             state = state as AchieveUiState.Success,
             onEvent = viewModel::onEvent,
@@ -83,27 +86,23 @@ private fun AchieveScreenView(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .nestedScroll(pullToRefreshState.nestedScrollConnection)
-    ) {
+    Box(Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection)) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             item {
-                Column(modifier = Modifier.windowInsetsPadding(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-                )) {
+                Column {
                     Header(
                         title = stringResource(R.string.achievements),
                         navigateTo = navigateBack,
                         trashVisible = true,
                         trashOnClick = { onEvent(AchieveEvent.OnClearAll) }
                     )
-                    Spacer(Modifier.height(21.dp))
+                    Spacer(Modifier.height(18.dp))
                 }
             }
 
@@ -134,7 +133,9 @@ private fun AchieveScreenView(
         }
 
         PullToRefreshContainer(
-            modifier = Modifier.align(Alignment.TopCenter),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .alpha(if (pullToRefreshState.isRefreshing) 1f else 0f),
             state = pullToRefreshState,
         )
 

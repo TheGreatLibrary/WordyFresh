@@ -22,7 +22,7 @@ fun RuleSection(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(9.dp)
     ) {
         Text(
             text = title,
@@ -41,7 +41,7 @@ fun RuleSection(
 
         WordRow(
             cells = cells,
-            modifier = Modifier.padding(horizontal = 15.dp)
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
     }
 }

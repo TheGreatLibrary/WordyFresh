@@ -22,7 +22,7 @@ class FriendViewModel @Inject constructor(
     private val getWordUseCase: GetDataWordUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(FriendUiState())
+    private val _state = MutableStateFlow<FriendUiState>(FriendUiState.FriendForm())
     val state: StateFlow<FriendUiState> = _state.asStateFlow()
 
     private val _copyRequest = MutableSharedFlow<String>()
@@ -30,89 +30,122 @@ class FriendViewModel @Inject constructor(
 
     fun onEvent(event: FriendEvent) {
         when (event) {
-            is FriendEvent.OnHiddenPlaceChange -> {
-                _state.update {
-                    it.copy(
-                        hiddenPlace = event.newValue,
-                        isError = false
-                    )
-                }
+            is FriendEvent.OnHiddenPlaceChange -> updateIFriendForm {
+                it.copy(
+                    hiddenPlace = event.newValue,
+                    isError = false
+                )
             }
 
-            is FriendEvent.OnGuessedPlaceChange -> {
-                _state.update {
-                    it.copy(
-                        guessedPlace = event.newValue,
-                        isError = false
-                    )
-                }
+            is FriendEvent.OnGuessedPlaceChange -> updateIFriendForm {
+                it.copy(
+                    guessedPlace = event.newValue,
+                    isError = false
+                )
             }
 
-            is FriendEvent.OnTabClick -> {
-                _state.update {
-                    it.copy(
-                        selectedTab = event.selectedTab,
-                        guessedPlace = "",
-                        hiddenPlace = "",
-                        isError = false
-                    )
-                }
+            is FriendEvent.OnTabClick -> updateIFriendForm {
+                it.copy(
+                    selectedTab = event.selectedTab,
+                    guessedPlace = "",
+                    hiddenPlace = "",
+                    isError = false
+                )
             }
 
-            is FriendEvent.DecodeCipher -> navigateToGame(event.navigateTo)
-
+            is FriendEvent.DecodeCipher -> navigateToGame()
 
             FriendEvent.EncodeCipher -> requestCopyCipher()
+
+            FriendEvent.ClearState -> clearState()
         }
     }
 
-    private fun encode(input: String): String {
-        return Base64.encodeToString(input.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-    }
+    private fun encode(input: String): String =
+        Base64.encodeToString(input.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
 
-    private fun decode(input: String): String {
-        return String(Base64.decode(input, Base64.NO_WRAP), Charsets.UTF_8)
+    private fun decode(input: String): String? {
+        return try {
+            String(Base64.decode(input, Base64.NO_WRAP), Charsets.UTF_8)
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
+    private fun clearState() {
+        _state.value = FriendUiState.FriendForm(
+            selectedTab = 0,
+            hiddenPlace = "",
+            guessedPlace = "",
+            isError = false
+        )
     }
 
     private fun requestCopyCipher() {
-        val word = _state.value.hiddenPlace.trim().uppercase()
+        val s = _state.value as? FriendUiState.FriendForm ?: return
+        val word = s.hiddenPlace.trim().uppercase()
+        updateIFriendForm { it.copy(isLoading = true) }
 
         viewModelScope.launch {
             getWordUseCase(word).fold(
                 onSuccess = {
                     val cipher = encode(word)
                     _copyRequest.emit(cipher)
-                    _state.update { it.copy(isError = false) }
+                    updateIFriendForm {
+                        it.copy(isError = false, isLoading = false)
+                    }
                 },
                 onFailure = {
                     Log.e("FriendViewModel", "Encode error", it)
-                    _state.update { it.copy(isError = true) }
+                    updateIFriendForm { form ->
+                        form.copy(isError = true, isLoading = false)
+                    }
                 }
             )
         }
     }
 
-    private fun navigateToGame(navigateTo: (ScreenRoute) -> Unit) {
-        val word = _state.value.guessedPlace.trim().let { decode(it).uppercase() }
+    private fun navigateToGame() {
+        val s = _state.value as? FriendUiState.FriendForm ?: return
+        val encoded = s.guessedPlace.trim()
+        updateIFriendForm { it.copy(isLoading = true) }
+
+        val word = decode(encoded)?.uppercase()
+        if (word == null) {
+            updateIFriendForm { form ->
+                form.copy(isError = true, isLoading = false)
+            }
+            return
+        }
 
         viewModelScope.launch {
             getWordUseCase(word).fold(
                 onSuccess = { wordData ->
-                    navigateTo(
+                    _state.value = FriendUiState.Success(
                         ScreenRoute.Game(
                             mode = GameMode.FRIENDLY.id,
-                            wordLength = word.length,
+                            wordLength = wordData.length,
                             lang = wordData.language,
-                            word = word
+                            word = wordData.word
                         )
                     )
-                    _state.update { it.copy(isError = false) }
                 },
                 onFailure = {
                     Log.e("FriendViewModel", "Decode error", it)
-                    _state.update { it.copy(isError = true) }
+                    updateIFriendForm { form ->
+                        form.copy(isError = true, isLoading = false)
+                    }
                 }
             )
+        }
+    }
+
+    private fun updateIFriendForm(transform: (FriendUiState.FriendForm) -> FriendUiState.FriendForm) {
+        _state.update { currentState ->
+            if (currentState is FriendUiState.FriendForm) {
+                transform(currentState)
+            } else {
+                currentState
+            }
         }
     }
 }

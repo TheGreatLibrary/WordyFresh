@@ -56,7 +56,10 @@ fun DictionaryScreen(
     val filteredList by viewModel.filteredList.collectAsStateWithLifecycle()
 
     when (state) {
-        DictionaryUiState.Loading -> DictionaryPlaceholder()
+        DictionaryUiState.Loading -> DictionaryPlaceholder(
+            title = stringResource(R.string.dictionary),
+            navigateToBackStack = navigateToBackStack,
+        )
 
         is DictionaryUiState.Success -> DictionaryScreenView(
             state = state as DictionaryUiState.Success,
@@ -84,7 +87,6 @@ private fun DictionaryScreenView(
             context.startActivity(intent)
         }
     }
-
     val onShare: (String, String) -> Unit = remember {
         { word, description ->
             val text = context.getString(
@@ -142,6 +144,7 @@ private fun DictionaryScreenView(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(horizontal = 16.dp)
         ) {
             item {
@@ -150,7 +153,7 @@ private fun DictionaryScreenView(
                     enter = fadeIn() + slideInVertically(),
                     exit = fadeOut() + slideOutVertically()
                 ) {
-                    Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                    Column {
                         Header(
                             title = stringResource(R.string.dictionary),
                             trashVisible = true,
@@ -163,7 +166,7 @@ private fun DictionaryScreenView(
                                 onEvent(DictionaryEvent.OnSearchQueryChanged(query))
                             }
                         )
-                        Spacer(Modifier.height(21.dp))
+                        Spacer(Modifier.height(18.dp))
                     }
                 }
             }
@@ -181,12 +184,14 @@ private fun DictionaryScreenView(
             }
 
             item {
-                Spacer(modifier = Modifier.height(7.dp))
+                Spacer(modifier = Modifier.height(18.dp))
             }
         }
 
         PullToRefreshContainer(
-            modifier = Modifier.align(Alignment.TopCenter) .alpha(if (pullToRefreshState.isRefreshing) 1f else 0f),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .alpha(if (pullToRefreshState.isRefreshing) 1f else 0f),
             state = pullToRefreshState,
         )
 

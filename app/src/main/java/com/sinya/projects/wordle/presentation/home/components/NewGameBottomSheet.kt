@@ -9,12 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,34 +27,27 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.enums.TypeLanguages
 import com.sinya.projects.wordle.navigation.ScreenRoute
+import com.sinya.projects.wordle.ui.features.CustomModalSheet
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewGameBottomSheet(
     onClickGame: (ScreenRoute) -> Unit,
     onDismissRequest: () -> Unit,
     initialMode: GameMode
 ) {
-    val sheetState = rememberModalBottomSheetState()
-
     var selectedWordSize by remember { mutableIntStateOf(5) }
     var selectedLang by remember { mutableStateOf(TypeLanguages.RU) }
     var selectedGameMode by remember { mutableStateOf(initialMode) }
 
-    ModalBottomSheet(
-        shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
-        onDismissRequest = onDismissRequest,
-        sheetState = sheetState,
-        containerColor = WordyColor.colors.background
-    ) {
+    CustomModalSheet(onDismissRequest) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 5.dp, start = 30.dp, end = 30.dp, bottom = 43.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+                .padding(top = 5.dp, bottom = 45.dp, start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SheetSection(title = stringResource(R.string.word_size)) {
@@ -88,7 +77,6 @@ fun NewGameBottomSheet(
                 ),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = {
-                    onDismissRequest()
                     onClickGame(
                         ScreenRoute.Game(
                             mode = selectedGameMode.id,
@@ -96,7 +84,7 @@ fun NewGameBottomSheet(
                             lang = selectedLang.code,
                         )
                     )
-                },
+                }
             ) {
                 Text(
                     text = stringResource(R.string.start_game),

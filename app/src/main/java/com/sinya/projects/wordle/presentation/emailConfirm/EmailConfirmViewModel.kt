@@ -41,8 +41,7 @@ class EmailConfirmViewModel @Inject constructor(
         val formState = _state.value as? EmailConfirmUiState.EmailConfirmForm ?: return false
 
         val email = formState.email.trim()
-        val isEmailValid = email.isNotEmpty() &&
-                Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        val isEmailValid = email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
         _state.update {
             formState.copy(
@@ -57,9 +56,9 @@ class EmailConfirmViewModel @Inject constructor(
     private fun putEmailToConfirm() {
         if (!validateForm()) return
 
-        viewModelScope.launch {
-            val formState = _state.value as? EmailConfirmUiState.EmailConfirmForm ?: return@launch
+        val formState = _state.value as? EmailConfirmUiState.EmailConfirmForm ?: return
 
+        viewModelScope.launch {
             resetPasswordUseCase(formState.email).fold(
                 onSuccess = {
                     _state.value = EmailConfirmUiState.Loading(formState.email)

@@ -20,7 +20,7 @@ class ResetEmailViewModel @Inject constructor(
     private val importSessionUseCase: ImportSessionUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<ResetEmailUiState>(ResetEmailUiState.Loading)
+    private val _state = MutableStateFlow<ResetEmailUiState>(ResetEmailUiState.ResetForm())
     val state: StateFlow<ResetEmailUiState> = _state.asStateFlow()
 
     fun handleDeepLink(deepLinkUri: String?) = viewModelScope.launch {
@@ -42,23 +42,17 @@ class ResetEmailViewModel @Inject constructor(
 
     fun onEvent(event: ResetEmailEvent) {
         when (event) {
-            is ResetEmailEvent.EmailChanged -> {
-                updateIfResetForm {
-                    it.copy(
-                        newEmail = event.value,
-                        isNewEmailError = false
-                    )
-                }
+            is ResetEmailEvent.EmailChanged -> updateIfResetForm {
+                it.copy(
+                    newEmail = event.value,
+                    isNewEmailError = false
+                )
             }
 
-            ResetEmailEvent.ResetClicked -> {
-                updateEmail()
-            }
+            ResetEmailEvent.ResetClicked -> updateEmail()
 
-            ResetEmailEvent.ErrorShown -> {
-                updateIfResetForm {
-                    it.copy(errorMessage = null)
-                }
+            ResetEmailEvent.ErrorShown -> updateIfResetForm {
+                it.copy(errorMessage = null)
             }
         }
     }
@@ -85,9 +79,9 @@ class ResetEmailViewModel @Inject constructor(
 
         val formState = _state.value as? ResetEmailUiState.ResetForm ?: return
 
-        viewModelScope.launch {
-            _state.value = ResetEmailUiState.LoadingConfirm(email = formState.newEmail)
+        _state.value = ResetEmailUiState.LoadingConfirm(email = formState.newEmail)
 
+        viewModelScope.launch {
             updateEmailUseCase(formState.newEmail).fold(
                 onSuccess = {
                     Log.d("ResetEmailViewModel", "Письмо успешно отправлено")

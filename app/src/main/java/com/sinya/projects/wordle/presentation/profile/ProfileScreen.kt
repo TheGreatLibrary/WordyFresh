@@ -1,19 +1,9 @@
 package com.sinya.projects.wordle.presentation.profile
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
@@ -21,7 +11,6 @@ import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.profile.subscreen.ProfileInAccount
 import com.sinya.projects.wordle.presentation.profile.subscreen.ProfileOutAccount
 import com.sinya.projects.wordle.presentation.profile.subscreen.ProfilePlaceholder
-import com.sinya.projects.wordle.ui.features.Header
 
 @Composable
 fun ProfileScreen(
@@ -31,31 +20,26 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(
-                WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-            )
-            .padding(start = 16.dp, end = 16.dp),
-        verticalArrangement = Arrangement.Top
-    ) {
-        Header(
+    when (state) {
+        ProfileUiState.Loading -> ProfilePlaceholder(
             title = stringResource(R.string.profile_screen),
-            trashVisible = false,
-            navigateTo = navigateBack
+            navigateBack = navigateBack
         )
 
-        when (state) {
-            ProfileUiState.Loading -> ProfilePlaceholder()
+        is ProfileUiState.InAccount -> ProfileInAccount(
+            title = stringResource(R.string.profile_screen),
+            navigateBack = navigateBack,
+            state = state as ProfileUiState.InAccount,
+            onEvent = viewModel::onEvent,
+            navigateTo = navigateTo,
+        )
 
-            is ProfileUiState.Success -> ProfileInAccount(
-                state = state as ProfileUiState.Success,
-                onEvent = viewModel::onEvent,
-                navigateTo = navigateTo,
-            )
+        is ProfileUiState.NoAccount -> ProfileOutAccount(navigateTo = navigateTo)
 
-            is ProfileUiState.NoAccount -> ProfileOutAccount(navigateTo = navigateTo)
+        ProfileUiState.CreateProfile -> {
+            LaunchedEffect(Unit) {
+                navigateTo(ScreenRoute.CreateProfile)
+            }
         }
     }
 }

@@ -12,12 +12,14 @@ import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.postgrest.postgrest
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 interface SupabaseAuthDataSource {
-    val sessionStatus: Flow<SessionStatus>
-    suspend fun getCurrentUser(): UserInfo?
+    fun authUserIdFlow(): Flow<String?>
+    fun sessionStatusFlow(): Flow<SessionStatus>
+    fun getCurrentUser(): UserInfo?
     suspend fun signOut()
     suspend fun logIn(email: String, password: String)
     suspend fun signUp(email: String, password: String)
@@ -25,7 +27,7 @@ interface SupabaseAuthDataSource {
     suspend fun updatePassword(password: String)
     suspend fun updateEmail(email: String)
 
-    suspend fun parseSessionFromFragment(deepLinkUri: String): Result<UserSession>
+    fun parseSessionFromFragment(deepLinkUri: String): Result<UserSession>
     suspend fun importSession(session: UserSession): Result<Unit>
     suspend fun resendEmail(email: String): Result<Unit>
     suspend fun checkEmailExists(email: String): Result<Boolean>
@@ -35,11 +37,16 @@ class SupabaseAuthDataSourceImpl @Inject constructor(
     private val supabaseClient: SupabaseClient
 ) : SupabaseAuthDataSource {
 
-    override val sessionStatus: Flow<SessionStatus> =
-        supabaseClient.auth.sessionStatus
-
-    override suspend fun getCurrentUser(): UserInfo? {
+    override fun getCurrentUser(): UserInfo? {
         return supabaseClient.auth.currentUserOrNull()
+    }
+
+    override fun authUserIdFlow(): Flow<String?> {
+        return supabaseClient.auth.sessionStatus.map { (it as? SessionStatus.Authenticated)?.session?.user?.id }
+    }
+
+    override fun sessionStatusFlow(): Flow<SessionStatus> {
+        return supabaseClient.auth.sessionStatus
     }
 
     override suspend fun signOut() {
@@ -81,7 +88,7 @@ class SupabaseAuthDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun parseSessionFromFragment(deepLinkUri: String): Result<UserSession> {
+    override fun parseSessionFromFragment(deepLinkUri: String): Result<UserSession> {
         return try {
             val fragment = supabaseClient.auth.parseSessionFromFragment(deepLinkUri)
             Result.success(fragment)

@@ -8,7 +8,9 @@ sealed interface ProfileUiState {
 
     data object NoAccount : ProfileUiState
 
-    data class Success(
+    data object CreateProfile : ProfileUiState
+
+    data class InAccount(
         val profile: Profiles,
         val email: String = "",
         val avatarUri: Uri?,

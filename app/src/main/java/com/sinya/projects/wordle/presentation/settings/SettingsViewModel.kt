@@ -12,9 +12,11 @@ import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,15 +26,8 @@ class SettingsViewModel @Inject constructor(
     private val checkAchievementUseCase: CheckAchievementUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
-    val state: StateFlow<SettingsUiState> = _state.asStateFlow()
-
-    init {
-        loadData()
-    }
-
-    private fun loadData() = viewModelScope.launch {
-        settingsEngine.uiState.map { config ->
+    val state: StateFlow<SettingsUiState> = settingsEngine.uiState
+        .map { config ->
             SettingsUiState.Success(
                 backgroundSetting = BackgroundSettings.fromName(config.background),
                 currentTheme = TypeThemes.fromIsDark(config.dark),
@@ -41,10 +36,17 @@ class SettingsViewModel @Inject constructor(
                 confettiEnabled = config.confetti,
                 ratingModeEnabled = config.ratingWords
             )
-        }.collect { mapped ->
-            _state.value = mapped
         }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = SettingsUiState.Loading
+        )
+
+    private val _showKeyboardSheet = MutableStateFlow(false)
+    val showKeyboardSheet = _showKeyboardSheet.asStateFlow()
+    private val _showLanguageSheet = MutableStateFlow(false)
+    val showLanguageSheet = _showLanguageSheet.asStateFlow()
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
@@ -54,8 +56,8 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.ToggleRating -> setRating(event.enabled)
             is SettingsEvent.SetLanguage -> setLanguage(event.lang)
             is SettingsEvent.SetKeyboard -> setKeyboard(event.code)
-            is SettingsEvent.KeyboardSheetState -> updateIfSuccess { it.copy(showKeyboardSheet = event.show) }
-            is SettingsEvent.LanguageSheetState -> updateIfSuccess { it.copy(showLanguageSheet = event.show) }
+            is SettingsEvent.KeyboardSheetState -> _showKeyboardSheet.update { event.show }
+            is SettingsEvent.LanguageSheetState -> _showLanguageSheet.update { event.show }
 
             SettingsEvent.SendSupport -> onSupportClick()
             SettingsEvent.ClearBackground -> clearBackground()
@@ -84,21 +86,11 @@ class SettingsViewModel @Inject constructor(
 
     private fun onSupportClick() {
         viewModelScope.launch {
-            checkAchievementUseCase.invoke(AchievementTrigger.SupportMessageSent)
+            checkAchievementUseCase(AchievementTrigger.SupportMessageSent)
                 .fold(
                     onSuccess = { },
                     onFailure = { }
                 )
-        }
-    }
-
-    private fun updateIfSuccess(transform: (SettingsUiState.Success) -> SettingsUiState.Success) {
-        _state.update { currentState ->
-            if (currentState is SettingsUiState.Success) {
-                transform(currentState)
-            } else {
-                currentState
-            }
         }
     }
 }

@@ -46,6 +46,5 @@ fun List<Cell>.toEmojiGridFromULong(wordLength: Int): String {
             }
         }
     }
-
 }
 

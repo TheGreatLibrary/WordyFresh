@@ -4,28 +4,28 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sinya.projects.wordle.data.remote.supabase.SessionManager
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
-import com.sinya.projects.wordle.domain.useCase.GetAvatarUseCase
-import com.sinya.projects.wordle.domain.useCase.GetEmailUseCase
+import com.sinya.projects.wordle.domain.error.UserHasNotProfileException
+import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.useCase.GetProfileUseCase
 import com.sinya.projects.wordle.domain.useCase.SignOutUseCase
 import com.sinya.projects.wordle.domain.useCase.UpdateImageUseCase
-import com.sinya.projects.wordle.domain.useCase.UploadAvatarUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val getAvatarUseCase: GetAvatarUseCase,
+    private val sessionManager: SessionManager,
     private val getProfileUseCase: GetProfileUseCase,
-    private val uploadAvatarUseCase: UploadAvatarUseCase,
     private val updateImageUseCase: UpdateImageUseCase,
-    private val getEmailUseCase: GetEmailUseCase,
     private val signOutUseCase: SignOutUseCase
 ) : ViewModel() {
 
@@ -39,11 +39,7 @@ class ProfileViewModel @Inject constructor(
     fun onEvent(event: ProfileEvent) {
         when (event) {
             ProfileEvent.SignOut -> signOut()
-
-            ProfileEvent.LoadAvatar -> loadAvatar()
-
             ProfileEvent.ErrorShown -> errorShown()
-
             is ProfileEvent.UpdateAvatar -> updateAvatar(event.uri)
         }
     }
@@ -53,20 +49,27 @@ class ProfileViewModel @Inject constructor(
             onSuccess = { profile ->
                 Log.d("Profile", "профиль $profile")
 
-                val email = getEmailUseCase().getOrNull() ?: ""
-
-                _state.value = ProfileUiState.Success(
+                _state.value = ProfileUiState.InAccount(
                     profile = profile,
-                    email = email,
                     avatarUri = null,
                 )
-
-                Log.d("ProfileVM", "Попробуем загрузить аватар")
-                loadAvatar()
+                combine(
+                    sessionManager.avatar,
+                    sessionManager.userInfo.map { it?.email ?: "" }
+                ) { avatar, email1 -> avatar to email1 }.collect { (avatar, email) ->
+                    _state.update { state ->
+                        if (state is ProfileUiState.InAccount) state.copy(avatarUri = avatar, email = email)
+                        else state
+                    }
+                }
             },
             onFailure = { error ->
+                when (error) {
+                    is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
+                    is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
+                    else ->  _state.value = ProfileUiState.NoAccount
+                }
                 Log.e("Profile", "Ошибка: ", error)
-                _state.value = ProfileUiState.NoAccount
             }
         )
     }
@@ -86,67 +89,41 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
-    private fun updateAvatar(uri: Uri) = viewModelScope.launch {
-        val currentState = _state.value as? ProfileUiState.Success ?: return@launch
-        val id = currentState.profile.id
-
-        _state.update {
-            currentState.copy(isUploadingAvatar = true, errorMessage = null)
-        }
-
-        uploadAvatarUseCase(id, uri).fold(
-            onSuccess = {
-                Log.d("ProfileVM", "Avatar uploaded")
-                updateImageUseCase(LegalLinks.getAvatarFileName(id)).fold(
-                    onSuccess = {
-                        _state.update { state ->
-                            if (state is ProfileUiState.Success) {
-                                state.copy(
-                                    avatarUri = uri,
-                                    isUploadingAvatar = false
+    private fun updateAvatar(uri: Uri) {
+        val id = (_state.value as? ProfileUiState.InAccount)?.profile?.id ?: return
+        updateIfSuccess { it.copy(isUploadingAvatar = true, errorMessage = null) }
+        viewModelScope.launch {
+            sessionManager.uploadAvatar(uri)
+                .onFailure { error ->
+                    Log.e("ProfileVM", "uploadAvatar failed", error)
+                    updateIfSuccess { it.copy(isUploadingAvatar = false, errorMessage = "Ошибка обновления аватара") }
+                }
+                .onSuccess {
+                    updateImageUseCase(LegalLinks.getAvatarFileName(id)).fold(
+                        onSuccess = {
+                            _state.update { state ->
+                                if (state is ProfileUiState.InAccount) {
+                                    state.copy(
+                                        avatarUri = uri,
+                                        isUploadingAvatar = false
+                                    )
+                                } else {
+                                    state
+                                }
+                            }
+                        },
+                        onFailure = { error ->
+                            Log.e("ProfileVM", "Failed to update avatar URL", error)
+                            updateIfSuccess {
+                                it.copy(
+                                    isUploadingAvatar = false,
+                                    errorMessage = "Ошибка обновления аватара"
                                 )
-                            } else {
-                                state
                             }
                         }
-                    },
-                    onFailure = { error ->
-                        Log.e("ProfileVM", "Failed to update avatar URL", error)
-                        updateIfSuccess {
-                            it.copy(
-                                isUploadingAvatar = false,
-                                errorMessage = "Ошибка обновления аватара"
-                            )
-                        }
-                    }
-                )
-            },
-            onFailure = {error ->
-                Log.e("ProfileVM", "Failed to update avatar URL", error)
-                updateIfSuccess {
-                    it.copy(
-                        isUploadingAvatar = false,
-                        errorMessage = "Ошибка обновления аватара"
                     )
+                    updateIfSuccess { it.copy(isUploadingAvatar = false) }
                 }
-            }
-        )
-    }
-
-    private fun loadAvatar() = viewModelScope.launch {
-        val currentState = _state.value as? ProfileUiState.Success ?: return@launch
-
-        getAvatarUseCase(currentState.profile.id)
-
-        getAvatarUseCase.observeAvatar().collect { newUri ->
-            _state.update { state ->
-                if (state is ProfileUiState.Success) {
-                    Log.d("ProfileVM", "Аватар обновлён: $newUri")
-                    state.copy(avatarUri = newUri)
-                } else {
-                    state
-                }
-            }
         }
     }
 
@@ -154,9 +131,9 @@ class ProfileViewModel @Inject constructor(
         it.copy(errorMessage = null)
     }
 
-    private fun updateIfSuccess(transform: (ProfileUiState.Success) -> ProfileUiState.Success) {
+    private fun updateIfSuccess(transform: (ProfileUiState.InAccount) -> ProfileUiState.InAccount) {
         _state.update { currentState ->
-            if (currentState is ProfileUiState.Success) {
+            if (currentState is ProfileUiState.InAccount) {
                 transform(currentState)
             } else {
                 currentState

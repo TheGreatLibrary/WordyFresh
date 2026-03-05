@@ -14,8 +14,6 @@ sealed interface SettingsUiState {
         val currentLang: TypeLanguages = TypeLanguages.RU,
         val currentKeyboard: TypeKeyboards = TypeKeyboards.WORDLE,
         val confettiEnabled: Boolean = true,
-        val ratingModeEnabled: Boolean = false,
-        val showLanguageSheet: Boolean = false,
-        val showKeyboardSheet: Boolean = false
+        val ratingModeEnabled: Boolean = false
     ) : SettingsUiState
 }

@@ -90,6 +90,7 @@ class GameViewModel @AssistedInject constructor(
     }
 
     init {
+
         observeSettings()
         loadData()
     }
@@ -99,8 +100,12 @@ class GameViewModel @AssistedInject constructor(
             val ratingStatus = if (_state.value.result != GameState.IN_PROGRESS) {
                 when (mode) {
                     GameMode.FRIENDLY -> getWordRatingUseCase(hiddenWord).getOrElse { config.ratingWords }
-                    GameMode.SAVED -> (config.lastGame as SavedGameState.Loaded).game?.settings?.ratingStatus ?: config.ratingWords
-                    else -> { config.ratingWords }
+                    GameMode.SAVED -> (config.lastGame as SavedGameState.Loaded).game?.settings?.ratingStatus
+                        ?: config.ratingWords
+
+                    else -> {
+                        config.ratingWords
+                    }
                 }
             } else _state.value.ratingStatus
 
@@ -114,7 +119,7 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
-    private fun loadData() = viewModelScope.launch {
+    private fun loadData() {
         val config = settingsEngine.uiState.value
 
         val actualWordLength = when (mode) {
@@ -133,7 +138,7 @@ class GameViewModel @AssistedInject constructor(
             else -> ""
         }
 
-        val actualMode = when(mode) {
+        val actualMode = when (mode) {
             GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.mode ?: mode
             else -> mode
         }
@@ -182,10 +187,6 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
-
-
-    /** изменение state */
-
     fun onEvent(event: GameEvent) {
         when (event) {
             is GameEvent.GameFinished -> finishGame(event.message)
@@ -196,6 +197,7 @@ class GameViewModel @AssistedInject constructor(
             is GameEvent.SetFocusCell -> updateFocusedCell(event.rowIndex, event.columnIndex)
             is GameEvent.ReloadGame -> reloadGame()
             is GameEvent.SaveGame -> saveGame()
+
         }
     }
 
@@ -359,7 +361,7 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
-    private fun saveGame() = viewModelScope.launch {
+    private fun saveGame() {
         if (_state.value.result == GameState.IN_PROGRESS) {
             val game = Game(
                 mode = _state.value.mode,
@@ -496,12 +498,12 @@ class GameViewModel @AssistedInject constructor(
                     return@launch
                 }
             )
+        }
 
-            checkFinishWithAnimation(enteredWord, row)
+        checkFinishWithAnimation(enteredWord, row)
 
-            if (row < 5) {
-                saveGame()
-            }
+        if (row < 5) {
+            saveGame()
         }
     }
 
@@ -566,14 +568,15 @@ class GameViewModel @AssistedInject constructor(
 
     /** Конец игры, Обновление статистики */
 
-    private fun finishGame(result: GameState) = viewModelScope.launch {
-        stopTimer()
+    private fun finishGame(result: GameState) {
 
         _state.update { it.copy(result = result) }
 
-        buildFinishData(result)
+        viewModelScope.launch {
+            buildFinishData(result)
 
-        saveGameData(result)
+            saveGameData(result)
+        }
     }
 
     private suspend fun buildFinishData(result: GameState) {
@@ -667,9 +670,9 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
-    private fun saveGameData(result: GameState) = viewModelScope.launch {
-        launch { addStatisticData(result) }
-        launch { settingsEngine.clearSavedGame() }
+    private suspend fun saveGameData(result: GameState) {
+        addStatisticData(result)
+        settingsEngine.clearSavedGame()
     }
 
     private suspend fun addStatisticData(result: GameState) {

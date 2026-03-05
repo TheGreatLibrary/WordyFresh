@@ -12,5 +12,5 @@ class GetAvatarUseCase @Inject constructor(
         return repository.downloadAvatar(userId)
     }
 
-    fun observeAvatar(): StateFlow<Uri?> = repository.avatarUriFlow
+//    fun observeAvatar(): StateFlow<Uri?> = repository.avatarUriFlow
 }

@@ -19,12 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.domain.enums.TypeAppNavigation
+import com.sinya.projects.wordle.domain.model.PopUpStrategy
 import com.sinya.projects.wordle.ui.theme.WordyColor
 
 @Composable
 fun BottomNavigation(
     currentRoute: String?,
-    navigateOn: (ScreenRoute) -> Unit
+    navigateOn: (ScreenRoute, PopUpStrategy) -> Unit
 ) {
     val items = TypeAppNavigation.entries
 
@@ -45,7 +46,7 @@ fun BottomNavigation(
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .clickable { navigateOn(item.route) }
+                    .clickable { navigateOn(item.route, PopUpStrategy.None) }
                     .background(Color.Transparent)
                     .padding(10.dp),
                 contentAlignment = Alignment.Center

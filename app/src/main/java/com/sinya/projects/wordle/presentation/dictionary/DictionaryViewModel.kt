@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.presentation.dictionary
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.error.DefinitionNotFoundException
@@ -49,6 +50,7 @@ class DictionaryViewModel @Inject constructor(
                         }
                     }
                 }
+
                 else -> emptyList()
             }
         }
@@ -65,36 +67,22 @@ class DictionaryViewModel @Inject constructor(
     fun onEvent(event: DictionaryEvent) {
         when (event) {
             DictionaryEvent.OnRefresh -> refreshDictionary()
+
             is DictionaryEvent.OnReloadedDefinition -> reloadDefinition(event.item)
-            is DictionaryEvent.OnSearchQueryChanged -> updateSearchQuery(event.query)
+
+            is DictionaryEvent.OnSearchQueryChanged -> updateIfSuccess {
+                it.copy(searchQuery = event.query)
+            }
+
             DictionaryEvent.OnClearAll -> clearAllDictionary()
-            DictionaryEvent.OnErrorShown -> onErrorShown()
-        }
-    }
 
-    private fun onErrorShown() {
-        _state.update { currentState ->
-            if (currentState is DictionaryUiState.Success) {
-                currentState.copy(errorMessage = null)
-            } else {
-                currentState
-            }
-        }
-    }
-
-    private fun updateSearchQuery(query: String) {
-        _state.update { currentState ->
-            if (currentState is DictionaryUiState.Success) {
-                currentState.copy(searchQuery = query)
-            } else {
-                currentState
-            }
+            DictionaryEvent.OnErrorShown -> updateIfSuccess { it.copy(errorMessage = null) }
         }
     }
 
     private fun reloadDefinition(item: DictionaryItem) = viewModelScope.launch {
         updateWordDescriptionUseCase(item.word).fold(
-            onSuccess = { /*loadDictionary()*/ },
+            onSuccess = { },
             onFailure = { exception ->
                 updateIfSuccess {
                     it.copy(errorMessage = getErrorMessage(exception))
@@ -105,7 +93,7 @@ class DictionaryViewModel @Inject constructor(
 
     private fun clearAllDictionary() = viewModelScope.launch {
         clearAllDictionaryUseCase().fold(
-            onSuccess = { /*loadDictionary()*/ },
+            onSuccess = { },
             onFailure = { exception ->
                 updateIfSuccess {
                     it.copy(errorMessage = "Ошибка очистки: ${exception.message}")
@@ -114,39 +102,43 @@ class DictionaryViewModel @Inject constructor(
         )
     }
 
-    private fun refreshDictionary() = viewModelScope.launch {
+    private fun refreshDictionary() {
         updateIfSuccess { it.copy(isRefreshing = true) }
 
-        syncDictionaryUseCase().fold(
-            onSuccess = { loadDictionary() },
-            onFailure = { exception ->
-                val errorMessage = when (exception) {
-                    is UserNotAuthenticatedException -> "Требуется авторизация"
-                    else -> "Ошибка синхронизации: ${exception.message}"
+        viewModelScope.launch {
+            syncDictionaryUseCase().fold(
+                onSuccess = {
+                    Log.d("Dictionary", "Uspech")
+                    updateIfSuccess {
+                        it.copy(isRefreshing = false)
+                    }
+                },
+                onFailure = { exception ->
+                    val errorMessage = when (exception) {
+                        is UserNotAuthenticatedException -> "Требуется авторизация"
+                        else -> "Ошибка синхронизации: ${exception.message}"
+                    }
+                    updateIfSuccess {
+                        it.copy(isRefreshing = false, errorMessage = errorMessage)
+                    }
                 }
-                updateIfSuccess {
-                    it.copy(isRefreshing = false, errorMessage = errorMessage)
-                }
-            }
-        )
+            )
+        }
     }
 
     private fun loadDictionary() = viewModelScope.launch {
         getAllWordsUseCase().collect { words ->
             if (_state.value is DictionaryUiState.Success) {
                 updateIfSuccess {
-                    it.copy(dictionaryList = words)
+                    it.copy(dictionaryList = words, isRefreshing = false)
                 }
-            }
-            else {
+            } else {
                 _state.update {
                     DictionaryUiState.Success(dictionaryList = words)
                 }
             }
         }
     }
-
-    /** доп. методы */
 
     private fun updateIfSuccess(transform: (DictionaryUiState.Success) -> DictionaryUiState.Success) {
         _state.update { currentState ->

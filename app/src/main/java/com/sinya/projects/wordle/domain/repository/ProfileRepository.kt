@@ -5,32 +5,41 @@ import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.domain.error.InvalidSendMailException
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
+import com.sinya.projects.wordle.domain.error.UserHasNotProfileException
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseProfileDataSource
 import io.github.jan.supabase.auth.user.UserInfo
 import jakarta.inject.Inject
 
 interface ProfileRepository {
-    suspend fun updateNickname(nickname: String): Result<Unit>
-    suspend fun updateImage(image: String): Result<Unit>
-    suspend fun getEmail(): Result<String>
-    suspend fun clearProfile()
-    suspend fun getProfile(): Result<Profiles>
+    // RegistrationScreen
+    suspend fun signUp(email: String, password: String): Result<Unit>
+    suspend fun resendEmail(email: String): Result<Unit>
+    suspend fun checkEmailExists(email: String): Result<Boolean>
+
+    // LoginScreen and ResetPasswordScreen
+    suspend fun signIn(email: String, password: String): Result<UserInfo?>
+    suspend fun resetPassword(email: String): Result<Unit>
+    suspend fun updatePassword(password: String): Result<Unit>
+
+    // ResetEmailScreen
+    suspend fun updateEmail(email: String): Result<Unit>
+    suspend fun importSession(deepLinkUri: String): Result<Unit>
+
+    // CreateProfileScreen
     suspend fun insertProfile(profile: Profiles): Result<Unit>
 
-    suspend fun signUp(email: String, password: String): Result<Unit>
-    suspend fun signIn(email: String, password: String): Result<UserInfo?>
+    // EditScreen
+    suspend fun updateNickname(nickname: String): Result<Unit>
 
-    suspend fun resetPassword(email: String): Result<Unit>
-    suspend fun importSession(deepLinkUri: String): Result<Unit>
-    suspend fun updatePassword(password: String): Result<Unit>
-    suspend fun updateEmail(email: String): Result<Unit>
+    // ProfileScreen
+    suspend fun updateImage(image: String): Result<Unit>
+    suspend fun clearProfile()
+    suspend fun getProfile(): Result<Profiles>
 
+    // SyncViewModel
     suspend fun syncFromSupabase(): Result<Unit>
     suspend fun syncFromLocal(): Result<Unit>
-    suspend fun resendEmail(email: String): Result<Unit>
-
-    suspend fun checkEmailExists(email: String): Result<Boolean>
 }
 
 class ProfileRepositoryImpl @Inject constructor(
@@ -39,85 +48,7 @@ class ProfileRepositoryImpl @Inject constructor(
     private val supabaseProfileDataSource: SupabaseProfileDataSource
 ) : ProfileRepository {
 
-    override suspend fun updateNickname(nickname: String): Result<Unit> {
-        val user = supabaseAuthDataSource.getCurrentUser()
-            ?: return Result.failure(UserNotAuthenticatedException())
-
-        return try {
-            supabaseProfileDataSource.updateNickname(
-                nickname = nickname,
-                id = user.id
-            ).getOrThrow()
-
-            profileDao.updateNickname(nickname, user.id)
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun updateImage(image: String): Result<Unit> {
-        val user = supabaseAuthDataSource.getCurrentUser()
-            ?: return Result.failure(UserNotAuthenticatedException())
-
-        return try {
-            supabaseProfileDataSource.updateImagePath(
-                urlPath = image,
-                id = user.id
-            ).getOrThrow()
-
-            profileDao.updateImageProfile(image, user.id)
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getEmail(): Result<String> {
-        val user = supabaseAuthDataSource.getCurrentUser()
-            ?: return Result.failure(UserNotAuthenticatedException())
-
-        return try {
-            Result.success(user.email ?: "Данные не найдены")
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun clearProfile() {
-        profileDao.clearAll()
-    }
-
-    override suspend fun getProfile(): Result<Profiles> {
-        Log.d("ЫЫЫ", "начинаю получать профиль")
-        val user = supabaseAuthDataSource.getCurrentUser()
-            ?: return Result.failure(UserNotAuthenticatedException())
-
-        Log.d("ЫЫЫ", "что-то получил $user")
-
-        return try {
-            val profile = supabaseProfileDataSource.fetchProfile(user.id)
-            Log.d("ЫЫЫ", "профиль $profile")
-
-            if (profile != null) Result.success(profile)
-            else Result.failure(UserNotAuthenticatedException())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun insertProfile(profile: Profiles): Result<Unit> {
-        return try {
-            supabaseProfileDataSource.updateProfile(profile)
-            profileDao.insertProfile(profile)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-
-    }
+    // RegistrationScreen
 
     override suspend fun signUp(email: String, password: String): Result<Unit> {
         return try {
@@ -138,6 +69,22 @@ class ProfileRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun resendEmail(email: String): Result<Unit> {
+        return supabaseAuthDataSource.resendEmail(email).fold(
+            onSuccess = { Result.success(Unit) },
+            onFailure = { e ->
+                Log.e("ResendEmailUseCase", "Error during resend email", e)
+                Result.failure(e)
+            }
+        )
+    }
+
+    override suspend fun checkEmailExists(email: String): Result<Boolean> {
+        return supabaseAuthDataSource.checkEmailExists(email)
+    }
+
+    // LoginScreen and ResetPasswordScreen
+
     override suspend fun signIn(email: String, password: String): Result<UserInfo?> {
         return try {
             supabaseAuthDataSource.logIn(email, password)
@@ -157,6 +104,20 @@ class ProfileRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updatePassword(password: String): Result<Unit> {
+        return try {
+//            supabaseAuthDataSource.getCurrentUser()
+//            ?: return Result.failure(UserNotAuthenticatedException())
+
+            supabaseAuthDataSource.updatePassword(password)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("UpdatePasswordUseCase", "Error during update password", e)
+            Result.failure(e)
+        }
+    }
+
     override suspend fun resetPassword(email: String): Result<Unit> {
         return try {
             supabaseAuthDataSource.resetPassword(email)
@@ -165,6 +126,22 @@ class ProfileRepositoryImpl @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e("ResetPasswordUseCase", "Error during reset password", e)
+            Result.failure(e)
+        }
+    }
+
+    // ResetEmailScreen
+
+    override suspend fun updateEmail(email: String): Result<Unit> {
+        return try {
+            supabaseAuthDataSource.getCurrentUser()
+                ?: return Result.failure(UserNotAuthenticatedException())
+
+            supabaseAuthDataSource.updateEmail(email)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("UpdatePasswordUseCase", "Error during update password", e)
             Result.failure(e)
         }
     }
@@ -192,33 +169,83 @@ class ProfileRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updatePassword(password: String): Result<Unit> {
-        return try {
-//            supabaseAuthDataSource.getCurrentUser()
-//            ?: return Result.failure(UserNotAuthenticatedException())
+    // CreateProfileScreen
 
-            supabaseAuthDataSource.updatePassword(password)
+    override suspend fun insertProfile(profile: Profiles): Result<Unit> {
+        return try {
+            supabaseProfileDataSource.updateProfile(profile)
+            profileDao.insertProfile(profile)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
+    }
+
+    // EditScreen
+
+    override suspend fun updateNickname(nickname: String): Result<Unit> {
+        val user = supabaseAuthDataSource.getCurrentUser()
+            ?: return Result.failure(UserNotAuthenticatedException())
+
+        return try {
+            supabaseProfileDataSource.updateNickname(
+                nickname = nickname,
+                id = user.id
+            ).getOrThrow()
+
+            profileDao.updateNickname(nickname, user.id)
 
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("UpdatePasswordUseCase", "Error during update password", e)
             Result.failure(e)
         }
     }
 
-    override suspend fun updateEmail(email: String): Result<Unit> {
-        return try {
-            supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
+    // ProfileScreen
 
-            supabaseAuthDataSource.updateEmail(email)
+    override suspend fun updateImage(image: String): Result<Unit> {
+        val user = supabaseAuthDataSource.getCurrentUser()
+            ?: return Result.failure(UserNotAuthenticatedException())
+
+        return try {
+            supabaseProfileDataSource.updateImagePath(
+                urlPath = image,
+                id = user.id
+            ).getOrThrow()
+
+            profileDao.updateImageProfile(image, user.id)
 
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("UpdatePasswordUseCase", "Error during update password", e)
             Result.failure(e)
         }
     }
+
+    override suspend fun clearProfile() {
+        profileDao.clearAll()
+    }
+
+    override suspend fun getProfile(): Result<Profiles> {
+        Log.d("ЫЫЫ", "начинаю получать профиль")
+        val user = supabaseAuthDataSource.getCurrentUser()
+            ?: return Result.failure(UserNotAuthenticatedException())
+
+        Log.d("ЫЫЫ", "что-то получил $user")
+
+        return try {
+            val profile = supabaseProfileDataSource.fetchProfile(user.id)
+            Log.d("ЫЫЫ", "профиль $profile")
+
+            if (profile != null) Result.success(profile)
+            else Result.failure(UserHasNotProfileException())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
+    // SyncViewModel
 
     override suspend fun syncFromSupabase(): Result<Unit> {
         return try {
@@ -244,19 +271,5 @@ class ProfileRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
-
-    override suspend fun resendEmail(email: String): Result<Unit> {
-        return supabaseAuthDataSource.resendEmail(email).fold(
-            onSuccess = { Result.success(Unit) },
-            onFailure = { e ->
-                Log.e("ResendEmailUseCase", "Error during resend email", e)
-                Result.failure(e)
-            }
-        )
-    }
-
-    override suspend fun checkEmailExists(email: String): Result<Boolean> {
-        return supabaseAuthDataSource.checkEmailExists(email)
     }
 }

@@ -1,12 +1,15 @@
 package com.sinya.projects.wordle.presentation.home.friendSheet
 
-import androidx.annotation.StringRes
-import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.navigation.ScreenRoute
 
-data class FriendUiState(
-    @StringRes val errorMessage: Int = R.string.is_word_in_database_error,
-    val selectedTab: Int = 0,
-    val hiddenPlace: String = "",
-    val guessedPlace: String = "",
-    val isError: Boolean = false
-)
+sealed interface FriendUiState {
+    data class FriendForm(
+        val selectedTab: Int = 0,
+        val hiddenPlace: String = "",
+        val guessedPlace: String = "",
+        val isLoading: Boolean = false,
+        val isError: Boolean = false
+    ) : FriendUiState
+
+    data class Success(val game: ScreenRoute.Game) : FriendUiState
+}

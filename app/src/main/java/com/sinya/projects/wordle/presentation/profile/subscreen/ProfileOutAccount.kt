@@ -4,10 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,15 +31,17 @@ fun ProfileOutAccount(
     navigateTo: (ScreenRoute) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Spacer(Modifier)
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 50.dp),
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(9.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -46,7 +51,6 @@ fun ProfileOutAccount(
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(15.dp))
             Text(
                 text = stringResource(R.string.play_with_friends),
                 color = WordyColor.colors.textCardSecondary,
@@ -56,13 +60,15 @@ fun ProfileOutAccount(
             )
         }
 
+        Spacer(Modifier)
+
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.9f),
+                modifier = Modifier.fillMaxWidth(0.7f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = { navigateTo(ScreenRoute.Register) }
@@ -75,7 +81,7 @@ fun ProfileOutAccount(
                 )
             }
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.9f),
+                modifier = Modifier.fillMaxWidth(0.7f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkII),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = { navigateTo(ScreenRoute.Login) }

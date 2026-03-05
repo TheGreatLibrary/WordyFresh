@@ -3,7 +3,6 @@ package com.sinya.projects.wordle.presentation.onboarding.subscreen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,16 +29,13 @@ fun PageFinish(onFinish: () -> Unit = {}) {
     val word2 = remember { OnboardingData.getFinishExample2() }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(vertical = 50.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(Modifier)
-
         Column(
-            modifier = Modifier.padding(vertical = 15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(space = 20.dp)
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             Text(
                 text = stringResource(R.string.duplicate),
@@ -50,35 +46,38 @@ fun PageFinish(onFinish: () -> Unit = {}) {
 
             WordRow(
                 cells = word1,
-                modifier = Modifier.padding(horizontal = 15.dp)
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
             Text(
                 text = stringResource(R.string.duplicate_descr),
                 style = WordyTypography.bodyMedium,
-                fontSize = 15.sp,
+                fontSize = 16.sp,
                 color = WordyColor.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                WordRow(cells = word2,   modifier = Modifier.padding(horizontal = 15.dp))
-                WordRow(cells = word1,   modifier = Modifier.padding(horizontal = 15.dp))
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                WordRow(cells = word2)
+                WordRow(cells = word1)
             }
-
-            Text(
-                text = stringResource(R.string.finish_onboard),
-                style = WordyTypography.bodyLarge,
-                fontSize = 15.sp,
-                color = WordyColor.colors.textPrimary,
-                textAlign = TextAlign.Center
-            )
         }
+
+        Text(
+            text = stringResource(R.string.finish_onboard),
+            style = WordyTypography.bodyLarge,
+            fontSize = 15.sp,
+            color = WordyColor.colors.textPrimary,
+            textAlign = TextAlign.Center
+        )
 
         RoundedButton(
             modifier = Modifier.fillMaxWidth(0.7f),
             colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
-            contentPadding = PaddingValues(vertical = 3.dp, horizontal = 15.dp),
+            contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
             onClick = onFinish
         ) {
             Text(

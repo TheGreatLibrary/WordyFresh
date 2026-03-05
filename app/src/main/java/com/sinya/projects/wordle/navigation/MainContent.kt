@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,10 +23,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sinya.projects.wordle.domain.enums.BackgroundSettings
 import com.sinya.projects.wordle.domain.enums.TypeBackground
+import com.sinya.projects.wordle.domain.model.PopUpStrategy
 import com.sinya.projects.wordle.ui.features.AchievementNotificationHost
 import com.sinya.projects.wordle.ui.theme.LocalSettingsEngine
 import com.sinya.projects.wordle.ui.theme.WordyColor
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun MainContent(startRoute: ScreenRoute) {
     val engine = LocalSettingsEngine.current
@@ -41,9 +44,14 @@ fun MainContent(startRoute: ScreenRoute) {
     }
 
     val navigateTo = remember(navController) {
-        { route: ScreenRoute ->
+        { route: ScreenRoute, popUp: PopUpStrategy ->
             navController.navigate(route) {
                 launchSingleTop = true
+                when (popUp) {
+                    is PopUpStrategy.ToRoute -> popUpTo(popUp.route::class) { inclusive = popUp.inclusive }
+                    is PopUpStrategy.ToStart -> popUpTo(navController.graph.startDestinationId) { inclusive = popUp.inclusive }
+                    PopUpStrategy.None -> {}
+                }
             }
         }
     }
@@ -106,7 +114,7 @@ fun MainContent(startRoute: ScreenRoute) {
                 ) {
                     AchievementNotificationHost(
                         onAchievementClick = {
-                            navigateTo(ScreenRoute.Achieves)
+                            navigateTo(ScreenRoute.Achieves, PopUpStrategy.None)
                         }
                     )
                 }

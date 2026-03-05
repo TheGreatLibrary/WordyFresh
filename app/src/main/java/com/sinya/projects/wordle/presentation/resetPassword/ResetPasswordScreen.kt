@@ -6,17 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarDuration
@@ -38,8 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.features.AuthHeader
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
-import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.ui.features.RoundedButton
+import com.sinya.projects.wordle.ui.features.ScreenColumn
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
@@ -58,21 +50,11 @@ fun ResetPasswordScreen(
     val activity = context.findActivity()
     LaunchedEffect(Unit) {
         val deepLinkUri = activity?.intent?.dataString
-        if (deepLinkUri != null) {
-            viewModel.handleDeepLink(deepLinkUri)
-        }
+        viewModel.handleDeepLink(deepLinkUri)
+        activity?.intent?.data = null
     }
 
     when (state) {
-        ResetPasswordUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-
         ResetPasswordUiState.Success -> {
             LaunchedEffect(Unit) {
                 navigateToProfile()
@@ -85,7 +67,6 @@ fun ResetPasswordScreen(
                 state = state as ResetPasswordUiState.ResetForm,
                 onEvent = viewModel::onEvent
             )
-
         }
     }
 }
@@ -108,26 +89,15 @@ private fun ResetPasswordScreenView(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-                )
-                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(27.dp)
-        ) {
-            Header(
-                title = "",
-                trashVisible = false,
-                navigateTo = navigateToBackStack
-            )
+    Box {
+        ScreenColumn(navigateBack = navigateToBackStack) {
             AuthHeader(
                 title = stringResource(R.string.reset_password),
                 subtitle = stringResource(R.string.put_new_password),
             )
+
+            Spacer(Modifier)
+
             ResetForm(
                 state = state,
                 onEvent = onEvent
@@ -152,7 +122,9 @@ private fun ResetForm(
         .background(white, WordyShapes.extraLarge)
         .padding(horizontal = 26.dp, vertical = 14.dp)
 ) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
         CustomTextFieldWithLabel(
             label = stringResource(R.string.new_password),
             name = state.newPassword,
@@ -162,7 +134,6 @@ private fun ResetForm(
             isError = state.isNewPasswordError,
             error = stringResource(R.string.is_password_error)
         )
-        Spacer(Modifier.height(15.dp))
         CustomTextFieldWithLabel(
             label = stringResource(R.string.repeat_new_password),
             name = state.repeatNewPassword,
@@ -172,23 +143,31 @@ private fun ResetForm(
             isError = state.isRepeatNewPasswordError,
             error = stringResource(R.string.is_password_error)
         )
-        Spacer(Modifier.height(15.dp))
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.9f),
+                modifier = Modifier.fillMaxWidth(0.7f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
-                onClick = { onEvent(ResetPasswordEvent.ResetClicked) }
+                onClick = { onEvent(ResetPasswordEvent.ResetClicked) },
+                enabled = !state.isLoading
             ) {
-                Text(
-                    text = stringResource(R.string.save_result),
-                    fontSize = 18.sp,
-                    color = WordyColor.colors.textForActiveBtnMkI,
-                    style = WordyTypography.bodyMedium
-                )
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = WordyColor.colors.textForActiveBtnMkI,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.save_result),
+                        fontSize = 16.sp,
+                        color = WordyColor.colors.textForActiveBtnMkI,
+                        style = WordyTypography.bodyMedium
+                    )
+                }
             }
         }
     }

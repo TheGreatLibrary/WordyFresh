@@ -34,7 +34,10 @@ fun LoadingConfirmScreen(email: String) {
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = stringResource(R.string.check_your_mail),
                 style = WordyTypography.titleLarge,

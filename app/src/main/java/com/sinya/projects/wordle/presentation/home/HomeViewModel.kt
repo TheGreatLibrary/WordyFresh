@@ -5,9 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
 import com.sinya.projects.wordle.data.local.datastore.SavedGameState
 import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
-import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
+import com.sinya.projects.wordle.data.remote.supabase.SessionManager
 import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
-import com.sinya.projects.wordle.domain.useCase.GetAvatarUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +20,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val settingsEngine: SettingsEngine,
-    private val authDataSource: SupabaseAuthDataSource,
-    private val getAvatarUseCase: GetAvatarUseCase,
+    private val sessionManager: SessionManager,
     private val checkAchievementUseCase: CheckAchievementUseCase,
 ) : ViewModel() {
 
@@ -30,20 +28,12 @@ class HomeViewModel @Inject constructor(
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
     init {
-        loadInitialData()
         observeChanges()
-    }
-
-    private fun loadInitialData() = viewModelScope.launch {
-        val userId = authDataSource.getCurrentUser()?.id
-        if (userId != null) {
-            getAvatarUseCase(userId)
-        }
     }
 
     private fun observeChanges() = viewModelScope.launch {
         combine(
-            getAvatarUseCase.observeAvatar(),
+            sessionManager.avatar,
             settingsEngine.uiState.map { it.lastGame }
         ) { avatarUri, lastGame ->
             HomeUiState.Success(

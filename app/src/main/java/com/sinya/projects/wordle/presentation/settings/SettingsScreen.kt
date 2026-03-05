@@ -1,8 +1,12 @@
 package com.sinya.projects.wordle.presentation.settings
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -14,8 +18,8 @@ import com.sinya.projects.wordle.presentation.settings.components.AppVersionInfo
 import com.sinya.projects.wordle.presentation.settings.components.BackgroundSettingsCard
 import com.sinya.projects.wordle.presentation.settings.components.RowSwitch
 import com.sinya.projects.wordle.presentation.settings.components.SettingsPlaceholder
-import com.sinya.projects.wordle.presentation.settings.sheets.KeyboardModalSheet
-import com.sinya.projects.wordle.presentation.settings.sheets.LanguageModalSheet
+import com.sinya.projects.wordle.presentation.settings.components.KeyboardModalSheet
+import com.sinya.projects.wordle.presentation.settings.components.LanguageModalSheet
 import com.sinya.projects.wordle.ui.features.CardColumn
 import com.sinya.projects.wordle.ui.features.RowLink
 import com.sinya.projects.wordle.ui.features.ScreenColumn
@@ -29,10 +33,12 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val showLanguageSheet by viewModel.showLanguageSheet.collectAsStateWithLifecycle()
+    val showKeyboardSheet by viewModel.showKeyboardSheet.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val backgrounds = remember { BackgroundSettings.entries }
 
-    when(state) {
+    when (state) {
         SettingsUiState.Loading -> {
             SettingsPlaceholder(
                 navigateToBackStack = navigateToBackStack,
@@ -53,7 +59,7 @@ fun SettingsScreen(
                 }
             )
 
-            if ((state as SettingsUiState.Success).showLanguageSheet) {
+            if (showLanguageSheet) {
                 LanguageModalSheet(
                     currentLang = (state as SettingsUiState.Success).currentLang.code,
                     onLanguageSelect = { newLang ->
@@ -64,7 +70,7 @@ fun SettingsScreen(
                 )
             }
 
-            if ((state as SettingsUiState.Success).showKeyboardSheet) {
+            if (showKeyboardSheet) {
                 KeyboardModalSheet(
                     currentKey = (state as SettingsUiState.Success).currentKeyboard.code,
                     onKeyboardSelect = { viewModel.onEvent(SettingsEvent.SetKeyboard(it)) },
@@ -84,7 +90,7 @@ private fun SettingsScreenView(
     backgrounds: List<BackgroundSettings>,
     navigateToBackStack: () -> Unit,
     navigateToOnboarding: () -> Unit,
-    sendEmail: () -> Unit
+    sendEmail: () -> Unit,
 ) {
     ScreenColumn(
         title = stringResource(R.string.settings_screen),
@@ -137,7 +143,12 @@ private fun SettingsScreenView(
             )
         }
 
-        AppVersionInfo()
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            AppVersionInfo()
+        }
     }
 }
 

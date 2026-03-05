@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -22,6 +23,7 @@ fun ScreenColumn(
     navigateBack: (() -> Unit)? = null,
     trashVisible: Boolean = false,
     onTrashClick: (() -> Unit)? = null,
+    spaced: Int = 9,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
@@ -30,7 +32,8 @@ fun ScreenColumn(
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(9.dp)
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(spaced.dp)
     ) {
         if (title != null || navigateBack != null) {
             Header(

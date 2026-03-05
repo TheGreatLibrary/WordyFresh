@@ -5,24 +5,23 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -34,32 +33,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
-import com.sinya.projects.wordle.presentation.home.friendSheet.components.CustomTab
-import com.sinya.projects.wordle.presentation.home.friendSheet.components.DecodeTab
-import com.sinya.projects.wordle.presentation.home.friendSheet.components.EncodeTab
+import com.sinya.projects.wordle.presentation.home.friendSheet.components.TabContent
+import com.sinya.projects.wordle.presentation.home.friendSheet.components.TabHeader
+import com.sinya.projects.wordle.ui.features.CustomModalSheet
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.white
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendBottomSheet(
     navigateTo: (ScreenRoute) -> Unit,
     onDismissRequest: () -> Unit,
     viewModel: FriendViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val modifier = Modifier
-        .fillMaxWidth()
-        .background(white, WordyShapes.large)
-        .padding(horizontal = 12.dp, vertical = 10.dp)
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.copyRequest) {
         viewModel.copyRequest.collect { cipher ->
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Шифр слова", cipher)
@@ -71,13 +63,51 @@ fun FriendBottomSheet(
             )
         }
     }
-    ModalBottomSheet(
-        shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
-        onDismissRequest = onDismissRequest,
-        sheetState = sheetState,
-        containerColor = WordyColor.colors.background
-    ) {
-        Column {
+
+    when(state) {
+        is FriendUiState.FriendForm -> {
+            Box {
+                FriendModalForm(
+                    onDismissRequest = onDismissRequest,
+                    state = state as FriendUiState.FriendForm,
+                    onEvent = viewModel::onEvent
+                )
+
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                )
+            }
+        }
+
+        is FriendUiState.Success -> {
+            LaunchedEffect(Unit) {
+                navigateTo((state as FriendUiState.Success).game)
+                viewModel.onEvent(FriendEvent.ClearState)
+            }
+        }
+    }
+}
+
+@Composable
+private fun FriendModalForm(
+    onDismissRequest: () -> Unit,
+    state: FriendUiState.FriendForm,
+    onEvent: (FriendEvent) -> Unit,
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .background(white, WordyShapes.large)
+        .padding(horizontal = 12.dp, vertical = 10.dp)
+) {
+    CustomModalSheet(onDismissRequest) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 5.dp, bottom = 45.dp, start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
             Text(
                 text = stringResource(R.string.friend_mode),
                 color = WordyColor.colors.textPrimary,
@@ -86,59 +116,62 @@ fun FriendBottomSheet(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp, start = 30.dp, end = 30.dp, bottom = 43.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+            TabRow(
+                selectedTabIndex = state.selectedTab,
+                containerColor = Color.Transparent,
+                contentColor = WordyColor.colors.textPrimary,
+                indicator = { tabPositions ->
+                    SecondaryIndicator(
+                        modifier = Modifier
+                            .tabIndicatorOffset(tabPositions[state.selectedTab])
+                            .height(2.dp),
+                        color = WordyColor.colors.backPrimary
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                TabRow(
-                    selectedTabIndex = state.selectedTab,
-                    containerColor = Color.Transparent,
-                    contentColor = WordyColor.colors.textPrimary,
-                    indicator = { tabPositions ->
-                        SecondaryIndicator(
-                            modifier = Modifier
-                                .tabIndicatorOffset(tabPositions[state.selectedTab])
-                                .height(2.dp),
-                            color = WordyColor.colors.backPrimary
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    CustomTab(
-                        selected = state.selectedTab == 0,
-                        onClick = { viewModel.onEvent(FriendEvent.OnTabClick(0)) },
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(R.string.get_shifr_word)
-                    )
-                    CustomTab(
-                        selected = state.selectedTab == 1,
-                        onClick = { viewModel.onEvent(FriendEvent.OnTabClick(1)) },
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(R.string.put_shifr_word)
-                    )
-                }
+                TabHeader(
+                    selected = state.selectedTab == 0,
+                    onClick = { onEvent(FriendEvent.OnTabClick(0)) },
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(R.string.get_shifr_word)
+                )
+                TabHeader(
+                    selected = state.selectedTab == 1,
+                    onClick = { onEvent(FriendEvent.OnTabClick(1)) },
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(R.string.put_shifr_word)
+                )
+            }
 
-                when (state.selectedTab) {
-                    0 -> EncodeTab(
-                        hiddenPlace = state.hiddenPlace,
-                        isError = state.isError,
-                        onValueChange = { viewModel.onEvent(FriendEvent.OnHiddenPlaceChange(it)) },
-                        onEncode = { viewModel.onEvent(FriendEvent.EncodeCipher) },
-                        modifier = modifier
-                    )
-                    1 -> DecodeTab(
-                        guessedPlace = state.guessedPlace,
-                        isError = state.isError,
-                        onValueChange = { viewModel.onEvent(FriendEvent.OnGuessedPlaceChange(it)) },
-                        onDecode = { viewModel.onEvent(FriendEvent.DecodeCipher(navigateTo)) },
-                        modifier = modifier
-                    )
-                }
+            when (state.selectedTab) {
+                0 -> TabContent(
+                    description = stringResource(R.string.enter_word_to_encode),
+                    placeholder = stringResource(R.string.put_here),
+                    errorMessage = stringResource(R.string.is_word_in_database_error),
+                    textButton = stringResource(R.string.get_cipher),
+                    isLoading = state.isLoading,
+                    value = state.hiddenPlace,
+                    isError = state.isError,
+                    onValueChange = { onEvent(FriendEvent.OnHiddenPlaceChange(it)) },
+                    onClick = { onEvent(FriendEvent.EncodeCipher) },
+                    modifier = modifier
+                )
+
+                1 -> TabContent(
+                    description = stringResource(R.string.enter_cipher_to_decode),
+                    placeholder = stringResource(R.string.cipher_placeholder),
+                    errorMessage = stringResource(R.string.invalid_cipher_error),
+                    textButton = stringResource(R.string.start_game),
+                    isLoading = state.isLoading,
+                    value = state.guessedPlace,
+                    isError = state.isError,
+                    onValueChange = { onEvent(FriendEvent.OnGuessedPlaceChange(it)) },
+                    onClick = { onEvent(FriendEvent.DecodeCipher) },
+                    modifier = modifier
+                )
             }
         }
-
     }
 }
 

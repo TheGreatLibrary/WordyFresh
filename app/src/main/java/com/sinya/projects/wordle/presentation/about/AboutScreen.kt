@@ -4,15 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
@@ -28,8 +19,8 @@ import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.presentation.settings.components.AppVersionInfo
 import com.sinya.projects.wordle.ui.features.CardColumn
 import com.sinya.projects.wordle.ui.features.CustomCard
-import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.ui.features.RowLink
+import com.sinya.projects.wordle.ui.features.ScreenColumn
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.utils.openUrl
@@ -40,21 +31,10 @@ fun AboutScreen(
 ) {
     val context = LocalContext.current
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(
-                WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-            )
-            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(9.dp)
+    ScreenColumn(
+        title = stringResource(R.string.about_app_screen),
+        navigateBack = navigateToBackStack
     ) {
-        Header(
-            title = stringResource(R.string.about_app_screen),
-            trashVisible = false,
-            navigateTo = navigateToBackStack
-        )
-        Spacer(Modifier.height(0.dp))
         CustomCard(
             modifier = Modifier
         ) {
@@ -107,12 +87,4 @@ fun AboutScreen(
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AboutPreview() {
-    AboutScreen(
-        navigateToBackStack = {}
-    )
 }

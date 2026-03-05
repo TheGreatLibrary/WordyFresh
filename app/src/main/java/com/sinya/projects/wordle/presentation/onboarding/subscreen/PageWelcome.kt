@@ -4,9 +4,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.presentation.onboarding.components.LocalizedText
+import com.sinya.projects.wordle.presentation.onboarding.components.OnboardingPageTemplate
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
@@ -29,16 +30,10 @@ fun PageWelcome(
     onNext: () -> Unit = {},
     changeLang: (String) -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Spacer(Modifier)
-
+    OnboardingPageTemplate {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             Text(
                 text = stringResource(R.string.app_name),
@@ -49,7 +44,7 @@ fun PageWelcome(
             Image(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
-                modifier = Modifier.size(180.dp)
+                modifier = Modifier.size(250.dp)
             )
             Text(
                 text = stringResource(R.string.onboard_welcome),
@@ -62,7 +57,7 @@ fun PageWelcome(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             LocalizedText(
                 onNext = onNext,
@@ -72,7 +67,7 @@ fun PageWelcome(
             RoundedButton(
                 modifier = Modifier.fillMaxWidth(0.7f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
-                contentPadding = PaddingValues(vertical = 3.dp, horizontal = 15.dp),
+                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = onNext
             ) {
                 Text(

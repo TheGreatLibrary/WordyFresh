@@ -42,9 +42,6 @@ class StatisticRepositoryImpl @Inject constructor(
     // StatisticScreen
 
     override suspend fun getAllStatistic(): List<OfflineStatistic> {
-
-
-
         var offline = offlineStatisticDao.getAllStatistic()
         val sync = syncStatisticDao.getAllStatistic()
 
@@ -54,17 +51,6 @@ class StatisticRepositoryImpl @Inject constructor(
         }
         return mergeStatistics(offline, sync)
     }
-
-//    override suspend fun getAllStatistic(): List<OfflineStatistic> {
-//        var offline = offlineStatisticDao.getAllStatistic()
-//        val sync = syncStatisticDao.getAllStatistic()
-//
-//        if (offline.isEmpty()) {
-//            createBaseData()
-//            offline = offlineStatisticDao.getAllStatistic()
-//        }
-//        return mergeStatistics(offline, sync)
-//    }
 
     override suspend fun getMergedSummary(): OfflineStatistic {
         return offlineStatisticDao.getMergedSummary()
@@ -108,7 +94,6 @@ class StatisticRepositoryImpl @Inject constructor(
         val supportedModes = GameMode.getStatsOfDataBase().map {
                 OfflineStatistic(modeId = it.id)
         }
-
         offlineStatisticDao.insertStatisticList(supportedModes)
     }
 

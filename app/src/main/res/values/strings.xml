@@ -120,6 +120,7 @@
         <item quantity="one">%d буква</item>
         <item quantity="few">%d буквы</item>
         <item quantity="many">%d букв</item>
+        <item quantity="other">%d букв</item>
     </plurals>
 
     <!-- Категории профиля -->
@@ -322,4 +323,6 @@
     <string name="parsing_word">Узнать значение слова →</string>
     <string name="share_button_text">Что такое %1$s? %2$s. Я узнал об этом в Wordy Fresh в результате игры:\n\n%3$s\n\nПрисоединяйся: %4$s</string>
     <string name="sum_time">Общее время</string>
+    <string name="create_profile">Создание вашего профиля</string>
+    <string name="put_nickname_and_avatar">Задай себе игровое имя!</string>
 </resources>

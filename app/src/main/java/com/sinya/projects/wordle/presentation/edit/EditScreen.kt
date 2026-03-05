@@ -6,18 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarDuration
@@ -38,8 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.features.AuthHeader
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
-import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.ui.features.RoundedButton
+import com.sinya.projects.wordle.ui.features.ScreenColumn
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
@@ -86,26 +78,17 @@ private fun EditScreenView(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-                )
-                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(27.dp)
+    Box {
+        ScreenColumn(
+            navigateBack = navigateToBackStack
         ) {
-            Header(
-                title = "",
-                trashVisible = false,
-                navigateTo = navigateToBackStack
-            )
             AuthHeader(
                 title = stringResource(R.string.edit),
                 subtitle = stringResource(R.string.put_new_nickname),
             )
+
+            Spacer(Modifier)
+
             EditForm(
                 state = state,
                 onEvent = onEvent
@@ -131,7 +114,9 @@ private fun EditForm(
         .background(white, WordyShapes.extraLarge)
         .padding(horizontal = 26.dp, vertical = 14.dp)
 ) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
         CustomTextFieldWithLabel(
             label = stringResource(R.string.new_nickname),
             name = state.nickname,
@@ -141,13 +126,13 @@ private fun EditForm(
             isError = state.isNicknameError,
             error = stringResource(R.string.is_name_error)
         )
-        Spacer(Modifier.height(15.dp))
+
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.9f),
+                modifier = Modifier.fillMaxWidth(0.7f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = {

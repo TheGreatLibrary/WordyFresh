@@ -1,0 +1,77 @@
+package com.sinya.projects.wordle.presentation.settings.components
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.domain.enums.TypeLanguages
+import com.sinya.projects.wordle.ui.features.CustomModalSheet
+import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyTypography
+import java.util.Locale
+
+@Composable
+fun LanguageModalSheet(
+    currentLang: String,
+    onLanguageSelect: (String) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    val languages = TypeLanguages.entries
+
+    CustomModalSheet(
+        onDismissRequest = onDismissRequest
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 5.dp, bottom = 45.dp, start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.change_lang),
+                color = WordyColor.colors.textPrimary,
+                style = WordyTypography.titleLarge,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            languages.forEach {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onLanguageSelect(it.code) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    RadioButton(
+                        selected = it.code == currentLang,
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = WordyColor.colors.primary
+                        ),
+                        onClick = { onLanguageSelect(it.code) }
+                    )
+                    Text(
+                        text = Locale(it.code).displayName.replaceFirstChar { char -> char.uppercaseChar() },
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = WordyColor.colors.textPrimary
+                    )
+                }
+            }
+        }
+    }
+}

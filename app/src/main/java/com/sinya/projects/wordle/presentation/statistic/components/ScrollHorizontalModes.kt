@@ -25,10 +25,7 @@ fun ScrollHorizontalModes(
 ) {
     val modes = remember { GameMode.getStatsOptions() }
 
-    LazyRow(
-        modifier = Modifier.padding(top = 18.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         items(
             items = modes,
             key = { it.id }

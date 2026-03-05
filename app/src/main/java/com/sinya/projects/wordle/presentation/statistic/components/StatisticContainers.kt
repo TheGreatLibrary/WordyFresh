@@ -51,9 +51,7 @@ fun StatisticContainers(
     )
 
     Row(
-        modifier = Modifier
-            .padding(top = 15.dp)
-            .height(IntrinsicSize.Min),
+        modifier = Modifier.height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         StatisticCountCard(
@@ -72,7 +70,6 @@ fun StatisticContainers(
     }
     Row(
         modifier = Modifier
-            .padding(vertical = 9.dp)
             .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -102,8 +99,6 @@ fun StatisticContainers(
     }
 
     AttemptsProgressCard(statisticByMode)
-
-    Spacer(Modifier.height(9.dp))
 }
 
 @Composable

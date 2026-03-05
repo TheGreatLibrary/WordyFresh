@@ -14,6 +14,7 @@ class WordyApplication : Application() {
     @Inject
     lateinit var engine: SettingsEngine
 
+
     override fun onCreate() {
         super.onCreate()
 

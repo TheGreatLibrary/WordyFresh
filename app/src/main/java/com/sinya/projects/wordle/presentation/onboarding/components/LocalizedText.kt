@@ -1,9 +1,11 @@
 package com.sinya.projects.wordle.presentation.onboarding.components
 
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -30,6 +32,10 @@ fun LocalizedText(
     }
 
     TextButton(
+        colors = ButtonDefaults.textButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = WordyColor.colors.textPrimary,
+        ),
         onClick = {
             onNext()
             changeLocale(nextLang)
@@ -37,8 +43,7 @@ fun LocalizedText(
     ) {
         Text(
             text = buttonText,
-            style = WordyTypography.labelSmall,
-            color = WordyColor.colors.textPrimary
+            style = WordyTypography.labelSmall
         )
     }
 }

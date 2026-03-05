@@ -6,18 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarDuration
@@ -37,9 +28,9 @@ import com.sinya.projects.wordle.presentation.register.RegisterUiState
 import com.sinya.projects.wordle.ui.features.AcceptPolicyCheckbox
 import com.sinya.projects.wordle.ui.features.AuthHeader
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
-import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.features.RowVariableAuth
+import com.sinya.projects.wordle.ui.features.ScreenColumn
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
@@ -63,21 +54,10 @@ fun RegisterFormView(
         }
     }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(
-                WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-            )
-            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(27.dp)
+    ScreenColumn(
+        navigateBack = navigateBack,
+        spaced = 27
     ) {
-        Header(
-            title = "",
-            trashVisible = false,
-            navigateTo = navigateBack
-        )
         AuthHeader(
             title = stringResource(R.string.create_account),
             subtitle = stringResource(R.string.put_string_and_play)
@@ -103,17 +83,7 @@ private fun RegisterForm(
         .background(white, WordyShapes.extraLarge)
         .padding(horizontal = 26.dp, vertical = 14.dp)
 ) {
-    Column {
-        CustomTextFieldWithLabel(
-            label = stringResource(R.string.name),
-            name = state.nickname,
-            placeholder = stringResource(R.string.scary_bober),
-            onValueChange = { onEvent(RegisterEvent.NicknameChanged(it)) },
-            modifier = modifier,
-            isError = state.isNickNameError,
-            error = stringResource(R.string.is_name_error)
-        )
-        Spacer(Modifier.height(15.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
         CustomTextFieldWithLabel(
             label = stringResource(R.string.email),
             name = state.email,
@@ -123,7 +93,6 @@ private fun RegisterForm(
             isError = state.isEmailError,
             error = stringResource(R.string.is_email_error)
         )
-        Spacer(Modifier.height(15.dp))
         CustomTextFieldWithLabel(
             label = stringResource(R.string.password),
             name = state.password,
@@ -133,19 +102,18 @@ private fun RegisterForm(
             isError = state.isPasswordError,
             error = stringResource(R.string.is_password_error)
         )
-        Spacer(Modifier.height(15.dp))
         AcceptPolicyCheckbox(
             isChecked = state.checkboxStatus,
             isError = state.isCheckboxError,
             onCheckedChange = { onEvent(RegisterEvent.CheckboxStatusChanged(it)) }
         )
-        Spacer(Modifier.height(35.dp))
+        Spacer(Modifier)
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.9f),
+                modifier = Modifier.fillMaxWidth(0.7f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = { onEvent(RegisterEvent.RegisterClicked) },

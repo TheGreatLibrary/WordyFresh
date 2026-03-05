@@ -1,6 +1,7 @@
 package com.sinya.projects.wordle.presentation.home.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,8 +22,7 @@ import com.sinya.projects.wordle.ui.features.PlaceholderBox
 @Composable
 fun HomePlaceholder() {
     Column(
-        Modifier
-            .fillMaxSize(),
+        Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -58,7 +58,7 @@ fun HomePlaceholder() {
                 }
             }
         }
-        Column {
+        Box {
             PlaceholderBox(
                 modifier = Modifier.fillMaxWidth(0.7f).height(45.dp),
                 shape = CircleShape

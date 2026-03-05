@@ -10,23 +10,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import coil.compose.rememberAsyncImagePainter
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 
 @Composable
 fun Avatar(modifier: Modifier, imageUri: Uri?, onClick: (() -> Unit)) {
-    val refreshedUri =
-        imageUri?.buildUpon()?.appendQueryParameter("ts", System.currentTimeMillis().toString())
-            ?.build()
+    val context = LocalContext.current
 
+    val request = ImageRequest.Builder(context)
+        .data(imageUri)
+        .memoryCachePolicy(CachePolicy.DISABLED)
+        .diskCachePolicy(CachePolicy.DISABLED)
+        .build()
     Box(
         modifier,
         contentAlignment = Alignment.Center
     ) {
         Image(
-            if (imageUri != null) rememberAsyncImagePainter(refreshedUri) else painterResource(R.drawable.avatar),
+            if (imageUri != null) rememberAsyncImagePainter(request) else painterResource(R.drawable.avatar),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize(0.93f)

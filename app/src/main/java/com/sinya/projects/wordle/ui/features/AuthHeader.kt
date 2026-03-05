@@ -16,7 +16,7 @@ import com.sinya.projects.wordle.ui.theme.WordyTypography
 fun AuthHeader(title: String, subtitle: String) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

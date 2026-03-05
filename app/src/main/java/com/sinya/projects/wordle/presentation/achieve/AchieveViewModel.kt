@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.presentation.achieve
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
+import com.sinya.projects.wordle.domain.model.AchieveItem
 import com.sinya.projects.wordle.domain.useCase.ClearAllAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncAchievementUseCase
@@ -11,6 +12,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,8 +26,23 @@ class AchieveViewModel @Inject constructor(
     private val _state = MutableStateFlow<AchieveUiState>(AchieveUiState.Loading)
     val state: StateFlow<AchieveUiState> = _state.asStateFlow()
 
+//    val state: StateFlow<Map<String, List<AchieveItem>>> = getAllAchievementUseCase().stateIn(
+//
+//    )
+
     init {
         loadAchievements()
+    }
+
+    private fun loadAchievements() = viewModelScope.launch {
+        getAllAchievementUseCase().collect { list ->
+            _state.update {
+                AchieveUiState.Success(
+                    isRefreshing = false,
+                    achieveList = list.groupBy { it.categoryName }
+                )
+            }
+        }
     }
 
     fun onEvent(event: AchieveEvent) {
@@ -48,28 +65,16 @@ class AchieveViewModel @Inject constructor(
         }
     }
 
-    private fun loadAchievements() = viewModelScope.launch {
-        getAllAchievementUseCase().collect { list ->
-            _state.update {
-                AchieveUiState.Success(
-                    achieveList = list.groupBy { it.categoryName }
-                )
-            }
-        }
-    }
-
     private fun refreshAchievement() = viewModelScope.launch {
-        _state.update { currentState ->
-            if (currentState is AchieveUiState.Success) {
-                currentState.copy(isRefreshing = true)
-            } else {
-                currentState
-            }
+        updateIfSuccess {
+            it.copy(isRefreshing = true)
         }
 
         syncAchievementUseCase().fold(
             onSuccess = {
-              //  loadAchievements()
+                updateIfSuccess {
+                    it.copy(isRefreshing = false)
+                }
             },
             onFailure = { exception ->
                 val errorMessage = when (exception) {
@@ -77,15 +82,11 @@ class AchieveViewModel @Inject constructor(
                     else -> "Ошибка синхронизации: ${exception.message}"
                 }
 
-                _state.update { currentState ->
-                    if (currentState is AchieveUiState.Success) {
-                        currentState.copy(
-                            isRefreshing = false,
-                            errorMessage = errorMessage
-                        )
-                    } else {
-                        currentState
-                    }
+                updateIfSuccess {
+                    it.copy(
+                        isRefreshing = false,
+                        errorMessage = errorMessage
+                    )
                 }
             }
         )
@@ -96,16 +97,22 @@ class AchieveViewModel @Inject constructor(
             onSuccess = {
             },
             onFailure = { exception ->
-                _state.update { currentState ->
-                    if (currentState is AchieveUiState.Success) {
-                        currentState.copy(
-                            errorMessage = "Ошибка очистки: ${exception.message}"
-                        )
-                    } else {
-                        currentState
-                    }
+                updateIfSuccess {
+                    it.copy(
+                        errorMessage = "Ошибка очистки: ${exception.message}"
+                    )
                 }
             }
         )
+    }
+
+    private fun updateIfSuccess(transform: (AchieveUiState.Success) -> AchieveUiState.Success) {
+        _state.update { currentState ->
+            if (currentState is AchieveUiState.Success) {
+                transform(currentState)
+            } else {
+                currentState
+            }
+        }
     }
 }

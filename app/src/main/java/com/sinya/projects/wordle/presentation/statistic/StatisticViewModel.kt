@@ -29,7 +29,9 @@ class StatisticViewModel @Inject constructor(
     val state: StateFlow<StatisticUiState> = _state.asStateFlow()
 
     init {
-        loadStatistic()
+        viewModelScope.launch {
+            loadStatistic()
+        }
     }
 
     fun onEvent(event: StatisticEvent) {
@@ -59,7 +61,7 @@ class StatisticViewModel @Inject constructor(
         )
     }
 
-    private fun loadStatistic() = viewModelScope.launch {
+    private suspend fun loadStatistic() {
         getAllStatisticsUseCase().fold(
             onSuccess = { stats ->
                 _state.value = StatisticUiState.Success(
@@ -77,29 +79,31 @@ class StatisticViewModel @Inject constructor(
         )
     }
 
-    private fun refreshStatistics() = viewModelScope.launch {
+    private fun refreshStatistics() {
         updateIfSuccess {
             it.copy(isRefreshing = true)
         }
 
-        syncStatisticUseCase().fold(
-            onSuccess = {
-                loadStatistic()
-            },
-            onFailure = { exception ->
-                val errorMessage = when (exception) {
-                    is UserNotAuthenticatedException -> "Требуется авторизация"
-                    else -> "Ошибка синхронизации: ${exception.message}"
-                }
+        viewModelScope.launch {
+            syncStatisticUseCase().fold(
+                onSuccess = {
+                    loadStatistic()
+                },
+                onFailure = { exception ->
+                    val errorMessage = when (exception) {
+                        is UserNotAuthenticatedException -> "Требуется авторизация"
+                        else -> "Ошибка синхронизации: ${exception.message}"
+                    }
 
-                updateIfSuccess {
-                    it.copy(
-                        isRefreshing = false,
-                        errorMessage = errorMessage
-                    )
+                    updateIfSuccess {
+                        it.copy(
+                            isRefreshing = false,
+                            errorMessage = errorMessage
+                        )
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     private fun clearAllStatistics() = viewModelScope.launch {

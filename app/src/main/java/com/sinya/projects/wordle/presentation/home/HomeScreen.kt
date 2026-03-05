@@ -43,7 +43,6 @@ fun HomeScreen(
     Box(
         Modifier
             .fillMaxSize()
-//            .consumeWindowInsets(WindowInsets.statusBars)
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(start = 16.dp, end = 16.dp, bottom = 50.dp),
     ) {
@@ -104,7 +103,7 @@ private fun HomeScreenView(
                     onRandomClick = { navigateTo(ScreenRoute.Game(mode = GameMode.RANDOM.id)) },
                 )
             }
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 state.savedGame?.let {
                     ContinueGameButton(
                         savedGame = it,

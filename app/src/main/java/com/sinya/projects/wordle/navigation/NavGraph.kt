@@ -10,8 +10,10 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.domain.enums.GameMode
+import com.sinya.projects.wordle.domain.model.PopUpStrategy
 import com.sinya.projects.wordle.presentation.about.AboutScreen
 import com.sinya.projects.wordle.presentation.achieve.AchieveScreen
+import com.sinya.projects.wordle.presentation.createProfile.CreateProfileScreen
 import com.sinya.projects.wordle.presentation.dictionary.DictionaryScreen
 import com.sinya.projects.wordle.presentation.edit.EditScreen
 import com.sinya.projects.wordle.presentation.emailConfirm.EmailConfirmScreen
@@ -31,7 +33,7 @@ fun NavGraph(
     startRoute: ScreenRoute,
     navHostController: NavHostController,
     navigateToBackStack: () -> Unit,
-    navigateTo: (ScreenRoute) -> Unit,
+    navigateTo: (ScreenRoute, PopUpStrategy) -> Unit,
     modifier: Modifier
 ) {
     NavHost(
@@ -43,18 +45,19 @@ fun NavGraph(
     ) {
         composable<ScreenRoute.Onboarding> {
             OnboardingPager(
-                navigateTo = { navigateTo(ScreenRoute.Home) }
+                navigateTo = { navigateTo(ScreenRoute.Home, PopUpStrategy.ToRoute(ScreenRoute.Onboarding)) }
             )
         }
+
         composable<ScreenRoute.Home> {
             HomeScreen(
-                navigateTo = navigateTo,
+                navigateTo = { navigateTo(it, PopUpStrategy.None) },
             )
         }
         composable<ScreenRoute.Statistic> {
             StatisticScreen(
                 navigateToBackStack = navigateToBackStack,
-                navigateTo = navigateTo
+                navigateTo = { navigateTo(it, PopUpStrategy.None) }
             )
         }
         composable<ScreenRoute.Achieves> {
@@ -67,17 +70,16 @@ fun NavGraph(
                 navigateToBackStack = navigateToBackStack
             )
         }
-
         composable<ScreenRoute.SettingWithBar> {
             SettingsScreen(
                 navigateToBackStack = navigateToBackStack,
-                navigateToOnboarding = { navigateTo(ScreenRoute.Onboarding) }
+                navigateToOnboarding = { navigateTo(ScreenRoute.Onboarding, PopUpStrategy.None) }
             )
         }
         composable<ScreenRoute.SettingWithoutBar> {
             SettingsScreen(
                 navigateToBackStack = navigateToBackStack,
-                navigateToOnboarding = { navigateTo(ScreenRoute.Onboarding) }
+                navigateToOnboarding = { navigateTo(ScreenRoute.Onboarding, PopUpStrategy.None) }
             )
         }
 
@@ -90,39 +92,30 @@ fun NavGraph(
                 lang = game.lang,
                 hiddenWord = game.word.orEmpty(),
                 navigateToBackStack = navigateToBackStack,
-                navigateTo = navigateTo
-            )
-        }
-
-        composable<ScreenRoute.About> {
-            AboutScreen(
-                navigateToBackStack = navigateToBackStack
+                navigateTo = { navigateTo(it, PopUpStrategy.None) }
             )
         }
 
         composable<ScreenRoute.Profile> {
             ProfileScreen(
                 navigateBack = navigateToBackStack,
-                navigateTo = navigateTo,
+                navigateTo = { navigateTo(it, PopUpStrategy.None) }
             )
         }
-        composable<ScreenRoute.Edit> {
-            EditScreen(
+        composable<ScreenRoute.Register> {
+            RegisterScreen(
                 navigateBack = navigateToBackStack,
-                navigateTo = { navigateTo(ScreenRoute.Profile) },
-            )
+                navigateTo = { navigateTo(it, PopUpStrategy.ToRoute(ScreenRoute.Register)) }
+            ) { user ->
+                if (user != null) navigateTo(ScreenRoute.Profile, PopUpStrategy.ToRoute(ScreenRoute.Register))
+                else navigateTo(ScreenRoute.Login, PopUpStrategy.ToRoute(ScreenRoute.Register))
+            }
         }
         composable<ScreenRoute.Login> {
             LoginScreen(
                 navigateBack = navigateToBackStack,
-                navigateTo = navigateTo,
-                onLoggedIn = {
-                    navHostController.navigate(ScreenRoute.Profile) {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            inclusive = false
-                        }
-                    }
-                }
+                navigateTo = { navigateTo(it, PopUpStrategy.None) },
+                onLoggedIn = { navigateTo(ScreenRoute.Profile, PopUpStrategy.ToStart()) }
             )
         }
         composable<ScreenRoute.EmailConfirm> {
@@ -130,28 +123,21 @@ fun NavGraph(
                 navigateBack = navigateToBackStack,
             )
         }
-
-        composable<ScreenRoute.Register>(
+        composable<ScreenRoute.Edit> {
+            EditScreen(
+                navigateBack = navigateToBackStack,
+                navigateTo = { navigateTo(ScreenRoute.Profile, PopUpStrategy.ToRoute(ScreenRoute.Edit)) },
+            )
+        }
+        composable<ScreenRoute.CreateProfile>(
             deepLinks = listOf(
                 navDeepLink { uriPattern = LegalLinks.EMAIL_CONFIRMED }
             )
         ) {
-            RegisterScreen(
+            CreateProfileScreen(
                 navigateBack = navigateToBackStack,
-                navigateTo = navigateTo
-            ) { user ->
-                if (user != null) {
-                    navHostController.navigate(ScreenRoute.Profile) {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            inclusive = false
-                        }
-                    }
-                } else {
-                    navHostController.navigate(ScreenRoute.Login) {
-                        popUpTo(ScreenRoute.Register) { inclusive = true }
-                    }
-                }
-            }
+                navigateTo = { navigateTo(ScreenRoute.Profile, PopUpStrategy.ToStart()) }
+            )
         }
         composable<ScreenRoute.ResetEmail>(
             deepLinks = listOf(
@@ -160,13 +146,7 @@ fun NavGraph(
         ) {
             ResetEmailScreen(
                 navigateToBackStack = navigateToBackStack,
-                navigateToProfile = {
-                    navHostController.navigate(ScreenRoute.Profile) {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            inclusive = false
-                        }
-                    }
-                }
+                navigateToProfile = { navigateTo(ScreenRoute.Profile, PopUpStrategy.ToRoute(ScreenRoute.ResetEmail)) }
             )
         }
         composable<ScreenRoute.ResetPassword>(
@@ -176,13 +156,12 @@ fun NavGraph(
         ) {
             ResetPasswordScreen(
                 navigateToBackStack = navigateToBackStack,
-                navigateToProfile = {
-                    navHostController.navigate(ScreenRoute.Profile) {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            inclusive = false
-                        }
-                    }
-                }
+                navigateToProfile = { navigateTo(ScreenRoute.Profile, PopUpStrategy.ToRoute(ScreenRoute.ResetPassword)) }
+            )
+        }
+        composable<ScreenRoute.About> {
+            AboutScreen(
+                navigateToBackStack = navigateToBackStack
             )
         }
     }

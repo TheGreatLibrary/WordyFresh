@@ -28,7 +28,7 @@ class SyncViewModel @Inject constructor(
     }
 
     private fun observeSessionChanges() = viewModelScope.launch {
-        authDataSource.sessionStatus.collect { status ->
+        authDataSource.sessionStatusFlow().collect { status ->
             val wasAuthenticated = isAuthenticated
             isAuthenticated = status is SessionStatus.Authenticated
 

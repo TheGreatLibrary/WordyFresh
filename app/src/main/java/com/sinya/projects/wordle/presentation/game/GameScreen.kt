@@ -3,11 +3,9 @@ package com.sinya.projects.wordle.presentation.game
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -105,14 +103,10 @@ private fun GameScreenView(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .windowInsetsPadding(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-                )
-//                .padding(top = 50.dp)
+                .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(paddingValues),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-//            Spacer(Modifier.height(50.dp))
             GameHeader(
                 navigateToBackStack = navigateToBackStack,
                 navigateTo = navigateTo,
@@ -131,6 +125,7 @@ private fun GameScreenView(
                 onEvent = onEvent
             )
         }
+
         NotRightWordDialog(state.showNotFoundDialog, state.showHardModeHint)
         if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
     }

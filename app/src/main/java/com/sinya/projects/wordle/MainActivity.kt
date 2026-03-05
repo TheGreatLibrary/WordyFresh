@@ -13,8 +13,10 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
+import com.sinya.projects.wordle.data.remote.supabase.SyncViewModel
 import com.sinya.projects.wordle.navigation.MainContent
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.theme.LocalSettingsEngine
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun App(engine: SettingsEngine) {
+        val syncViewModel: SyncViewModel = hiltViewModel()
         val config by engine.uiState.collectAsStateWithLifecycle()
 
         SideEffect {

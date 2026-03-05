@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.presentation.resetPassword
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.useCase.ImportSessionUseCase
@@ -102,6 +103,10 @@ class ResetPasswordViewModel @Inject constructor(
 
         val formState = _state.value as? ResetPasswordUiState.ResetForm ?: return
 
+        updateIfResetForm { formState.copy(
+            isLoading = true
+        ) }
+
         viewModelScope.launch {
             updatePasswordUseCase(formState.newPassword).fold(
                 onSuccess = {
@@ -109,6 +114,7 @@ class ResetPasswordViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     _state.value = ResetPasswordUiState.ResetForm(
+                        isLoading = false,
                         newPassword = formState.newPassword,
                         repeatNewPassword = formState.repeatNewPassword,
                         errorMessage = error.localizedMessage ?: "Ошибка смены пароля"

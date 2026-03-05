@@ -5,16 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -34,8 +26,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
-import com.sinya.projects.wordle.ui.features.Header
 import com.sinya.projects.wordle.ui.features.RoundedButton
+import com.sinya.projects.wordle.ui.features.ScreenColumn
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
@@ -49,14 +41,14 @@ fun EmailConfirmScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    when (val currentState = state) {
+    when (state) {
         is EmailConfirmUiState.EmailConfirmForm -> EmailConfirmScreenView(
             navigateBack = navigateBack,
-            state = currentState,
+            state = state as EmailConfirmUiState.EmailConfirmForm,
             onEvent = viewModel::onEvent
         )
 
-        is EmailConfirmUiState.Loading -> LoadingConfirmScreen(currentState.email)
+        is EmailConfirmUiState.Loading -> LoadingConfirmScreen((state as EmailConfirmUiState.Loading).email)
     }
 }
 
@@ -78,23 +70,8 @@ private fun EmailConfirmScreenView(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-                )
-                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(27.dp)
-        ) {
-            Header(
-                title = "",
-                trashVisible = false,
-                navigateTo = navigateBack
-            )
+    Box {
+        ScreenColumn(navigateBack = navigateBack, spaced = 27) {
             HeaderConfirm()
             CustomTextFieldWithLabel(
                 label = stringResource(R.string.email),
@@ -109,7 +86,7 @@ private fun EmailConfirmScreenView(
                 error = stringResource(R.string.is_email_error)
             )
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.9f),
+                modifier = Modifier.fillMaxWidth(0.7f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = { onEvent(EmailConfirmEvent.GoToLoading) }
@@ -136,20 +113,20 @@ private fun EmailConfirmScreenView(
 private fun HeaderConfirm() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(9.dp)
     ) {
         Text(
             text = stringResource(R.string.forgot_password),
             style = WordyTypography.titleLarge,
             color = WordyColor.colors.textPrimary,
-            fontSize = 22.sp,
+            fontSize = 20.sp,
             textAlign = TextAlign.Center
         )
         Text(
             text = stringResource(R.string.put_email_of_account),
             style = WordyTypography.bodyMedium,
             color = WordyColor.colors.textPrimary,
-            fontSize = 15.sp,
+            fontSize = 16.sp,
             textAlign = TextAlign.Center
         )
     }

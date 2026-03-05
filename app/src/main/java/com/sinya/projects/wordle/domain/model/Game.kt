@@ -15,9 +15,3 @@ data class Game(
     val keyboard: List<List<Key>>,
 )
 
-@Serializable
-data class GameSettings(
-    val confettiStatus: Boolean,
-    val ratingStatus: Boolean,
-    val keyboardCode: Int
-)
