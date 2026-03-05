@@ -325,4 +325,6 @@
     <string name="per_win">Win rate</string>
     <string name="parsing_word">Learn word meaning →</string>
     <string name="share_button_text">What is %1$s? %2$s. I learned this in Wordy Fresh while playing:\n\n%3$s\n\nJoin me: %4$s</string>
+    <string name="create_profile">Create your profile</string>
+    <string name="put_nickname_and_avatar">Pick a nickname and avatar!</string>
 </resources>

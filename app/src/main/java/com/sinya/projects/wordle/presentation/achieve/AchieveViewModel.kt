@@ -3,7 +3,6 @@ package com.sinya.projects.wordle.presentation.achieve
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
-import com.sinya.projects.wordle.domain.model.AchieveItem
 import com.sinya.projects.wordle.domain.useCase.ClearAllAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncAchievementUseCase
@@ -12,7 +11,6 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 

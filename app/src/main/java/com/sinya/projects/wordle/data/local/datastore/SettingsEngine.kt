@@ -1,12 +1,9 @@
 package com.sinya.projects.wordle.data.local.datastore
 
-import android.net.Uri
 import com.sinya.projects.wordle.domain.enums.BackgroundSettings
 import com.sinya.projects.wordle.domain.enums.TypeKeyboards
 import com.sinya.projects.wordle.domain.model.Game
 import com.sinya.projects.wordle.domain.model.UiConfig
-import com.sinya.projects.wordle.domain.repository.AvatarRepository
-import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
