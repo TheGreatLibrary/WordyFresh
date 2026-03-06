@@ -96,7 +96,7 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:realtime-kt")
 
     // ktor
-    implementation("io.ktor:ktor-client-android:3.1.0")
+    implementation("io.ktor:ktor-client-okhttp:3.1.0")
 
     // room
     implementation(libs.androidx.room.runtime)
@@ -109,7 +109,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // datastore
-    implementation("androidx.datastore:datastore-preferences:1.1.6")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

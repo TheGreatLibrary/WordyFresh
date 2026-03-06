@@ -498,12 +498,12 @@ class GameViewModel @AssistedInject constructor(
                     return@launch
                 }
             )
-        }
 
-        checkFinishWithAnimation(enteredWord, row)
+            checkFinishWithAnimation(enteredWord, row)
 
-        if (row < 5) {
-            saveGame()
+            if (row < 5) {
+                saveGame()
+            }
         }
     }
 

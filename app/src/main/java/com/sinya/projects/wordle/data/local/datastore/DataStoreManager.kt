@@ -1,12 +1,15 @@
 package com.sinya.projects.wordle.data.local.datastore
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.preferences.preferencesDataStoreFile
 import com.sinya.projects.wordle.domain.enums.BackgroundSettings
 import com.sinya.projects.wordle.domain.enums.TypeKeyboards
 import com.sinya.projects.wordle.domain.enums.TypeLanguages
@@ -21,7 +24,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 
-private val Context.dataStore by preferencesDataStore(name = "settings")
 
 sealed interface SavedGameState {
     data object Loading : SavedGameState
@@ -32,6 +34,8 @@ sealed interface SavedGameState {
 class DataStoreManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
     private val RATING_WORDS_KEY = booleanPreferencesKey("rating_words")
     private val CONFETTI_KEY = booleanPreferencesKey("confetti")
     private val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")

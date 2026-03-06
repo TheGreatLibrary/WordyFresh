@@ -2,6 +2,7 @@ package com.sinya.projects.wordle.data.local.datastore
 
 import com.sinya.projects.wordle.domain.enums.BackgroundSettings
 import com.sinya.projects.wordle.domain.enums.TypeKeyboards
+import com.sinya.projects.wordle.domain.enums.TypeLanguages
 import com.sinya.projects.wordle.domain.model.Game
 import com.sinya.projects.wordle.domain.model.UiConfig
 import jakarta.inject.Inject
@@ -16,11 +17,10 @@ import kotlinx.coroutines.launch
 class SettingsEngine @Inject constructor(
     private val store: DataStoreManager
 ) {
-
     private val _state = AtomicState(
         UiConfig(
             dark = false,
-            language = "ru",
+            language = TypeLanguages.RU.code,
             onboardingDone = null,
             background = BackgroundSettings.DEFAULT.name,
             ratingWords = false,

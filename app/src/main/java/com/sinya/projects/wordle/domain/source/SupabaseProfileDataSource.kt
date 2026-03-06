@@ -5,13 +5,26 @@ import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.annotations.SupabaseExperimental
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.realtime.PostgresAction
+import io.github.jan.supabase.realtime.channel
+import io.github.jan.supabase.realtime.decodeRecord
+import io.github.jan.supabase.realtime.postgresChangeFlow
+import io.github.jan.supabase.realtime.selectAsFlow
+import io.github.jan.supabase.realtime.selectSingleValueAsFlow
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
+import java.util.Locale.filter
 
 interface SupabaseProfileDataSource {
     suspend fun fetchProfile(userId: String): Profiles?
@@ -20,6 +33,7 @@ interface SupabaseProfileDataSource {
     suspend fun updateNickname(nickname: String, id: String): Result<Unit>
     suspend fun syncToSupabase(userId: String): Result<Unit>
     suspend fun syncFromSupabase(userId: String): Result<Profiles?>
+    suspend fun observeProfile(userId: String): Flow<Profiles?>
 }
 
 class SupabaseProfileDataSourceImpl @Inject constructor(
@@ -40,6 +54,15 @@ class SupabaseProfileDataSourceImpl @Inject constructor(
             }
         }
     }
+
+    @OptIn(SupabaseExperimental::class)
+    override suspend fun observeProfile(userId: String): Flow<Profiles?> =
+        supabaseClient
+            .from("profiles")
+            .selectSingleValueAsFlow(Profiles::id) {
+                eq("id", userId)
+            }
+
 
     override suspend fun updateProfile(profile: Profiles): Result<Unit> {
         return withContext(Dispatchers.IO) {

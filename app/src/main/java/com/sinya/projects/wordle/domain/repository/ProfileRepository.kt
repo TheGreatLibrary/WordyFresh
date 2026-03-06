@@ -4,12 +4,14 @@ import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.domain.error.InvalidSendMailException
-import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.error.UserHasNotProfileException
+import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseProfileDataSource
 import io.github.jan.supabase.auth.user.UserInfo
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 interface ProfileRepository {
     // RegistrationScreen
@@ -35,6 +37,7 @@ interface ProfileRepository {
     // ProfileScreen
     suspend fun updateImage(image: String): Result<Unit>
     suspend fun clearProfile()
+    suspend fun getProfileFlow(): Flow<Result<Profiles?>>
     suspend fun getProfile(): Result<Profiles>
 
     // SyncViewModel
@@ -241,6 +244,24 @@ class ProfileRepositoryImpl @Inject constructor(
             else Result.failure(UserHasNotProfileException())
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    override suspend fun getProfileFlow(): Flow<Result<Profiles?>> = flow {
+        try {
+            val user = supabaseAuthDataSource.getCurrentUser()
+                ?: throw UserNotAuthenticatedException()
+
+            supabaseProfileDataSource.observeProfile(user.id)
+                .collect { profile ->
+                    if (profile != null) {
+                        emit(Result.success(profile))
+                    } else {
+                        emit(Result.failure(UserHasNotProfileException()))
+                    }
+                }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
         }
     }
 

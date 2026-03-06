@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -24,6 +25,9 @@ import com.sinya.projects.wordle.ui.theme.WordleTheme
 import com.sinya.projects.wordle.utils.updateLocale
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,6 +41,8 @@ class MainActivity : ComponentActivity() {
         splash.setKeepOnScreenCondition {
             engine.uiState.value.onboardingDone == null
         }
+
+        updateLocale(engine.uiState.value.language)
 
         applySystem()
 
@@ -55,8 +61,8 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun App(engine: SettingsEngine) {
-        val syncViewModel: SyncViewModel = hiltViewModel()
         val config by engine.uiState.collectAsStateWithLifecycle()
+        val syncViewModel: SyncViewModel = hiltViewModel()
 
         SideEffect {
             WindowCompat.getInsetsController(window, window.decorView).apply {
@@ -64,8 +70,12 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        LaunchedEffect(config.language) {
-            updateLocale(config.language)
+        LaunchedEffect(Unit) {
+            snapshotFlow { config.language }
+                .drop(1)
+                .collect { lang ->
+                    updateLocale(lang)
+                }
         }
 
         CompositionLocalProvider(

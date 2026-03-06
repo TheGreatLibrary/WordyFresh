@@ -45,34 +45,57 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun loadProfile() = viewModelScope.launch {
-        getProfileUseCase().fold(
-            onSuccess = { profile ->
-                Log.d("Profile", "профиль $profile")
-
-                _state.value = ProfileUiState.InAccount(
-                    profile = profile,
-                    avatarUri = null,
-                )
-                combine(
-                    sessionManager.avatar,
-                    sessionManager.userInfo.map { it?.email ?: "" }
-                ) { avatar, email1 -> avatar to email1 }.collect { (avatar, email) ->
-                    _state.update { state ->
-                        if (state is ProfileUiState.InAccount) state.copy(avatarUri = avatar, email = email)
-                        else state
+        getProfileUseCase().collect { result ->
+            result.fold(
+                onSuccess = { profile ->
+                    Log.d("Profile", profile.toString())
+                    _state.value = ProfileUiState.InAccount(
+                        profile = profile!!,
+                        avatarUri = sessionManager.avatar.value,
+                        email = sessionManager.userInfo.value?.email ?: ""
+                    )
+                },
+                onFailure = { error ->
+                    when (error) {
+                        is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
+                        is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
+                        else -> _state.value = ProfileUiState.NoAccount
                     }
+                    Log.e("Profile", "Ошибка: ", error)
                 }
-            },
-            onFailure = { error ->
-                when (error) {
-                    is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
-                    is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
-                    else ->  _state.value = ProfileUiState.NoAccount
-                }
-                Log.e("Profile", "Ошибка: ", error)
-            }
-        )
+            )
+        }
     }
+
+//    private fun loadProfile() = viewModelScope.launch {
+//        getProfileUseCase().fold(
+//            onSuccess = { profile ->
+//                Log.d("Profile", "профиль $profile")
+//
+//                _state.value = ProfileUiState.InAccount(
+//                    profile = profile,
+//                    avatarUri = null,
+//                )
+//                combine(
+//                    sessionManager.avatar,
+//                    sessionManager.userInfo.map { it?.email ?: "" }
+//                ) { avatar, email1 -> avatar to email1 }.collect { (avatar, email) ->
+//                    _state.update { state ->
+//                        if (state is ProfileUiState.InAccount) state.copy(avatarUri = avatar, email = email)
+//                        else state
+//                    }
+//                }
+//            },
+//            onFailure = { error ->
+//                when (error) {
+//                    is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
+//                    is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
+//                    else ->  _state.value = ProfileUiState.NoAccount
+//                }
+//                Log.e("Profile", "Ошибка: ", error)
+//            }
+//        )
+//    }
 
     private fun signOut() = viewModelScope.launch {
         signOutUseCase().fold(
@@ -96,7 +119,12 @@ class ProfileViewModel @Inject constructor(
             sessionManager.uploadAvatar(uri)
                 .onFailure { error ->
                     Log.e("ProfileVM", "uploadAvatar failed", error)
-                    updateIfSuccess { it.copy(isUploadingAvatar = false, errorMessage = "Ошибка обновления аватара") }
+                    updateIfSuccess {
+                        it.copy(
+                            isUploadingAvatar = false,
+                            errorMessage = "Ошибка обновления аватара"
+                        )
+                    }
                 }
                 .onSuccess {
                     updateImageUseCase(LegalLinks.getAvatarFileName(id)).fold(
