@@ -7,23 +7,27 @@ import com.sinya.projects.wordle.domain.model.Key
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
 import com.sinya.projects.wordle.ui.features.UiText
 
-data class GameUiState(
-    val gridState: List<Cell> = emptyList(),
-    val keyboardState: List<List<Key>> = emptyList(),
+sealed interface GameUiState {
+    data object Loading : GameUiState
 
-    val showNotFoundDialog: Boolean = false,
-    val showHardModeHint: UiText? = null,
-    val showFinishDialog: FinishStatisticGame? = null,
+    data class Ready(
+        val gridState: List<Cell> = emptyList(),
+        val keyboardState: List<List<Key>> = emptyList(),
 
-    val focusedCell: Int = 0,
-    val result: GameState = GameState.NONE,
-    val timePassed: Long = 0,
-    val mode: GameMode = GameMode.NORMAL,
-    val wordLength: Int = 5,
-    val lang: String = "ru",
-    val hiddenWord: String = "",
+        val showNotFoundDialog: Boolean = false,
+        val showHardModeHint: UiText? = null,
+        val showFinishDialog: FinishStatisticGame? = null,
 
-    val confettiStatus: Boolean = false,
-    val ratingStatus: Boolean = false,
-    val keyboardCode: Int = 0
-)
+        val focusedCell: Int = 0,
+        val result: GameState = GameState.NONE,
+        val timePassed: Long = 0,
+        val mode: GameMode = GameMode.NORMAL,
+        val wordLength: Int = 5,
+        val lang: String = "ru",
+        val hiddenWord: String = "",
+
+        val confettiStatus: Boolean = false,
+        val ratingStatus: Boolean = false,
+        val keyboardCode: Int = 0
+    ) : GameUiState
+}

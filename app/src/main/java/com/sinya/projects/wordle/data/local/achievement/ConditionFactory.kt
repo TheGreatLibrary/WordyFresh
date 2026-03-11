@@ -29,7 +29,6 @@ object ConditionFactory {
         AchievementId.TESTER -> SupportMessageSentCondition()
         AchievementId.SECRET_PICNIC -> MysteryCondition("ПИКНИК")
         AchievementId.SECRET_BOBER -> MysteryCondition("БОБЕР")
-        // fallback
         else                                -> DummyCondition()
     }
 

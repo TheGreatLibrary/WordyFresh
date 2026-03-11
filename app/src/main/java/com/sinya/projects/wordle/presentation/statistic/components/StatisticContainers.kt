@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +52,24 @@ fun StatisticContainers(
         animationSpec = tween(500),
         label = "winRate"
     )
+    var smallFontSize by remember { mutableStateOf(26.sp) }
+    var bigFontSize by remember { mutableStateOf(50.sp) }
+    val onTextLayoutSmall: (TextLayoutResult) -> Unit = remember {
+        { result ->
+            if (result.didOverflowWidth) {
+                smallFontSize = (smallFontSize.value * 0.9f).sp.value
+                    .coerceAtLeast(12.sp.value).sp
+            }
+        }
+    }
+    val onTextLayoutBig: (TextLayoutResult) -> Unit = remember {
+        { result ->
+            if (result.didOverflowWidth) {
+                bigFontSize = (bigFontSize.value * 0.9f).sp.value
+                    .coerceAtLeast(16.sp.value).sp
+            }
+        }
+    }
 
     Row(
         modifier = Modifier.height(IntrinsicSize.Min),
@@ -56,9 +78,10 @@ fun StatisticContainers(
         StatisticCountCard(
             value = statisticByMode.countGame,
             description = stringResource(R.string.all_count_game),
-            fontSize = 50.sp,
+            fontSize = bigFontSize,
             descriptionSize = 14.sp,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            onTextLayout = onTextLayoutBig
         )
 
         StatisticWinRateCard(
@@ -72,29 +95,39 @@ fun StatisticContainers(
             .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        StatisticCountCard(
-            value = statisticByMode.currentStreak,
-            description = stringResource(R.string.now_serial),
-            fontSize = 26.sp,
-            descriptionSize = 11.sp,
-            modifier = Modifier.weight(1f)
-        )
+        key(smallFontSize) {
+            StatisticCountCard(
+                value = statisticByMode.currentStreak,
+                description = stringResource(R.string.now_serial),
+                fontSize = smallFontSize,
+                onTextLayout = onTextLayoutSmall,
+                descriptionSize = 11.sp,
+                modifier = Modifier.weight(1f)
+            )
+        }
 
-        StatisticCountCard(
-            value = statisticByMode.bestStreak,
-            description = stringResource(R.string.best_serial),
-            fontSize = 26.sp,
-            descriptionSize = 11.sp,
-            modifier = Modifier.weight(1f)
-        )
+        key(smallFontSize) {
 
-        StatisticTimeCard(
-            timeText = animatedTime,
-            countGame = statisticByMode.countGame,
-            fontSize = 26.sp,
-            descriptionSize = 11.sp,
-            modifier = Modifier.weight(1f)
-        )
+            StatisticCountCard(
+                value = statisticByMode.bestStreak,
+                description = stringResource(R.string.best_serial),
+                fontSize = smallFontSize,
+                onTextLayout = onTextLayoutSmall,
+                descriptionSize = 11.sp,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        key(smallFontSize) {
+
+            StatisticTimeCard(
+                timeText = animatedTime,
+                countGame = statisticByMode.countGame,
+                fontSize = smallFontSize,
+                onTextLayout = onTextLayoutSmall,
+                descriptionSize = 11.sp,
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 
     AttemptsProgressCard(statisticByMode)

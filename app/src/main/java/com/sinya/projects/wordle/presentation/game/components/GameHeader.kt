@@ -29,7 +29,7 @@ fun GameHeader(
     navigateToBackStack: () -> Unit,
     navigateTo: (ScreenRoute) -> Unit,
     onEvent: (GameEvent) -> Unit,
-    state: GameUiState
+    state: GameUiState.Ready
 ) {
     Row(
         Modifier

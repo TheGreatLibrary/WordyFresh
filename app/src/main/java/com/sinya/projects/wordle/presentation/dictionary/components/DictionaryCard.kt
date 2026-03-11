@@ -1,7 +1,12 @@
 package com.sinya.projects.wordle.presentation.dictionary.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -93,6 +98,19 @@ private fun DictionaryCardExpandedContent(
     onOpenUrl: (String) -> Unit,
     onShare: (String, String) -> Unit
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+
+    val angle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing)
+        ),
+        label = "rotation"
+    )
+
+    val rotation = if (item.isLoading) angle else 0f
+
     Column {
         HorizontalDivider(
             color = WordyColor.colors.secondary,
@@ -117,7 +135,7 @@ private fun DictionaryCardExpandedContent(
             DictionaryImageButton(R.drawable.dict_share) {
                 onShare(item.word, item.description)
             }
-            DictionaryImageButton(image = R.drawable.dict_reload) {
+            DictionaryImageButton(image = R.drawable.dict_reload, rotation) {
                 onEvent(DictionaryEvent.OnReloadedDefinition(item))
             }
         }

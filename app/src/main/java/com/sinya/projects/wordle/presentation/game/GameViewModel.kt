@@ -10,26 +10,26 @@ import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
 import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
 import com.sinya.projects.wordle.data.local.datastore.SavedGameState
 import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
+import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.enums.GameState
-import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
-import com.sinya.projects.wordle.domain.useCase.GetRandomWordUseCase
-import com.sinya.projects.wordle.domain.useCase.GetStatisticByModeUseCase
-import com.sinya.projects.wordle.domain.useCase.GetWordRatingUseCase
-import com.sinya.projects.wordle.domain.useCase.UpdateStatisticUseCase
-import com.sinya.projects.wordle.domain.useCase.WordExistsUseCase
 import com.sinya.projects.wordle.domain.model.Cell
 import com.sinya.projects.wordle.domain.model.Game
-import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.model.GameSettings
 import com.sinya.projects.wordle.domain.model.getWord
 import com.sinya.projects.wordle.domain.model.toEmojiGridFromULong
 import com.sinya.projects.wordle.domain.model.updateColor
 import com.sinya.projects.wordle.domain.model.updateText
+import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.CheckHardModeRulesUseCase
 import com.sinya.projects.wordle.domain.useCase.GenerateKeyboardLayoutUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllStatisticsByModeUseCase
+import com.sinya.projects.wordle.domain.useCase.GetRandomWordUseCase
+import com.sinya.projects.wordle.domain.useCase.GetStatisticByModeUseCase
+import com.sinya.projects.wordle.domain.useCase.GetWordRatingUseCase
 import com.sinya.projects.wordle.domain.useCase.InsertOrUpdateDefinitionUseCase
+import com.sinya.projects.wordle.domain.useCase.UpdateStatisticUseCase
 import com.sinya.projects.wordle.domain.useCase.ValidateWordColorsUseCase
+import com.sinya.projects.wordle.domain.useCase.WordExistsUseCase
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
 import com.sinya.projects.wordle.ui.features.UiText
 import com.sinya.projects.wordle.ui.theme.gray100
@@ -41,15 +41,19 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @HiltViewModel(assistedFactory = GameViewModel.Factory::class)
 class GameViewModel @AssistedInject constructor(
@@ -76,7 +80,7 @@ class GameViewModel @AssistedInject constructor(
 
     private var timerJob: Job? = null
 
-    private val _state = MutableStateFlow(GameUiState())
+    private val _state = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val state: StateFlow<GameUiState> = _state.asStateFlow()
 
     @AssistedFactory
@@ -90,36 +94,42 @@ class GameViewModel @AssistedInject constructor(
     }
 
     init {
+        viewModelScope.launch {
+            val initialState = withContext(Dispatchers.Default) {
+                prepareInitialState()
+            }
 
-        observeSettings()
-        loadData()
-    }
+            _state.value = initialState
 
-    private fun observeSettings() = viewModelScope.launch {
-        settingsEngine.uiState.collectLatest { config ->
-            val ratingStatus = if (_state.value.result != GameState.IN_PROGRESS) {
-                when (mode) {
-                    GameMode.FRIENDLY -> getWordRatingUseCase(hiddenWord).getOrElse { config.ratingWords }
-                    GameMode.SAVED -> (config.lastGame as SavedGameState.Loaded).game?.settings?.ratingStatus
-                        ?: config.ratingWords
+            launch { observeSettings() }
 
-                    else -> {
-                        config.ratingWords
+            when (mode) {
+                GameMode.SAVED -> {
+                    val config = settingsEngine.uiState.value
+                    val saved = (config.lastGame as? SavedGameState.Loaded)?.game
+                    if (saved != null) {
+                        restoreGame(saved)
+                        startTimer()
+                    } else {
+                        updateFinishDialog(
+                            FinishStatisticGame(
+                                hiddenWord, "", GameState.NONE, 0, mode, "",
+                                emptyList(), emptyList(), emptyList(), emptyList()
+                            )
+                        )
                     }
                 }
-            } else _state.value.ratingStatus
-
-            _state.update { current ->
-                current.copy(
-                    confettiStatus = config.confetti,
-                    ratingStatus = ratingStatus
-                )
+                else -> {
+                    if (initialState.hiddenWord.isEmpty()) {
+                        getRandomWord()
+                    }
+                    startTimer()
+                }
             }
-            updateKeyboardLayout(config.keyboardMode)
         }
     }
 
-    private fun loadData() {
+    private fun prepareInitialState(): GameUiState.Ready {
         val config = settingsEngine.uiState.value
 
         val actualWordLength = when (mode) {
@@ -127,11 +137,13 @@ class GameViewModel @AssistedInject constructor(
             GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.length ?: 5
             else -> wordLength ?: 5
         }
+
         val actualLang = when (mode) {
             GameMode.RANDOM -> listOf("ru", "en").random()
             GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.lang ?: "ru"
             else -> lang ?: "ru"
         }
+
         val actualHiddenWord = when (mode) {
             GameMode.FRIENDLY -> hiddenWord
             GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.targetWord ?: ""
@@ -143,47 +155,55 @@ class GameViewModel @AssistedInject constructor(
             else -> mode
         }
 
-        _state.update {
-            it.copy(
-                mode = actualMode,
-                wordLength = actualWordLength,
-                lang = actualLang,
-                hiddenWord = actualHiddenWord,
-                result = GameState.IN_PROGRESS,
-                confettiStatus = config.confetti,
-                keyboardCode = config.keyboardMode,
-            )
-        }
+        val keyboardLayout = generateKeyboardLayoutUseCase(
+            lang = actualLang,
+            code = config.keyboardMode
+        )
 
-        // 2. Запуск игры после инициализации стейта
-        when (mode) {
-            GameMode.SAVED -> {
-                val saved = (config.lastGame as? SavedGameState.Loaded)?.game
-                if (saved != null) {
-                    restoreGame(saved)
-                    startTimer()
-                } else {
-                    updateFinishDialog(
-                        FinishStatisticGame(
-                            hiddenWord,
-                            "",
-                            GameState.NONE,
-                            0,
-                            mode,
-                            "",
-                            emptyList(),
-                            emptyList(),
-                            emptyList(),
-                            emptyList()
-                        )
-                    )
+        val gridState = List(actualWordLength * 6) { Cell() }
+
+        return GameUiState.Ready(
+            mode = actualMode,
+            wordLength = actualWordLength,
+            lang = actualLang,
+            hiddenWord = actualHiddenWord,
+            result = GameState.IN_PROGRESS,
+            confettiStatus = config.confetti,
+            ratingStatus = config.ratingWords,
+            keyboardCode = config.keyboardMode,
+            gridState = gridState,
+            keyboardState = keyboardLayout,
+            focusedCell = 0,
+            timePassed = 0
+        )
+    }
+
+    private suspend fun observeSettings() {
+        combine(
+            settingsEngine.uiState,
+            _state.filterIsInstance<GameUiState.Ready>()
+        ) { config, gameState ->
+            config to gameState
+        }.collectLatest { (config, gameState) ->
+
+            val ratingStatus = if (gameState.result != GameState.IN_PROGRESS) {
+                when (mode) {
+                    GameMode.FRIENDLY -> getWordRatingUseCase(hiddenWord).getOrElse { config.ratingWords }
+                    GameMode.SAVED -> (config.lastGame as SavedGameState.Loaded).game?.settings?.ratingStatus
+                        ?: config.ratingWords
+                    else -> config.ratingWords
                 }
+            } else {
+                gameState.ratingStatus
             }
 
-            else -> {
-                startNewGame()
-                startTimer()
+            updateIfReady { current ->
+                current.copy(
+                    confettiStatus = config.confetti,
+                    ratingStatus = ratingStatus
+                )
             }
+            updateKeyboardLayout(config.keyboardMode)
         }
     }
 
@@ -197,66 +217,20 @@ class GameViewModel @AssistedInject constructor(
             is GameEvent.SetFocusCell -> updateFocusedCell(event.rowIndex, event.columnIndex)
             is GameEvent.ReloadGame -> reloadGame()
             is GameEvent.SaveGame -> saveGame()
-
         }
-    }
-
-    private fun updateFinishDialog(state: FinishStatisticGame?) {
-        _state.update { it.copy(showFinishDialog = state) }
-    }
-
-    private fun updateNotFoundDialog(state: Boolean) {
-        _state.update { it.copy(showNotFoundDialog = state) }
-    }
-
-    private fun updateHardModeHintDialog(state: UiText?) {
-        _state.update { it.copy(showHardModeHint = state) }
-    }
-
-    private fun updateKeyboardLayout(newCode: Int) {
-        if (_state.value.keyboardCode != newCode) {
-            _state.update { it.copy(keyboardCode = newCode) }
-            generateKeyboard()
-        }
-    }
-
-    private fun updateCellText(row: Int, col: Int, text: String) {
-        val index = row * _state.value.wordLength + col
-        val updatedBoard = _state.value.gridState.updateText(index, text)
-        _state.update { it.copy(gridState = updatedBoard) }
-    }
-
-    private fun updateCellColor(index: Int, color: Color) {
-        val updatedBoard = _state.value.gridState.updateColor(index, color)
-        _state.update { it.copy(gridState = updatedBoard) }
-    }
-
-    private fun updateKeyColor(char: Char, color: Color) {
-        val updatedKeyboard = _state.value.keyboardState.updateColor(char, color)
-        _state.update { it.copy(keyboardState = updatedKeyboard) }
-    }
-
-    private fun updateFocusedCell(rowCell: Int, colCell: Int) {
-        if (_state.value.result == GameState.IN_PROGRESS) {
-            val row = _state.value.focusedCell / _state.value.wordLength
-            if (rowCell == row) {
-                _state.update { it.copy(focusedCell = row * _state.value.wordLength + colCell) }
-            }
-        }
-    }
-
-    private fun updateFocusedCell(row: Int) {
-        _state.update { it.copy(focusedCell = row * _state.value.wordLength) }
     }
 
     /** timer */
 
     private fun startTimer() {
         timerJob?.cancel()
+
+        val s = _state.value as? GameUiState.Ready ?: return
+
         timerJob = viewModelScope.launch {
-            while (isActive && _state.value.result == GameState.IN_PROGRESS) {
+            while (isActive && s.result == GameState.IN_PROGRESS) {
                 delay(1000)
-                _state.update { it.copy(timePassed = it.timePassed + 1) }
+                updateIfReady { it.copy(timePassed = it.timePassed + 1) }
             }
         }
     }
@@ -270,70 +244,18 @@ class GameViewModel @AssistedInject constructor(
         stopTimer()
     }
 
-    /** клавиатура */
-
-    private fun generateKeyboard() {
-        val layout = generateKeyboardLayoutUseCase(
-            lang = _state.value.lang,
-            code = _state.value.keyboardCode
-        )
-
-        val newLayout = if (_state.value.keyboardState.isEmpty()) {
-            layout
-        } else {
-            val currentColors = _state.value.keyboardState
-                .flatten()
-                .associate { it.char to it.color }
-
-            layout.map { row ->
-                row.map { key ->
-                    key.copy(color = currentColors[key.char] ?: gray100.value)
-                }
-            }
-        }
-        _state.update { it.copy(keyboardState = newLayout) }
-    }
-
     /** сохраненная игра */
 
-    private fun startNewGame() {
-        _state.update {
-            it.copy(
-                gridState = List(it.wordLength * 6) { Cell() }
-            )
-        }
-        generateKeyboard()
-
-        if (_state.value.hiddenWord.isEmpty()) {
-            getRandomWord()
-        }
-    }
-
     private fun reloadGame() {
-        stopTimer()
-
-        val newMode = if (_state.value.mode == GameMode.FRIENDLY) {
-            GameMode.NORMAL
-        } else {
-            _state.value.mode
-        }
-
-        val resetBoard = _state.value.gridState.map {
-            it.copy(letter = "", backgroundColor = gray30.value)
-        }
-        val resetKeyboard = _state.value.keyboardState.map { row ->
-            row.map { key -> key.copy(color = gray100.value) }
-        }
-
-        _state.update {
+        updateIfReady {
             it.copy(
                 showFinishDialog = null,
                 focusedCell = 0,
                 timePassed = 0,
                 result = GameState.IN_PROGRESS,
-                mode = newMode,
-                gridState = resetBoard,
-                keyboardState = resetKeyboard,
+                mode = if (it.mode == GameMode.FRIENDLY) GameMode.NORMAL else it.mode,
+                gridState = it.gridState.map { row -> row.copy(letter = "", backgroundColor = gray30.value) },
+                keyboardState = it.keyboardState.map { row -> row.map { key -> key.copy(color = gray100.value) } },
             )
         }
 
@@ -343,7 +265,7 @@ class GameViewModel @AssistedInject constructor(
 
     private fun restoreGame(game: Game) {
         val firstEmptyIndex = game.board.indexOfFirst { it.backgroundColor == gray30.value }
-        _state.update {
+        updateIfReady {
             it.copy(
                 ratingStatus = game.settings.ratingStatus,
                 confettiStatus = game.settings.confettiStatus,
@@ -362,19 +284,21 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private fun saveGame() {
-        if (_state.value.result == GameState.IN_PROGRESS) {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        if (s.result == GameState.IN_PROGRESS) {
             val game = Game(
-                mode = _state.value.mode,
-                targetWord = _state.value.hiddenWord,
-                length = _state.value.wordLength,
-                lang = _state.value.lang,
-                board = _state.value.gridState.toList(),
-                keyboard = _state.value.keyboardState.toList(),
-                totalSeconds = _state.value.timePassed,
+                mode = s.mode,
+                targetWord = s.hiddenWord,
+                length = s.wordLength,
+                lang = s.lang,
+                board = s.gridState.toList(),
+                keyboard = s.keyboardState.toList(),
+                totalSeconds = s.timePassed,
                 settings = GameSettings(
-                    _state.value.confettiStatus,
-                    _state.value.ratingStatus,
-                    _state.value.keyboardCode
+                    s.confettiStatus,
+                    s.ratingStatus,
+                    s.keyboardCode
                 ),
             )
             settingsEngine.saveGame(game)
@@ -382,13 +306,15 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private fun getRandomWord() = viewModelScope.launch {
+        val s = _state.value as? GameUiState.Ready ?: return@launch
+
         getRandomWordUseCase(
-            length = _state.value.wordLength,
-            lang = _state.value.lang,
-            ratingStatus = _state.value.ratingStatus
+            length = s.wordLength,
+            lang = s.lang,
+            ratingStatus = s.ratingStatus
         ).fold(
             onSuccess = { word ->
-                _state.update { it.copy(hiddenWord = word) }
+                updateIfReady { it.copy(hiddenWord = word) }
             },
             onFailure = {
                 Log.d("GameReload", "Не удалось слово подобрать")
@@ -396,10 +322,37 @@ class GameViewModel @AssistedInject constructor(
         )
     }
 
-    /** keyboard */
+    /** основной геймплей */
+
+    private fun generateKeyboard() {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        val layout = generateKeyboardLayoutUseCase(
+            lang = s.lang,
+            code = s.keyboardCode
+        )
+
+        updateIfReady { ready ->
+            ready.copy(keyboardState =
+            if (ready.keyboardState.isEmpty()) layout
+            else {
+                val currentColors = ready.keyboardState
+                    .flatten()
+                    .associate { it.char to it.color }
+
+                layout.map { row ->
+                    row.map { key ->
+                        key.copy(color = currentColors[key.char] ?: gray100.value)
+                    }
+                }
+            }
+            )
+        }
+    }
 
     private fun keyboardControl(char: Char) {
-        val state = _state.value
+        val state = _state.value as? GameUiState.Ready ?: return
+
         val row = state.focusedCell / state.wordLength
         val col = state.focusedCell % state.wordLength
 
@@ -419,8 +372,10 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private fun deleteLetter(col: Int, row: Int) {
-        if (_state.value.result == GameState.IN_PROGRESS) {
-            if (_state.value.gridState[_state.value.focusedCell].letter == "") {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        if (s.result == GameState.IN_PROGRESS) {
+            if (s.gridState[s.focusedCell].letter == "") {
                 if (col > 0) {
                     updateFocusedCell(row, col - 1)
                     updateCellText(row, col - 1, "")
@@ -432,38 +387,39 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private fun enterSubmit(col: Int, row: Int) {
-        if (_state.value.result != GameState.IN_PROGRESS) {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        if (s.result != GameState.IN_PROGRESS) {
             reloadGame()
             return
         }
 
-        if (_state.value.gridState[_state.value.focusedCell].letter.isEmpty()) {
-            if (col < _state.value.wordLength - 1) {
+        if (s.gridState[s.focusedCell].letter.isEmpty()) {
+            if (col < s.wordLength - 1) {
                 updateFocusedCell(row, col + 1)
             }
             return
         }
 
-        val enteredWord = _state.value.gridState.getWord(row, _state.value.wordLength)
-        if (enteredWord.length < _state.value.wordLength) return
+        val enteredWord = s.gridState.getWord(row, s.wordLength)
+        if (enteredWord.length < s.wordLength) return
 
         viewModelScope.launch {
             wordExistsUseCase(
                 enteredWord,
-                _state.value.lang,
-                _state.value.wordLength,
-                if (_state.value.ratingStatus) 1 else 0
+                s.lang,
+                s.wordLength,
+                if (s.ratingStatus) 1 else 0
             ).fold(
                 onSuccess = {
-                    if (_state.value.mode == GameMode.HARD && row > 0) {
-                        val previousWord =
-                            _state.value.gridState.getWord(row - 1, _state.value.wordLength)
+                    if (s.mode == GameMode.HARD && row > 0) {
+                        val previousWord = s.gridState.getWord(row - 1, s.wordLength)
 
                         when (val result = checkHardModeRulesUseCase(
                             enteredWord = enteredWord,
                             previousWord = previousWord,
-                            hiddenWord = _state.value.hiddenWord,
-                            wordLength = _state.value.wordLength
+                            hiddenWord = s.hiddenWord,
+                            wordLength = s.wordLength
                         )) {
                             is CheckHardModeRulesUseCase.HardModeResult.ExactPositionError -> {
                                 updateHardModeHintDialog(
@@ -508,16 +464,20 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private fun enterLetter(char: Char, col: Int, row: Int) {
-        if (_state.value.result == GameState.IN_PROGRESS) {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        if (s.result == GameState.IN_PROGRESS) {
             updateCellText(row, col, char.toString())
-            if (col + 1 < _state.value.wordLength) {
+            if (col + 1 < s.wordLength) {
                 updateFocusedCell(row, col + 1)
             }
         }
     }
 
     private fun checkFinishWithAnimation(enteredWord: String, row: Int) {
-        val isWin = enteredWord == _state.value.hiddenWord
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        val isWin = enteredWord == s.hiddenWord
         val isLose = row == 5 && !isWin
 
         if (isWin) finishGame(GameState.WIN)
@@ -525,14 +485,16 @@ class GameViewModel @AssistedInject constructor(
 
         val colors = validateWordColorsUseCase(
             enteredWord = enteredWord,
-            hiddenWord = _state.value.hiddenWord
+            hiddenWord = s.hiddenWord
         )
 
         animateWordAndKeyboard(row, enteredWord, colors)
     }
 
     private fun animateWordAndKeyboard(row: Int, enteredWord: String, colors: List<Color>) {
-        val len = _state.value.wordLength
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        val len = s.wordLength
 
         viewModelScope.launch {
             launch {
@@ -547,7 +509,7 @@ class GameViewModel @AssistedInject constructor(
                     val char = enteredWord[i]
                     val newColor = colors[i]
 
-                    val currentColor = _state.value.keyboardState
+                    val currentColor = s.keyboardState
                         .flatten()
                         .find { it.char == char }
                         ?.color
@@ -569,26 +531,27 @@ class GameViewModel @AssistedInject constructor(
     /** Конец игры, Обновление статистики */
 
     private fun finishGame(result: GameState) {
+        stopTimer()
 
-        _state.update { it.copy(result = result) }
+        updateIfReady { it.copy(result = result) }
 
         viewModelScope.launch {
             buildFinishData(result)
-
             saveGameData(result)
         }
     }
 
     private suspend fun buildFinishData(result: GameState) {
-        val hiddenWord = _state.value.hiddenWord
-        _state.update {
+        val hiddenWord = (_state.value as? GameUiState.Ready ?: return).hiddenWord
+
+        updateIfReady {
             it.copy(
                 showFinishDialog = FinishStatisticGame(
-                    hiddenWord = _state.value.hiddenWord,
+                    hiddenWord = it.hiddenWord,
                     description = null,
-                    mode = _state.value.mode,
-                    result = _state.value.result,
-                    colors = _state.value.gridState.toEmojiGridFromULong(_state.value.wordLength),
+                    mode = it.mode,
+                    result = it.result,
+                    colors = it.gridState.toEmojiGridFromULong(it.wordLength),
                     countGame = null,
                     percentWin = null,
                     currentStreak = null,
@@ -599,10 +562,9 @@ class GameViewModel @AssistedInject constructor(
         }
 
         val isWin = result == GameState.WIN
-        val currentState = _state.value
+        val currentState = _state.value as? GameUiState.Ready ?: return
 
-        val oldStat = getAllStatisticsByModeUseCase(currentState.mode.id).getOrNull()
-            ?: OfflineStatistic(currentState.mode.id)
+        val oldStat = getAllStatisticsByModeUseCase(currentState.mode.id).getOrNull() ?: OfflineStatistic(currentState.mode.id)
 
         val newStreak = if (isWin) oldStat.currentStreak + 1 else 0
         val newWinCount = if (isWin) oldStat.winGame + 1 else oldStat.winGame
@@ -610,7 +572,7 @@ class GameViewModel @AssistedInject constructor(
         val newTotalGames = countGame + 1
         val newAvgTime = (oldStat.sumTime + currentState.timePassed) / newTotalGames
 
-        _state.update {
+       updateIfReady {
             it.copy(
                 showFinishDialog = it.showFinishDialog?.copy(
                     countGame = newTotalGames,
@@ -622,7 +584,7 @@ class GameViewModel @AssistedInject constructor(
                     avgTime = listOf(
                         if (countGame != 0) oldStat.sumTime / countGame else 0,
                         newAvgTime
-                    ),
+                    )
                 )
             )
         }
@@ -633,14 +595,10 @@ class GameViewModel @AssistedInject constructor(
                 mode = currentState.mode,
                 lang = currentState.lang,
                 word = currentState.hiddenWord,
-                attempts = currentState.focusedCell / state.value.wordLength,
+                attempts = currentState.focusedCell / currentState.wordLength,
                 timeSeconds = currentState.timePassed
             )
         ).getOrNull() ?: emptyList()
-
-        Log.d("Achieves", "events count: ${achieveEvents.size}")
-        Log.d("Achieves", "events: $achieveEvents")
-
 
         val allAchieveChanges = achieveEvents.map { event ->
             when (event) {
@@ -649,22 +607,20 @@ class GameViewModel @AssistedInject constructor(
             }
         }
 
-        Log.d("Achieves", "changes: $allAchieveChanges")
-
-        _state.update {
+        updateIfReady {
             it.copy(
                 showFinishDialog = it.showFinishDialog?.copy(
-                    achieves = allAchieveChanges,
+                    achieves = allAchieveChanges
                 )
             )
         }
 
         val definition = insertWordInDictionaryUseCase(hiddenWord).getOrNull() ?: ""
 
-        _state.update {
+        updateIfReady {
             it.copy(
                 showFinishDialog = it.showFinishDialog?.copy(
-                    description = definition,
+                    description = definition
                 )
             )
         }
@@ -676,17 +632,19 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private suspend fun addStatisticData(result: GameState) {
-        getStatisticByModeUseCase(_state.value.mode.id).fold(
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        getStatisticByModeUseCase(s.mode.id).fold(
             onSuccess = { stat ->
                 val win = result == GameState.WIN
                 val currentStreak = if (win) stat.currentStreak + 1 else 0
-                val row = _state.value.focusedCell / _state.value.wordLength
+                val row = s.focusedCell / s.wordLength
                 val updated = stat.copy(
                     countGame = stat.countGame + 1,
                     currentStreak = currentStreak,
                     bestStreak = if (stat.bestStreak < currentStreak) currentStreak else stat.bestStreak,
                     winGame = if (win) stat.winGame + 1 else stat.winGame,
-                    sumTime = stat.sumTime + _state.value.timePassed,
+                    sumTime = stat.sumTime + s.timePassed,
                     firstTry = if (row == 1 && win) stat.firstTry + 1 else stat.firstTry, // первая попытка
                     secondTry = if (row == 2 && win) stat.secondTry + 1 else stat.secondTry, // вторая попытка
                     thirdTry = if (row == 3 && win) stat.thirdTry + 1 else stat.thirdTry, // третья попытка
@@ -708,5 +666,66 @@ class GameViewModel @AssistedInject constructor(
                 Log.d("GameFinish", "Ошибка получения статистики текущей")
             }
         )
+    }
+
+    /** update-методы для атомарного обновления state */
+
+    private fun updateFinishDialog(state: FinishStatisticGame?) =
+        updateIfReady { it.copy(showFinishDialog = state) }
+
+    private fun updateNotFoundDialog(state: Boolean) =
+        updateIfReady { it.copy(showNotFoundDialog = state) }
+
+    private fun updateHardModeHintDialog(state: UiText?) =
+        updateIfReady { it.copy(showHardModeHint = state) }
+
+    private fun updateKeyboardLayout(newCode: Int) {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        if (s.keyboardCode != newCode) {
+            updateIfReady { it.copy(keyboardCode = newCode) }
+            generateKeyboard()
+        }
+    }
+
+    private fun updateCellText(row: Int, col: Int, text: String) = updateIfReady {
+        it.copy(
+            gridState = it.gridState.updateText(
+                index = row * it.wordLength + col,
+                text = text
+            )
+        )
+    }
+
+    private fun updateCellColor(index: Int, color: Color) = updateIfReady {
+        it.copy(gridState = it.gridState.updateColor(index, color))
+    }
+
+    private fun updateKeyColor(char: Char, color: Color) = updateIfReady {
+        it.copy(keyboardState = it.keyboardState.updateColor(char, color))
+    }
+
+    private fun updateFocusedCell(rowCell: Int, colCell: Int) {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        if (s.result == GameState.IN_PROGRESS) {
+            val row = s.focusedCell / s.wordLength
+            if (rowCell == row) {
+                updateIfReady { it.copy(focusedCell = row * it.wordLength + colCell) }
+            }
+        }
+    }
+
+    private fun updateFocusedCell(row: Int) =
+        updateIfReady { it.copy(focusedCell = row * it.wordLength) }
+
+    private fun updateIfReady(transform: (GameUiState.Ready) -> GameUiState.Ready) {
+        _state.update { currentState ->
+            if (currentState is GameUiState.Ready) {
+                transform(currentState)
+            } else {
+                currentState
+            }
+        }
     }
 }

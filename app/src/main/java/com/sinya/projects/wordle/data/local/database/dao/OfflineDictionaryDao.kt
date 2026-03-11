@@ -17,7 +17,8 @@ interface OfflineDictionaryDao {
     SELECT 
         COALESCE(od.word_id, sd.word_id) as id,
         w.word,
-        COALESCE(od.description, sd.description) as description
+        COALESCE(od.description, sd.description) as description,
+        0 AS isLoading
     FROM words w
     LEFT JOIN offline_dictionary od ON w.id = od.word_id
     LEFT JOIN sync_dictionary sd ON w.id = sd.word_id

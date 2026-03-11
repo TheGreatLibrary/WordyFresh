@@ -2,7 +2,6 @@ package com.sinya.projects.wordle.data.remote.supabase.mapper
 
 import com.sinya.projects.wordle.data.local.database.entity.OfflineDictionary
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncDictionary
-import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
 import com.sinya.projects.wordle.utils.getCurrentTime
 
 fun OfflineDictionary.toSync(userId: String, updatedAt: String): SyncDictionary {

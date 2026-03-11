@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -34,63 +35,71 @@ import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun NewGameBottomSheet(
-    onClickGame: (ScreenRoute) -> Unit,
+    navigateTo: (ScreenRoute) -> Unit,
     onDismissRequest: () -> Unit,
     initialMode: GameMode
 ) {
     var selectedWordSize by remember { mutableIntStateOf(5) }
     var selectedLang by remember { mutableStateOf(TypeLanguages.RU) }
     var selectedGameMode by remember { mutableStateOf(initialMode) }
+    var shouldNavigate by remember { mutableStateOf(false) }
+    var pendingRoute by remember { mutableStateOf<ScreenRoute.Game?>(null) }
 
-    CustomModalSheet(onDismissRequest) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 5.dp, bottom = 45.dp, start = 16.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            SheetSection(title = stringResource(R.string.word_size)) {
-                WordSizeSelector(
-                    selected = selectedWordSize,
-                    onSelected = { selectedWordSize = it }
-                )
-            }
-            SheetSection(title = stringResource(R.string.language_of_game)) {
-                LanguageSelector(
-                    selected = selectedLang,
-                    onSelected = { selectedLang = it }
-                )
-            }
-            SheetSection(title = stringResource(R.string.mode_of_game)) {
-                GameModeSelector(
-                    selected = selectedGameMode,
-                    onSelected = { selectedGameMode = it }
-                )
-            }
+    if (shouldNavigate && pendingRoute != null) {
+        LaunchedEffect(Unit) {
+            navigateTo(pendingRoute!!)
+        }
+    }
+    else {
+        CustomModalSheet(onDismissRequest) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp, bottom = 45.dp, start = 16.dp, end = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SheetSection(title = stringResource(R.string.word_size)) {
+                    WordSizeSelector(
+                        selected = selectedWordSize,
+                        onSelected = { selectedWordSize = it }
+                    )
+                }
+                SheetSection(title = stringResource(R.string.language_of_game)) {
+                    LanguageSelector(
+                        selected = selectedLang,
+                        onSelected = { selectedLang = it }
+                    )
+                }
+                SheetSection(title = stringResource(R.string.mode_of_game)) {
+                    GameModeSelector(
+                        selected = selectedGameMode,
+                        onSelected = { selectedGameMode = it }
+                    )
+                }
 
-            RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.7f),
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = WordyColor.colors.backgroundActiveBtnMkI,
-                    containerColor = WordyColor.colors.textForActiveBtnMkI
-                ),
-                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
-                onClick = {
-                    onClickGame(
-                        ScreenRoute.Game(
+                RoundedButton(
+                    modifier = Modifier.fillMaxWidth(0.7f),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = WordyColor.colors.backgroundActiveBtnMkI,
+                        containerColor = WordyColor.colors.textForActiveBtnMkI
+                    ),
+                    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
+                    onClick = {
+                        pendingRoute = ScreenRoute.Game(
                             mode = selectedGameMode.id,
                             wordLength = selectedWordSize,
                             lang = selectedLang.code,
                         )
+                        shouldNavigate = true
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.start_game),
+                        fontSize = 14.sp,
+                        style = WordyTypography.bodyMedium
                     )
                 }
-            ) {
-                Text(
-                    text = stringResource(R.string.start_game),
-                    fontSize = 14.sp,
-                    style = WordyTypography.bodyMedium
-                )
             }
         }
     }

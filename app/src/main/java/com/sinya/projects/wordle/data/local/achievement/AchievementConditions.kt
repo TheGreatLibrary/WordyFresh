@@ -6,7 +6,6 @@ interface AchievementCondition {
     fun isSatisfied(trigger: AchievementTrigger): Boolean
 }
 
-
 class GuessedInModeCondition(private val mode: GameMode) : AchievementCondition {
     override fun isSatisfied(trigger: AchievementTrigger) =
         trigger is AchievementTrigger.GameFinishedTrigger &&

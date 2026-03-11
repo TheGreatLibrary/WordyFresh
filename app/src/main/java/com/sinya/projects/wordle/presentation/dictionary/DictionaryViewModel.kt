@@ -80,15 +80,36 @@ class DictionaryViewModel @Inject constructor(
         }
     }
 
-    private fun reloadDefinition(item: DictionaryItem) = viewModelScope.launch {
-        updateWordDescriptionUseCase(item.word).fold(
-            onSuccess = { },
-            onFailure = { exception ->
-                updateIfSuccess {
-                    it.copy(errorMessage = getErrorMessage(exception))
+    private fun reloadDefinition(item: DictionaryItem) {
+        updateIfSuccess {
+            it.copy(dictionaryList = it.dictionaryList.map { items ->
+                if (items.id == item.id) items.copy(isLoading = true)
+                else items
+            })
+        }
+
+        viewModelScope.launch {
+            updateWordDescriptionUseCase(item.word).fold(
+                onSuccess = {
+                    updateIfSuccess {
+                        it.copy(dictionaryList = it.dictionaryList.map { items ->
+                            if (items.id == item.id) items.copy(isLoading = false)
+                            else items
+                        })
+                    }
+                },
+                onFailure = { exception ->
+                    updateIfSuccess {
+                        it.copy(
+                            errorMessage = getErrorMessage(exception),
+                            dictionaryList = it.dictionaryList.map { items ->
+                                if (items.id == item.id) items.copy(isLoading = false)
+                                else items
+                            })
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     private fun clearAllDictionary() = viewModelScope.launch {

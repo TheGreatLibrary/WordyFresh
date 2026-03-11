@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
@@ -46,7 +47,8 @@ fun StatisticCountCard(
     description: String,
     fontSize: TextUnit,
     descriptionSize: TextUnit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTextLayout: (TextLayoutResult) -> Unit
 ) {
     val animatedValue by animateIntAsState(
         targetValue = value,
@@ -61,6 +63,7 @@ fun StatisticCountCard(
             mainText = animatedValue.toString(),
             description = description,
             fontSize = fontSize,
+            onTextLayout = onTextLayout,
             descriptionSize = descriptionSize
         )
     }
@@ -72,7 +75,8 @@ fun StatisticTimeCard(
     countGame: Int,
     fontSize: TextUnit,
     descriptionSize: TextUnit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTextLayout: (TextLayoutResult) -> Unit
 ) {
     var showSumTime by remember { mutableStateOf(false) }
 
@@ -91,6 +95,7 @@ fun StatisticTimeCard(
             mainText = progress,
             description = if (!showSumTime) stringResource(R.string.abs_time) else stringResource(R.string.sum_time),
             fontSize = fontSize,
+            onTextLayout = onTextLayout,
             descriptionSize = descriptionSize
         )
     }
@@ -138,7 +143,8 @@ private fun StatisticContent(
     mainText: String,
     description: String,
     fontSize: TextUnit,
-    descriptionSize: TextUnit
+    descriptionSize: TextUnit,
+    onTextLayout: (TextLayoutResult) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -147,15 +153,21 @@ private fun StatisticContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = mainText,
-            fontSize = fontSize,
-            color = WordyColor.colors.textCardPrimary,
-            style = WordyTypography.bodyLarge,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = mainText,
+                color = WordyColor.colors.textCardPrimary,
+                style = WordyTypography.bodyLarge.copy(fontSize = fontSize),
+                textAlign = TextAlign.Center,
+                onTextLayout = onTextLayout,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Clip,
+            )
+        }
         Text(
             text = description,
             fontSize = descriptionSize,

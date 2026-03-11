@@ -15,7 +15,7 @@ interface AchievementsDao {
             a.description AS description,
             a.condition AS condition,
             a.image AS image,
-            (COALESCE(s.count, 0) + COALESCE(o.count, 0)) AS count,
+            MIN(COALESCE(s.count, 0) + COALESCE(o.count, 0), a.max_count) AS count,
             a.max_count AS maxCount
         FROM achievements a
         JOIN categories_achieves c ON a.category_id = c.id

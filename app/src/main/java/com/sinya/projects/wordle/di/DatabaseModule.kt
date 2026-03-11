@@ -12,7 +12,6 @@ import com.sinya.projects.wordle.data.local.database.dao.SyncAchievementsDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncDictionaryDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncStatisticDao
 import com.sinya.projects.wordle.data.local.database.dao.WordDao
-import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

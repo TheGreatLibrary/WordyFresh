@@ -1,17 +1,21 @@
 package com.sinya.projects.wordle.presentation.game
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -23,6 +27,7 @@ import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.game.components.CustomKeyboard
 import com.sinya.projects.wordle.presentation.game.components.GameHeader
 import com.sinya.projects.wordle.presentation.game.components.GamePlace
+import com.sinya.projects.wordle.presentation.game.components.GamePlaceholder
 import com.sinya.projects.wordle.presentation.game.components.NotRightWordDialog
 import com.sinya.projects.wordle.presentation.game.components.ReactiveConfetti
 import com.sinya.projects.wordle.presentation.game.components.TextResult
@@ -51,25 +56,31 @@ fun GameScreen(
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    GameScreenView(
-        navigateToBackStack = navigateToBackStack,
-        navigateTo = navigateTo,
-        state = state,
-        onEvent = viewModel::onEvent
-    )
+    when (state) {
+        GameUiState.Loading -> GamePlaceholder(navigateToBackStack, "")
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_STOP) {
-                viewModel.onEvent(GameEvent.SaveGame)
+        is GameUiState.Ready -> {
+            GameScreenView(
+                navigateToBackStack = navigateToBackStack,
+                navigateTo = navigateTo,
+                state = state as GameUiState.Ready,
+                onEvent = viewModel::onEvent
+            )
+
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_STOP) {
+                        viewModel.onEvent(GameEvent.SaveGame)
+                    }
+                }
+
+                lifecycleOwner.lifecycle.addObserver(observer)
+
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
             }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }
@@ -78,18 +89,17 @@ fun GameScreen(
 private fun GameScreenView(
     navigateToBackStack: () -> Unit,
     navigateTo: (ScreenRoute) -> Unit,
-    state: GameUiState,
+    state: GameUiState.Ready,
     onEvent: (GameEvent) -> Unit
 ) {
     FinishBottomSheet(
         state = state.showFinishDialog,
         onEvent = onEvent
-    ) { paddingValues ->
+    ) { paddingValues, onClick ->
         LaunchedEffect(state.showNotFoundDialog) {
             if (state.showNotFoundDialog) {
                 delay(400)
                 onEvent(GameEvent.WordNotFound(false))
-
             }
         }
 
@@ -105,7 +115,7 @@ private fun GameScreenView(
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(paddingValues),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             GameHeader(
                 navigateToBackStack = navigateToBackStack,
@@ -113,20 +123,37 @@ private fun GameScreenView(
                 onEvent = onEvent,
                 state = state
             )
+
             GamePlace(
                 state = state,
                 onEvent = onEvent
             )
-            TextResult(
-                state.result.res
-            )
-            CustomKeyboard(
-                state = state,
-                onEvent = onEvent
-            )
-        }
 
-        NotRightWordDialog(state.showNotFoundDialog, state.showHardModeHint)
-        if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                TextResult(
+                    state.result.res
+                )
+            }
+            Box(
+                modifier = Modifier.wrapContentHeight(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                CustomKeyboard(
+                    state = state,
+                    onEvent = onEvent,
+                    onClick = onClick
+                )
+            }
+
+            NotRightWordDialog(
+                state.showNotFoundDialog,
+                state.showHardModeHint
+            )
+
+            if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
+        }
     }
 }

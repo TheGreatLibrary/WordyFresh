@@ -3,7 +3,6 @@ package com.sinya.projects.wordle.data.local.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.UUID
 
 @Entity(tableName = "words")
 data class Words(

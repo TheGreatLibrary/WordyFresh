@@ -34,7 +34,7 @@ import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.white
-import com.sinya.projects.wordle.utils.LoadingConfirmScreen
+import com.sinya.projects.wordle.ui.features.LoadingConfirmScreen
 import com.sinya.projects.wordle.utils.findActivity
 import kotlinx.coroutines.delay
 

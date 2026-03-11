@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -19,7 +20,8 @@ import com.sinya.projects.wordle.ui.theme.WordyColor
 @Composable
 fun DictionaryImageButton(
     @DrawableRes image: Int,
-    onClick: () -> Unit
+    angle: Float = 0f,
+    onClick: () -> Unit,
 ) {
     Image(
         painter = painterResource(image),
@@ -30,6 +32,7 @@ fun DictionaryImageButton(
             .size(28.dp)
             .clickable { onClick() }
             .scale(0.8f)
+            .rotate(angle)
             .padding(2.dp),
         colorFilter = ColorFilter.tint(WordyColor.colors.foregroundIcon)
     )

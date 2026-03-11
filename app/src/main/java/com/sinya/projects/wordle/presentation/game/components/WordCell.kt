@@ -37,7 +37,6 @@ import com.sinya.projects.wordle.ui.theme.green800
 fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val density = LocalDensity.current
 
-    // —————————————————————————————————————————
     // Существующая логика поворота флипа:
     var prevColor by remember { mutableStateOf(cell.backgroundColor) }
     val isFlipping = prevColor != cell.backgroundColor
@@ -50,22 +49,21 @@ fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modi
         }
     )
     val showingFront = rotationY <= 90f
-    // —————————————————————————————————————————
 
-    // 1) Animatable для масштаба:
+
     val scale = remember { Animatable(1f) }
-    // 2) Триггерим на каждую смену буквы:
+
     LaunchedEffect(cell.letter) {
-        // резкий «щелчок» в 0.9
-        scale.snapTo(0.95f)
-        // затем плавно «отскок» обратно к 1f
-        scale.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
+        if (cell.letter.isNotEmpty()) { // ← добавь проверку
+            scale.snapTo(0.95f)
+            scale.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
             )
-        )
+        }
     }
 
     BoxWithConstraints(
@@ -83,9 +81,11 @@ fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modi
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        val fontSize = with(density) {
-            val calculated = (maxHeight.value*maxWidth.value * 0.032f).toSp()
-            calculated.value.coerceIn(14f, 35f).sp // преобразуем к Float → ограничиваем → обратно в sp
+        val fontSize = remember(maxHeight, maxWidth, density) {
+            with(density) {
+                val calculated = (maxHeight.value * maxWidth.value * 0.032f).toSp()
+                calculated.value.coerceIn(14f, 35f).sp
+            }
         }
 
         Text(

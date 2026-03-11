@@ -142,7 +142,7 @@ private fun HomeScreenView(
 
     if (state.showGameBottomSheet) {
         NewGameBottomSheet(
-            onClickGame = navigateTo,
+            navigateTo = navigateTo,
             onDismissRequest = { onEvent(HomeEvent.BottomSheetUploadVisible(false)) },
             initialMode = state.modeGame
         )

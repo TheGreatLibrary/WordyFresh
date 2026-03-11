@@ -73,7 +73,7 @@ fun AboutScreen(
                 icon = R.drawable.prof_privacy,
                 icon2 = R.drawable.arrow,
                 navigateTo = {
-                    openUrl(context, LegalLinks.PRIVACY_POLICY_URL)
+                    context.openUrl(LegalLinks.PRIVACY_POLICY_URL)
                 }
             )
             RowLink(
@@ -82,7 +82,7 @@ fun AboutScreen(
                 icon = R.drawable.prof_terms,
                 icon2 = R.drawable.arrow,
                 navigateTo = {
-                   openUrl(context, LegalLinks.TERMS_OF_USE_URL)
+                    context.openUrl(LegalLinks.TERMS_OF_USE_URL)
                 }
             )
         }

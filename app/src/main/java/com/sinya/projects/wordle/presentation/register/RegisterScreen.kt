@@ -15,7 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.register.subscreen.RegisterFormView
-import com.sinya.projects.wordle.utils.LoadingConfirmScreen
+import com.sinya.projects.wordle.ui.features.LoadingConfirmScreen
 import io.github.jan.supabase.auth.user.UserInfo
 
 @Composable
