@@ -1,4 +1,4 @@
-# Wordy Fresh — Wordle / Вордли 🟩
+# Wordy Fresh — Wordle / Вордли
 
 <p align="center">
   <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="Иконка Wordy Fresh" width="170"/>
