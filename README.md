@@ -1,7 +1,7 @@
 # Wordy Fresh — Wordle / Вордли 🟩
 
 <p align="center">
-  <img src="assets/image/ic_app.png" alt="Иконка Wordy Fresh" width="120"/>
+  <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="Иконка Wordy Fresh" width="170"/>
 </p>
 
 <p align="center">
@@ -12,6 +12,16 @@
   <img src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-orange?style=for-the-badge&logo=kotlin" alt="Kotlin"/>
   <img src="https://img.shields.io/badge/Без рекламы-✓-brightgreen?style=for-the-badge" alt="Без рекламы"/>
 </p>
+
+---
+
+## 📦 Скачать
+
+| Источник | Ссылка |
+|----------|--------|
+| 🏪 RuStore | [Открыть страницу приложения](https://www.rustore.ru/catalog/app/com.sinya.projects.wordle) |
+| 📱 APK | [Скачать релизный APK](app/release/app-release.apk) |
+
 
 ---
 
@@ -39,15 +49,6 @@
 - 🏆 **Достижения** — собирай награды и открывай новые уровни сложности
 - 🎚 **Гибкие настройки** — тема, клавиатура, язык интерфейса
 - 🚫 **Без рекламы** — полностью, навсегда
-
----
-
-## 📦 Скачать
-
-| Источник | Ссылка |
-|----------|--------|
-| 🏪 RuStore | [Открыть страницу приложения](https://www.rustore.ru/catalog/app/com.sinya.projects.wordle) |
-| 📱 APK | [Скачать релизный APK](release/app-release.apk) |
 
 ---
 
