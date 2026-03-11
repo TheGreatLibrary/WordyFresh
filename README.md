@@ -61,23 +61,8 @@
 
 ---
 
-## 🚀 Запуск проекта
-
-1. Клонируй репозиторий:
-   ```bash
-   git clone https://github.com/your-username/wordy-fresh.git
-   ```
-2. Открой в **Android Studio**
-3. Создай файл `local.properties` и добавь ключи Supabase:
-   ```
-   SUPABASE_URL=your_url
-   SUPABASE_KEY=your_key
-   ```
-4. Запусти на эмуляторе или устройстве (**minSdk 26**)
-
----
-
 ## 📬 Контакты
 
-**GitHub**: [your-github](https://github.com/your-username)  
-**Email**: your@email.com
+**Email**: programming.creature@gmail.com
+**Telegram**: https://t.me/Supreme_creature
+**Vk**: https://vk.com/supreme_creature
