@@ -3,10 +3,8 @@ package com.sinya.projects.wordle.domain.source
 import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.OfflineStatisticDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncStatisticDao
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistics
 import com.sinya.projects.wordle.data.remote.supabase.mapper.toSyncList
-import com.sinya.projects.wordle.utils.getCurrentTime
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import jakarta.inject.Inject

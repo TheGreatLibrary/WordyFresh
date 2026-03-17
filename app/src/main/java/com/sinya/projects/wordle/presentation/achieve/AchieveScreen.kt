@@ -111,8 +111,7 @@ private fun AchieveScreenView(
                     CategoryHeader(
                         categoryName = category,
                         finishedCount = items.count { it.count >= it.maxCount },
-                        totalCount = items.size,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        totalCount = items.size
                     )
                 }
 

@@ -6,7 +6,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistics
-import com.sinya.projects.wordle.domain.model.StatAggregated
 
 @Dao
 interface SyncStatisticDao {

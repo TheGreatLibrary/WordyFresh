@@ -15,8 +15,7 @@ import com.sinya.projects.wordle.ui.theme.WordyTypography
 fun CategoryHeader(
     categoryName: String,
     finishedCount: Int,
-    totalCount: Int,
-    modifier: Modifier = Modifier
+    totalCount: Int
 ) {
     Row(
         modifier = Modifier,

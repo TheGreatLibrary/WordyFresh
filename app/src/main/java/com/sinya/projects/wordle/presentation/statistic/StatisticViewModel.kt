@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
-import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.domain.useCase.ClearAllStatisticsUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllStatisticsUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncStatisticUseCase
