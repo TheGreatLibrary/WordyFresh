@@ -77,9 +77,9 @@ fun GameHeader(
 @Composable
 fun TimerDisplay(
     modifier: Modifier = Modifier.padding(16.dp),
-    totalSeconds: Long
+    totalSeconds: Int
 ) {
-    val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds).toInt()
+    val minutes = TimeUnit.SECONDS.toMinutes(totalSeconds.toLong())
     val seconds = totalSeconds % 60
     val timeText = String.format("%02d:%02d", minutes, seconds)
 

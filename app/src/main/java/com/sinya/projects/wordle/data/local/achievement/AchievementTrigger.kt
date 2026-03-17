@@ -7,9 +7,11 @@ sealed interface AchievementTrigger {
         val isWin: Boolean,
         val mode: GameMode,
         val word: String,
+        val attemptsWords: List<String>,
         val lang: String,
-        val attempts: Int,
-        val timeSeconds: Long,
+        val length: Int,
+        val rowAttempts: Int,
+        val timeSeconds: Int,
     ) : AchievementTrigger
     data object AccountRegistered : AchievementTrigger
     data object SupportMessageSent : AchievementTrigger

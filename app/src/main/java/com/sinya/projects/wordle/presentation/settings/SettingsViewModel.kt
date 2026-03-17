@@ -86,7 +86,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun onSupportClick() {
         viewModelScope.launch {
-            checkAchievementUseCase(AchievementTrigger.SupportMessageSent)
+            checkAchievementUseCase(AchievementTrigger.SupportMessageSent, settingsEngine.uiState.value.language)
                 .fold(
                     onSuccess = { },
                     onFailure = { }

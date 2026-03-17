@@ -10,35 +10,42 @@ interface AchievementsDao {
     @Query("""
         SELECT 
             a.id AS id,
-            c.title AS categoryName,
-            a.title AS title,
-            a.description AS description,
-            a.condition AS condition,
+            cat.name AS categoryName,
+            at.title AS title,
+            at.description AS description,
+            at.condition AS condition,
+            a.hidden AS hidden,
             a.image AS image,
             MIN(COALESCE(s.count, 0) + COALESCE(o.count, 0), a.max_count) AS count,
             a.max_count AS maxCount
         FROM achievements a
-        JOIN categories_achieves c ON a.category_id = c.id
+         JOIN achievement_translations at ON a.id = at.achieve_id
+        JOIN category_achieve_translations cat ON a.category_id = cat.category_id
         LEFT JOIN sync_achievements s ON a.id = s.achieve_id
         LEFT JOIN offline_achievements o ON a.id = o.achieve_id
+        WHERE at.lang = :lang AND cat.lang = :lang
+        
     """)
-    fun observeAchievements(): Flow<List<AchieveItem>>
+    fun observeAchievements(lang: String): Flow<List<AchieveItem>>
 
     @Query("""
         SELECT 
             a.id AS id,
-            c.title AS categoryName,
-            a.title AS title,
-            a.description AS description,
-            a.condition AS condition,
+            cat.name AS categoryName,
+            at.title AS title,
+            at.description AS description,
+            at.condition AS condition,
+            a.hidden AS hidden,
             a.image AS image,
             (COALESCE(s.count, 0) + COALESCE(o.count, 0)) AS count,
             a.max_count AS maxCount
         FROM achievements a
-        JOIN categories_achieves c ON a.category_id = c.id
+        JOIN achievement_translations at ON a.id = at.achieve_id
+        JOIN category_achieve_translations cat ON a.category_id = cat.category_id
         LEFT JOIN sync_achievements s ON a.id = s.achieve_id
         LEFT JOIN offline_achievements o ON a.id = o.achieve_id
+        WHERE at.lang = :lang AND cat.lang = :lang
     """)
-    suspend fun getAchievementsList(): List<AchieveItem>
+    suspend fun getAchievementsList(lang: String): List<AchieveItem>
 }
 

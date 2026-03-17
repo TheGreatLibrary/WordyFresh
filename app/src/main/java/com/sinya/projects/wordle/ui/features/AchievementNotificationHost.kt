@@ -45,6 +45,7 @@ import com.sinya.projects.wordle.data.local.achievement.AchievementNotificationV
 import com.sinya.projects.wordle.domain.model.AchieveItem
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
+import com.sinya.projects.wordle.utils.obfuscate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -127,7 +128,7 @@ fun AchievementNotificationCard(
             ) {
                 Image(
                     painter = painterResource(getDrawableId(achievement.image)),
-                    contentDescription = getLocalizedString(achievement.title),
+                    contentDescription = achievement.title,
                     modifier = Modifier
                         .clip(CircleShape)
                         .fillMaxHeight()
@@ -145,7 +146,7 @@ fun AchievementNotificationCard(
                     verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically)
                 ) {
                     Text(
-                        text = getLocalizedString(achievement.title),
+                        text = if (achievement.hidden && !achievement.isUnlocked) achievement.title.obfuscate() else achievement.title,
                         style = WordyTypography.titleMedium,
                         color = WordyColor.colors.textCardPrimary,
                         fontSize = 21.sp,

@@ -3,8 +3,9 @@ package com.sinya.projects.wordle.domain.source
 import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.OfflineStatisticDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncStatisticDao
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
-import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
+import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistics
+import com.sinya.projects.wordle.data.remote.supabase.mapper.toSyncList
 import com.sinya.projects.wordle.utils.getCurrentTime
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
@@ -15,8 +16,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 
 interface SupabaseStatisticsDataSource {
-    suspend fun fetchStatistics(userId: String): Result<List<SyncStatistic>>
-    suspend fun upsertStatistics(statistics: List<SyncStatistic>): Result<Unit>
+    suspend fun fetchStatistics(userId: String): Result<List<SyncStatistics>>
+    suspend fun upsertStatistics(statistics: List<SyncStatistics>): Result<Unit>
     suspend fun clearAllStatistics(userId: String): Result<Unit>
     suspend fun syncToSupabase(userId: String): Result<Unit>
     suspend fun syncFromSupabase(userId: String): Result<Unit>
@@ -28,13 +29,13 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
     private val syncStatisticDao: SyncStatisticDao
 ) : SupabaseStatisticsDataSource {
 
-    override suspend fun fetchStatistics(userId: String): Result<List<SyncStatistic>> {
+    override suspend fun fetchStatistics(userId: String): Result<List<SyncStatistics>> {
         return withContext(Dispatchers.IO) {
             try {
                 val statistics = supabaseClient
-                    .from("sync_statistic")
+                    .from("sync_statistics")
                     .select { filter { eq("user_id", userId) } }
-                    .decodeList<SyncStatistic>()
+                    .decodeList<SyncStatistics>()
 
                 Result.success(statistics)
             } catch (e: Exception) {
@@ -44,21 +45,16 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun upsertStatistics(statistics: List<SyncStatistic>): Result<Unit> {
+    override suspend fun upsertStatistics(statistics: List<SyncStatistics>): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
                 val json = Json { encodeDefaults = true }
 
                 val jsonString = statistics.map {
-                    val encoded = json.encodeToString(it)
-                    val obj = json.parseToJsonElement(encoded).jsonObject
-                    Log.d("SUPABASE_JSON_OBJECT", obj.toString())
-                    obj
+                    json.parseToJsonElement(json.encodeToString(it)).jsonObject
                 }
 
-                supabaseClient.from("sync_statistic").upsert(jsonString) {
-                    onConflict = "user_id,mode_id"
-                }
+                supabaseClient.from("sync_statistics").upsert(jsonString)
                 Result.success(Unit)
             } catch (e: Exception) {
                 Log.e("SupabaseStatisticsDataSource", "Error upserting statistics", e)
@@ -70,7 +66,7 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
     override suspend fun clearAllStatistics(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                supabaseClient.from("sync_statistic")
+                supabaseClient.from("sync_statistics")
                     .delete { filter { eq("user_id", userId) } }
                 syncFromSupabase(userId).getOrThrow()
                 Result.success(Unit)
@@ -85,13 +81,12 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
     override suspend fun syncToSupabase(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                val remote = fetchStatistics(userId).getOrThrow()
-                val offline = offlineStatisticDao.getAllStatistic()
+                val offline = offlineStatisticDao
+                    .getAllStatistic()
+                    .toSyncList(userId)
 
-                val merged = mergeStatistics(remote, offline, userId)
-
-                if (merged.isNotEmpty()) {
-                    upsertStatistics(merged).getOrThrow()
+                if (offline.isNotEmpty()) {
+                    upsertStatistics(offline).getOrThrow()
                 }
 
                 offlineStatisticDao.clearAll()
@@ -108,8 +103,12 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val remote = fetchStatistics(userId).getOrThrow()
+                syncStatisticDao.clearAll()
 
-                syncStatisticDao.replaceAll(remote)
+                if (remote.isNotEmpty()) {
+                    syncStatisticDao.insertStatistic(remote)
+
+                }
 
                 Result.success(Unit)
             } catch (e: Exception) {
@@ -117,54 +116,5 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
                 Result.failure(e)
             }
         }
-    }
-
-    private fun mergeStatistics(
-        remote: List<SyncStatistic>,
-        offline: List<OfflineStatistic>,
-        userId: String
-    ): List<SyncStatistic> {
-        val updatedAt = getCurrentTime()
-        val remoteMap = remote.associateBy { it.modeId }.toMutableMap()
-
-        for (local in offline) {
-            val remoteStat = remoteMap[local.modeId]
-
-            val merged = remoteStat?.copy(
-                userId = userId,
-                countGame = (remoteStat.countGame + local.countGame) ?: 0,
-                currentStreak = remoteStat.currentStreak + local.currentStreak + 0,
-                bestStreak = maxOf(remoteStat.bestStreak, local.bestStreak, 0),
-                winGame = remoteStat.winGame + local.winGame + 0,
-                sumTime = (remoteStat.sumTime + local.sumTime) ?: 0,
-                firstTry = remoteStat.firstTry + local.firstTry + 0,
-                secondTry = remoteStat.secondTry + local.secondTry + 0,
-                thirdTry = remoteStat.thirdTry + local.thirdTry + 0,
-                fourthTry = remoteStat.fourthTry + local.fourthTry + 0,
-                fifthTry = remoteStat.fifthTry + local.fifthTry + 0,
-                sixthTry = remoteStat.sixthTry + local.sixthTry + 0,
-                updatedAt = updatedAt
-            )
-                ?: SyncStatistic(
-                    userId = userId,
-                    modeId = local.modeId + 0,
-                    countGame = local.countGame ?: 0,
-                    currentStreak = local.currentStreak + 0,
-                    bestStreak = local.bestStreak + 0,
-                    winGame = local.winGame + 0,
-                    sumTime = local.sumTime ?: 0,
-                    firstTry = local.firstTry + 0,
-                    secondTry = local.secondTry + 0,
-                    thirdTry = local.thirdTry + 0,
-                    fourthTry = local.fourthTry + 0,
-                    fifthTry = local.fifthTry + 0,
-                    sixthTry = local.sixthTry + 0,
-                    updatedAt = updatedAt
-                )
-
-            remoteMap[local.modeId] = merged
-        }
-
-        return remoteMap.values.toList()
     }
 }

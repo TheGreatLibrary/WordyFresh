@@ -65,7 +65,6 @@ import com.sinya.projects.wordle.presentation.game.GameEvent
 import com.sinya.projects.wordle.ui.features.CustomCard
 import com.sinya.projects.wordle.ui.features.PlaceholderBox
 import com.sinya.projects.wordle.ui.features.RoundedButton
-import com.sinya.projects.wordle.ui.features.getLocalizedString
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
@@ -445,7 +444,7 @@ private fun FinishAchieveCard(
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = getLocalizedString(achieve.title),
+                text = achieve.title,
                 color = WordyColor.colors.textPrimary,
                 style = WordyTypography.bodyLarge,
                 fontSize = 16.sp
@@ -505,19 +504,19 @@ private fun calculateIntDiff(values: List<Int>): StatDiff {
     )
 }
 
-private fun calculateTimeDiff(values: List<Long>): StatDiff {
-    val old = values.getOrElse(0) { 0L }
-    val new = values.getOrElse(1) { 0L }
+private fun calculateTimeDiff(values: List<Int>): StatDiff {
+    val old = values.getOrElse(0) { 0 }
+    val new = values.getOrElse(1) { 0 }
     val diff = new - old
 
     return StatDiff(
         value = formatTime(new),
         difference = "${if (diff <= 0) "" else "+"}${formatTime(diff)}",
-        isPositive = if (diff == 0L) null else diff <= 0
+        isPositive = if (diff == 0) null else diff <= 0
     )
 }
 
-private fun formatTime(seconds: Long): String {
+private fun formatTime(seconds: Int): String {
     val mins = seconds / 60
     val secs = seconds % 60
     return if (mins > 0) "${mins}:${secs.toString().padStart(2, '0')}" else "${secs}с"

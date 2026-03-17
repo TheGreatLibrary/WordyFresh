@@ -1,13 +1,13 @@
 package com.sinya.projects.wordle.presentation.statistic
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
+import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.domain.useCase.ClearAllStatisticsUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllStatisticsUseCase
-import com.sinya.projects.wordle.domain.useCase.GetTotalStatisticUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncStatisticUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -22,7 +22,6 @@ class StatisticViewModel @Inject constructor(
     private val getAllStatisticsUseCase: GetAllStatisticsUseCase,
     private val syncStatisticUseCase: SyncStatisticUseCase,
     private val clearAllStatisticsUseCase: ClearAllStatisticsUseCase,
-    private val getTotalStatisticUseCase: GetTotalStatisticUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<StatisticUiState>(StatisticUiState.Loading)
@@ -46,18 +45,14 @@ class StatisticViewModel @Inject constructor(
         }
     }
 
-    private fun calculateTotalStatistic(statisticsList: List<OfflineStatistic>, mode: GameMode): OfflineStatistic {
-        return getTotalStatisticUseCase(statisticsList, mode).getOrNull() ?: OfflineStatistic(GameMode.ALL.id)
-    }
-
     private fun onErrorShown() = updateIfSuccess {
         it.copy(errorMessage = null)
     }
 
-    private fun selectMode(mode: GameMode) = updateIfSuccess {
-        it.copy(
+    private fun selectMode(mode: GameMode) = updateIfSuccess { success ->
+        success.copy(
             selectedMode = mode,
-            currentStatistic = calculateTotalStatistic(it.statisticList, mode)
+            currentStatistic = success.statisticList.first { it.modeId == mode.id }
         )
     }
 
@@ -66,15 +61,14 @@ class StatisticViewModel @Inject constructor(
             onSuccess = { stats ->
                 _state.value = StatisticUiState.Success(
                     statisticList = stats,
+                    currentStatistic = stats.first { it.modeId == GameMode.ALL.id }
                 )
-                updateIfSuccess {
-                    it.copy(
-                        currentStatistic = calculateTotalStatistic(stats, it.selectedMode)
-                    )
-                }
             },
-            onFailure = {
-                _state.value = StatisticUiState.Success(errorMessage = it.message)
+            onFailure = { throwable ->
+                Log.d("Error", throwable.toString())
+                _state.value = StatisticUiState.Success(
+                    errorMessage = throwable.message,
+                )
             }
         )
     }

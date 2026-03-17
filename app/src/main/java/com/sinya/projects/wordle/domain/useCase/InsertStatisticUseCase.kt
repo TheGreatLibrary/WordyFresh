@@ -1,15 +1,15 @@
 package com.sinya.projects.wordle.domain.useCase
 
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
 import com.sinya.projects.wordle.domain.repository.StatisticRepository
 import jakarta.inject.Inject
 
-class UpdateStatisticUseCase @Inject constructor(
+class InsertStatisticUseCase @Inject constructor(
     private val repository: StatisticRepository
 ) {
-    suspend operator fun invoke(updated: OfflineStatistic): Result<Unit> {
+    suspend operator fun invoke(updated: OfflineStatistics): Result<Unit> {
         return try {
-            repository.updateStatistic(updated)
+            repository.insertGame(updated)
 
             Result.success(Unit)
         } catch (e: Exception) {

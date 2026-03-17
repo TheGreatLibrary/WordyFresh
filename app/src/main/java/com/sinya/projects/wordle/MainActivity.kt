@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -51,9 +52,11 @@ class MainActivity : ComponentActivity() {
 
     private fun applySystem() {
         enableEdgeToEdge()
-        WindowCompat.getInsetsController(window, window.decorView).apply {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.apply {
             hide(WindowInsetsCompat.Type.navigationBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            isAppearanceLightStatusBars = !engine.uiState.value.dark
         }
     }
 
@@ -62,10 +65,11 @@ class MainActivity : ComponentActivity() {
         val config by engine.uiState.collectAsStateWithLifecycle()
         val syncViewModel: SyncViewModel = hiltViewModel()
 
-        SideEffect {
+        DisposableEffect(config.dark) {
             WindowCompat.getInsetsController(window, window.decorView).apply {
                 isAppearanceLightStatusBars = !config.dark
             }
+            onDispose {}
         }
 
         LaunchedEffect(Unit) {

@@ -2,7 +2,7 @@ package com.sinya.projects.wordle.presentation.game
 
 import com.sinya.projects.wordle.domain.enums.GameState
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
-import com.sinya.projects.wordle.ui.features.UiText
+import com.sinya.projects.wordle.domain.model.UiText
 
 sealed interface GameEvent {
     data class EnterLetter(val char: Char) : GameEvent

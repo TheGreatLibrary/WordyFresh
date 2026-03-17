@@ -11,33 +11,39 @@ import com.sinya.projects.wordle.data.local.database.dao.SyncAchievementsDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncDictionaryDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncStatisticDao
 import com.sinya.projects.wordle.data.local.database.dao.WordDao
+import com.sinya.projects.wordle.data.local.database.entity.AchievementTranslations
 import com.sinya.projects.wordle.data.local.database.entity.Achievements
 import com.sinya.projects.wordle.data.local.database.entity.CategoriesAchieves
-import com.sinya.projects.wordle.data.local.database.entity.Modes
+import com.sinya.projects.wordle.data.local.database.entity.CategoryAchieveTranslations
+import com.sinya.projects.wordle.data.local.database.entity.ModeStatisticsTranslations
+import com.sinya.projects.wordle.data.local.database.entity.ModesStatistics
 import com.sinya.projects.wordle.data.local.database.entity.OfflineAchievements
 import com.sinya.projects.wordle.data.local.database.entity.OfflineDictionary
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
+import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncAchievements
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncDictionary
-import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistics
 import com.sinya.projects.wordle.data.local.database.entity.Words
 
 @Database(
     entities = [
         Achievements::class,
+        AchievementTranslations::class,
         CategoriesAchieves::class,
-        Modes::class,
+        CategoryAchieveTranslations::class,
+        ModesStatistics::class,
+        ModeStatisticsTranslations::class,
         OfflineAchievements::class,
         OfflineDictionary::class,
-        OfflineStatistic::class,
+        OfflineStatistics::class,
         Profiles::class,
         SyncAchievements::class,
         SyncDictionary::class,
-        SyncStatistic::class,
+        SyncStatistics::class,
         Words::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

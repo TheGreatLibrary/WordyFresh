@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.data.remote.supabase.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import com.sinya.projects.wordle.data.local.database.entity.Words
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -24,7 +25,11 @@ import kotlinx.serialization.Serializable
             childColumns = ["word_id"],
             onDelete = ForeignKey.CASCADE
         )
-  ],
+    ],
+    indices = [
+        Index(value = ["user_id"]),
+        Index(value = ["word_id"])
+    ]
 )
 data class SyncDictionary(
     @ColumnInfo(name = "user_id")

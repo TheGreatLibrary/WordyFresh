@@ -1,4 +1,0 @@
-<resources
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@string/padawan,@string/dilettant,@string/veteran,@string/the_old"
-/>

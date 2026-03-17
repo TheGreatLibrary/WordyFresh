@@ -40,4 +40,7 @@ interface SyncAchievementsDao {
             insertOrReplace(list)
         }
     }
+
+    @Query("UPDATE sync_achievements SET count = 0 WHERE achieve_id = :id")
+    suspend fun resetCount(id: Int)
 }

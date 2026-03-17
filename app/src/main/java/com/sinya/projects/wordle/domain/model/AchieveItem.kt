@@ -8,6 +8,7 @@ data class AchieveItem(
     val condition: String,
     val image: String,
     val count: Int,
+    val hidden: Boolean = false,
     val maxCount: Int,
 ) {
     val isUnlocked: Boolean get() = count >= maxCount

@@ -19,9 +19,8 @@ import androidx.room.PrimaryKey
 data class Achievements(
     @PrimaryKey val id: Int,
     @ColumnInfo(name = "category_id") val categoryId: Int,
-    @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "description") val description: String,
-    @ColumnInfo(name = "condition") val condition: String,
     @ColumnInfo(name = "image") val image: String,
     @ColumnInfo(name = "max_count") val maxCount: Int,
+    @ColumnInfo(name = "hidden") val hidden: Int = 0,
 )
+

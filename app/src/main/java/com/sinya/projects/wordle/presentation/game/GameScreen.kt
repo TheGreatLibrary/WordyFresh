@@ -147,13 +147,13 @@ private fun GameScreenView(
                     onClick = onClick
                 )
             }
-
-            NotRightWordDialog(
-                state.showNotFoundDialog,
-                state.showHardModeHint
-            )
-
-            if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
         }
+
+        NotRightWordDialog(
+            state.showNotFoundDialog,
+            state.showHardModeHint
+        )
+
+        if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
     }
 }

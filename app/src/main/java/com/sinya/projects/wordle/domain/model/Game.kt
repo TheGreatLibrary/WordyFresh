@@ -9,7 +9,7 @@ data class Game(
     val mode: GameMode,
     val lang: String,
     val length: Int,
-    val totalSeconds: Long,
+    val totalSeconds: Int,
     val settings: GameSettings,
     val board: List<Cell>,
     val keyboard: List<List<Key>>,

@@ -24,14 +24,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
+import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.ui.features.CustomCard
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun StatisticContainers(
-    statisticByMode: OfflineStatistic
+    statisticByMode: StatAggregated
 ) {
     val winRate = remember(statisticByMode.winGame, statisticByMode.countGame) {
         if (statisticByMode.countGame != 0) {
@@ -42,7 +42,7 @@ fun StatisticContainers(
     }
 
     val animatedTime by animateIntAsState(
-        targetValue = statisticByMode.sumTime.toInt(),
+        targetValue = statisticByMode.sumTime,
         animationSpec = tween(500),
         label = "time"
     )
@@ -134,7 +134,7 @@ fun StatisticContainers(
 }
 
 @Composable
-private fun AttemptsProgressCard(statistic: OfflineStatistic) {
+private fun AttemptsProgressCard(statistic: StatAggregated) {
     val attempts = remember(statistic) {
         listOf(
             "#1" to statistic.firstTry,

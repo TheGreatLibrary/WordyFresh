@@ -2,9 +2,18 @@ package com.sinya.projects.wordle.data.local.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "words")
+@Entity(
+    tableName = "words",
+    indices = [
+        Index(value = ["language"]),
+        Index(value = ["length"]),
+        Index(value = ["word"]),
+        Index(value = ["language", "length"])
+    ]
+)
 data class Words(
     @PrimaryKey val id: Int,
     val word: String,

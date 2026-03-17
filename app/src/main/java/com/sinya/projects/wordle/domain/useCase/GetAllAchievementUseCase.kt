@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.flowOn
 class GetAllAchievementUseCase @Inject constructor(
     private val repository: AchievementRepository
 ) {
-    operator fun invoke(): Flow<List<AchieveItem>> {
-        return repository.observeAchievements().flowOn(Dispatchers.IO)
+    operator fun invoke(lang: String): Flow<List<AchieveItem>> {
+        return repository.observeAchievements(lang).flowOn(Dispatchers.IO)
     }
 }

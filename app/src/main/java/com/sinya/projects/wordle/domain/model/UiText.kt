@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.ui.features
+package com.sinya.projects.wordle.domain.model
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable

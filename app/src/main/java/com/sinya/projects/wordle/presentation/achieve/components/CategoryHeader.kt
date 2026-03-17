@@ -8,7 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sinya.projects.wordle.ui.features.getLocalizedString
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 
@@ -25,7 +24,7 @@ fun CategoryHeader(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = getLocalizedString(categoryName),
+            text = categoryName,
             style = WordyTypography.bodyLarge,
             fontSize = 20.sp,
             color = WordyColor.colors.textPrimary

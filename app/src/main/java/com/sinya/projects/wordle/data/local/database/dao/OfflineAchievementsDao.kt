@@ -18,8 +18,11 @@ interface OfflineAchievementsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(row: OfflineAchievements)
 
-    @Query("UPDATE offline_achievements SET count = count + 1 WHERE achieve_id = :id")
-    suspend fun increment(id: Int): Int
+    @Query("UPDATE offline_achievements SET count = :by WHERE achieve_id = :id")
+    suspend fun setCount(id: Int, by: Int): Int
+
+    @Query("UPDATE offline_achievements SET count = count + :by WHERE achieve_id = :id")
+    suspend fun increment(id: Int, by: Int): Int
 
     @Query("UPDATE offline_achievements SET count = 0 WHERE achieve_id = :id")
     suspend fun resetCount(id: Int)

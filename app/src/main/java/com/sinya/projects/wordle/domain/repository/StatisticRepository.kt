@@ -2,26 +2,24 @@ package com.sinya.projects.wordle.domain.repository
 
 import com.sinya.projects.wordle.data.local.database.dao.OfflineStatisticDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncStatisticDao
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
-import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistic
+import com.sinya.projects.wordle.data.local.database.entity.ModesStatistics
+import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
+import com.sinya.projects.wordle.domain.model.GameRow
+import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseStatisticsDataSource
 import jakarta.inject.Inject
 
 interface StatisticRepository {
     // StatisticScreen
-    suspend fun getAllStatistic(): List<OfflineStatistic>
-    fun getTotalStatistic(list: List<OfflineStatistic>, mode: GameMode): OfflineStatistic
+    suspend fun getAggregatedAll(): List<StatAggregated>
     suspend fun clearAllStatistics(): Result<Unit>
 
-    suspend fun getMergedSummary(): OfflineStatistic /// !!!
-
     // GameScreen
-    suspend fun getStatisticByMode(mode: Int): OfflineStatistic?
-    suspend fun getAllStatisticByMode(mode: Int) : OfflineStatistic
-    suspend fun updateStatistic(updated: OfflineStatistic): Result<Int>
+    suspend fun getAllStatisticByMode(mode: Int) : Result<StatAggregated>
+    suspend fun insertGame(stat: OfflineStatistics): Result<Unit>
 
     // ProfileScreen
     suspend fun clearLocal(): Result<Unit>
@@ -30,6 +28,8 @@ interface StatisticRepository {
     suspend fun syncFromSupabase(): Result<Unit>
     suspend fun syncFromLocal(): Result<Unit>
 
+    // AchievementManager
+    suspend fun getCurrentStreak(isWin: Boolean, currentResult: Boolean): Int
 }
 
 class StatisticRepositoryImpl @Inject constructor(
@@ -41,40 +41,32 @@ class StatisticRepositoryImpl @Inject constructor(
 
     // StatisticScreen
 
-    override suspend fun getAllStatistic(): List<OfflineStatistic> {
-        var offline = offlineStatisticDao.getAllStatistic()
-        val sync = syncStatisticDao.getAllStatistic()
-
-        if (offline.isEmpty()) {
-            createBaseData()
-            offline = offlineStatisticDao.getAllStatistic()
-        }
-        return mergeStatistics(offline, sync)
-    }
-
-    override suspend fun getMergedSummary(): OfflineStatistic {
-        return offlineStatisticDao.getMergedSummary()
-    }
-
-    override fun getTotalStatistic(
-        list: List<OfflineStatistic>,
-        mode: GameMode
-    ): OfflineStatistic {
-        return list.firstOrNull { it.modeId == mode.id } ?: list.reduce { acc, stat ->
-            acc.copy(
-                countGame = acc.countGame + stat.countGame,
-                currentStreak = acc.currentStreak + stat.currentStreak,
-                bestStreak = maxOf(acc.bestStreak, stat.bestStreak),
-                winGame = acc.winGame + stat.winGame,
-                sumTime = acc.sumTime + stat.sumTime,
-                firstTry = acc.firstTry + stat.firstTry,
-                secondTry = acc.secondTry + stat.secondTry,
-                thirdTry = acc.thirdTry + stat.thirdTry,
-                fourthTry = acc.fourthTry + stat.fourthTry,
-                fifthTry = acc.fifthTry + stat.fifthTry,
-                sixthTry = acc.sixthTry + stat.sixthTry
+    override suspend fun getAggregatedAll(): List<StatAggregated> {
+        val modes = listOf(ModesStatistics(GameMode.ALL.id)) + offlineStatisticDao.getModes()
+        val list = listOf(offlineStatisticDao.getAggregatedTotal(GameMode.ALL.id)) + offlineStatisticDao.getAggregatedAll()
+        val streak = offlineStatisticDao.getAllGamesOrdered()
+        return modes.map { item ->
+            val streaks = calculateStreaks(if (item.id == GameMode.ALL.id) streak else streak.filter { it.modeId == item.id })
+            (list.firstOrNull { it.modeId == item.id } ?: StatAggregated(item.id)).copy(
+                currentStreak = streaks.first,
+                bestStreak = streaks.second
             )
-        }.copy(modeId = GameMode.ALL.id)
+        }
+    }
+
+    private fun calculateStreaks(games: List<GameRow>): Pair<Int, Int> {
+        var best = 0
+        var temp = 0
+        for (game in games) {
+            if (game.result == 1) { temp++; best = maxOf(best, temp) }
+            else temp = 0
+        }
+        var current = 0
+        for (game in games.reversed()) {
+            if (game.result == 1) current++
+            else break
+        }
+        return current to best
     }
 
     override suspend fun clearAllStatistics(): Result<Unit> {
@@ -90,73 +82,29 @@ class StatisticRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun createBaseData() {
-        val supportedModes = GameMode.getStatsOfDataBase().map {
-                OfflineStatistic(modeId = it.id)
-        }
-        offlineStatisticDao.insertStatisticList(supportedModes)
-    }
-
-    private fun mergeStatistics(
-        offlineStats: List<OfflineStatistic>,
-        syncStats: List<SyncStatistic>
-    ): List<OfflineStatistic> {
-        val syncMap = syncStats.associateBy { it.modeId }
-        return offlineStats.map { offline ->
-            val sync = syncMap[offline.modeId]
-            if (sync != null) {
-                mergeStatistic(offline, sync)
-            } else {
-                offline
-            }
-        }
-    }
-
-    private fun mergeStatistic(
-        offline: OfflineStatistic,
-        sync: SyncStatistic
-    ): OfflineStatistic {
-        return offline.copy(
-            countGame = offline.countGame + sync.countGame,
-            bestStreak = maxOf(offline.bestStreak, sync.bestStreak),
-            winGame = offline.winGame + sync.winGame,
-            sumTime = offline.sumTime + sync.sumTime,
-            firstTry = offline.firstTry + sync.firstTry,
-            secondTry = offline.secondTry + sync.secondTry,
-            thirdTry = offline.thirdTry + sync.thirdTry,
-            fourthTry = offline.fourthTry + sync.fourthTry,
-            fifthTry = offline.fifthTry + sync.fifthTry,
-            sixthTry = offline.sixthTry + sync.sixthTry,
-        )
-    }
-
     // GameScreen
 
-    override suspend fun updateStatistic(updated: OfflineStatistic): Result<Int> {
+    override suspend fun getAllStatisticByMode(mode: Int): Result<StatAggregated> {
         return try {
-            Result.success(offlineStatisticDao.updateStatistic(updated))
+            val streak = offlineStatisticDao.getAllGamesOrdered()
+            val streaks = calculateStreaks(streak.filter { it.modeId == mode })
+
+            Result.success(offlineStatisticDao.getAggregatedByMode(mode).copy(
+                currentStreak = streaks.first,
+                bestStreak = streaks.second
+            ))
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun getStatisticByMode(mode: Int): OfflineStatistic? {
-        var offline = offlineStatisticDao.getStatisticByMode(mode)
-
-        if (offline == null) {
-            createBaseData()
-            offline = offlineStatisticDao.getStatisticByMode(mode)
+    override suspend fun insertGame(stat: OfflineStatistics): Result<Unit> {
+        return try {
+            offlineStatisticDao.insertGame(stat)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-        return offline
-    }
-
-    override suspend fun getAllStatisticByMode(mode: Int): OfflineStatistic {
-        val offline = getStatisticByMode(mode) as OfflineStatistic
-        val online = syncStatisticDao.getStatisticByMode(mode)
-
-        val merge = mergeStatistic(offline, online)
-
-        return merge
     }
 
     // ProfileScreen
@@ -198,5 +146,18 @@ class StatisticRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    // AchievementManager
+
+    override suspend fun getCurrentStreak(isWin: Boolean, currentResult: Boolean): Int {
+        val games = offlineStatisticDao.getAllGamesOrdered()
+        val allGames = games + GameRow(modeId = 0, result = if (currentResult) 1 else 0, createdAt = "")
+        var streak = 0
+        for (game in allGames.reversed()) {
+            if ((game.result == 1) == isWin) streak++
+            else break
+        }
+        return streak
     }
 }

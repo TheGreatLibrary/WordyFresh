@@ -13,6 +13,6 @@ data class FinishStatisticGame(
     val colors: String,
     val percentWin: List<Float?>?,
     val currentStreak: List<Int>?,
-    val avgTime: List<Long>?,
+    val avgTime: List<Int>?,
     val achieves: List<AchieveItem>?
 )

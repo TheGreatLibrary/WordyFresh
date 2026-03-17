@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
+import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.data.remote.supabase.SessionManager
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
@@ -23,6 +24,7 @@ import kotlinx.datetime.Clock
 @HiltViewModel
 class CreateProfileViewModel @Inject constructor(
     private val sessionManager: SessionManager,
+    private val settingsEngine: SettingsEngine,
     private val importSessionUseCase: ImportSessionUseCase,
     private val insertProfileUseCase: InsertProfileUseCase,
     private val checkAchievementUseCase: CheckAchievementUseCase
@@ -92,7 +94,7 @@ class CreateProfileViewModel @Inject constructor(
                 }
             }
 
-            checkAchievementUseCase(AchievementTrigger.AccountRegistered)
+            checkAchievementUseCase(AchievementTrigger.AccountRegistered, settingsEngine.uiState.value.language)
 
             _state.value = CreateProfileUiState.Success
         }

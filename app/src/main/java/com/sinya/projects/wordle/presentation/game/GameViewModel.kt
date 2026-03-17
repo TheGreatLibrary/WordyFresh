@@ -7,7 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.achievement.AchievementEvent
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
+import com.sinya.projects.wordle.domain.model.StatAggregated
+import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
 import com.sinya.projects.wordle.data.local.datastore.SavedGameState
 import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.domain.enums.GameMode
@@ -24,14 +25,13 @@ import com.sinya.projects.wordle.domain.useCase.CheckHardModeRulesUseCase
 import com.sinya.projects.wordle.domain.useCase.GenerateKeyboardLayoutUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllStatisticsByModeUseCase
 import com.sinya.projects.wordle.domain.useCase.GetRandomWordUseCase
-import com.sinya.projects.wordle.domain.useCase.GetStatisticByModeUseCase
 import com.sinya.projects.wordle.domain.useCase.GetWordRatingUseCase
 import com.sinya.projects.wordle.domain.useCase.InsertOrUpdateDefinitionUseCase
-import com.sinya.projects.wordle.domain.useCase.UpdateStatisticUseCase
+import com.sinya.projects.wordle.domain.useCase.InsertStatisticUseCase
 import com.sinya.projects.wordle.domain.useCase.ValidateWordColorsUseCase
 import com.sinya.projects.wordle.domain.useCase.WordExistsUseCase
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
-import com.sinya.projects.wordle.ui.features.UiText
+import com.sinya.projects.wordle.domain.model.UiText
 import com.sinya.projects.wordle.ui.theme.gray100
 import com.sinya.projects.wordle.ui.theme.gray30
 import com.sinya.projects.wordle.ui.theme.gray600
@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 
 @HiltViewModel(assistedFactory = GameViewModel.Factory::class)
 class GameViewModel @AssistedInject constructor(
@@ -70,9 +71,8 @@ class GameViewModel @AssistedInject constructor(
 
     private val checkAchievementUseCase: CheckAchievementUseCase,
     private val insertWordInDictionaryUseCase: InsertOrUpdateDefinitionUseCase,
-    private val getStatisticByModeUseCase: GetStatisticByModeUseCase,
     private val getAllStatisticsByModeUseCase: GetAllStatisticsByModeUseCase,
-    private val updateStatisticUseCase: UpdateStatisticUseCase,
+    private val updateStatisticUseCase: InsertStatisticUseCase,
     private val wordExistsUseCase: WordExistsUseCase,
     private val getRandomWordUseCase: GetRandomWordUseCase,
     private val getWordRatingUseCase: GetWordRatingUseCase
@@ -103,12 +103,13 @@ class GameViewModel @AssistedInject constructor(
 
             launch { observeSettings() }
 
+            val config = settingsEngine.uiState.value
+            val game = (config.lastGame as? SavedGameState.Loaded)?.game
+
             when (mode) {
                 GameMode.SAVED -> {
-                    val config = settingsEngine.uiState.value
-                    val saved = (config.lastGame as? SavedGameState.Loaded)?.game
-                    if (saved != null) {
-                        restoreGame(saved)
+                    if (game != null) {
+                        restoreGame(game)
                         startTimer()
                     } else {
                         updateFinishDialog(
@@ -119,7 +120,28 @@ class GameViewModel @AssistedInject constructor(
                         )
                     }
                 }
+
                 else -> {
+//                    if (game != null) {
+//                        val firstEmptyIndex =
+//                            game.board.indexOfFirst { it.backgroundColor == gray30.value }
+//                        addStatisticData(
+//                            GameState.LOSE, GameUiState.Ready(
+//                                ratingStatus = game.settings.ratingStatus,
+//                                confettiStatus = game.settings.confettiStatus,
+//                                keyboardCode = game.settings.keyboardCode,
+//                                mode = game.mode,
+//                                wordLength = game.length,
+//                                lang = game.lang,
+//                                hiddenWord = game.targetWord,
+//                                focusedCell = if (firstEmptyIndex != -1) firstEmptyIndex else 0,
+//                                timePassed = game.totalSeconds,
+//                                gridState = game.board.toList(),
+//                                keyboardState = game.keyboard.toList(),
+//                                showFinishDialog = null
+//                            )
+//                        )
+//                    }
                     if (initialState.hiddenWord.isEmpty()) {
                         getRandomWord()
                     }
@@ -191,6 +213,7 @@ class GameViewModel @AssistedInject constructor(
                     GameMode.FRIENDLY -> getWordRatingUseCase(hiddenWord).getOrElse { config.ratingWords }
                     GameMode.SAVED -> (config.lastGame as SavedGameState.Loaded).game?.settings?.ratingStatus
                         ?: config.ratingWords
+
                     else -> config.ratingWords
                 }
             } else {
@@ -254,7 +277,12 @@ class GameViewModel @AssistedInject constructor(
                 timePassed = 0,
                 result = GameState.IN_PROGRESS,
                 mode = if (it.mode == GameMode.FRIENDLY) GameMode.NORMAL else it.mode,
-                gridState = it.gridState.map { row -> row.copy(letter = "", backgroundColor = gray30.value) },
+                gridState = it.gridState.map { row ->
+                    row.copy(
+                        letter = "",
+                        backgroundColor = gray30.value
+                    )
+                },
                 keyboardState = it.keyboardState.map { row -> row.map { key -> key.copy(color = gray100.value) } },
             )
         }
@@ -509,9 +537,9 @@ class GameViewModel @AssistedInject constructor(
                     val char = enteredWord[i]
                     val newColor = colors[i]
 
-                    val currentColor = s.keyboardState
-                        .flatten()
-                        .find { it.char == char }
+                    val currentColor = (_state.value as? GameUiState.Ready)?.keyboardState
+                        ?.flatten()
+                        ?.find { it.char == char }
                         ?.color
                         ?.let { Color(it) } ?: gray600
 
@@ -520,6 +548,7 @@ class GameViewModel @AssistedInject constructor(
                         currentColor == yellow && newColor == gray600 -> yellow
                         else -> newColor
                     }
+                    Log.d("Game", ""+currentColor+finalColor)
 
                     updateKeyColor(char, finalColor)
                     delay(150L)
@@ -564,7 +593,8 @@ class GameViewModel @AssistedInject constructor(
         val isWin = result == GameState.WIN
         val currentState = _state.value as? GameUiState.Ready ?: return
 
-        val oldStat = getAllStatisticsByModeUseCase(currentState.mode.id).getOrNull() ?: OfflineStatistic(currentState.mode.id)
+        val oldStat =
+            getAllStatisticsByModeUseCase(currentState.mode.id).getOrElse { StatAggregated(modeId = currentState.mode.id) }
 
         val newStreak = if (isWin) oldStat.currentStreak + 1 else 0
         val newWinCount = if (isWin) oldStat.winGame + 1 else oldStat.winGame
@@ -572,7 +602,7 @@ class GameViewModel @AssistedInject constructor(
         val newTotalGames = countGame + 1
         val newAvgTime = (oldStat.sumTime + currentState.timePassed) / newTotalGames
 
-       updateIfReady {
+        updateIfReady {
             it.copy(
                 showFinishDialog = it.showFinishDialog?.copy(
                     countGame = newTotalGames,
@@ -595,9 +625,14 @@ class GameViewModel @AssistedInject constructor(
                 mode = currentState.mode,
                 lang = currentState.lang,
                 word = currentState.hiddenWord,
-                attempts = currentState.focusedCell / currentState.wordLength,
+                length = currentState.wordLength,
+                attemptsWords = (0 until 6).map {
+                    currentState.gridState.getWord(it, currentState.wordLength)
+                },
+                rowAttempts = currentState.focusedCell / currentState.wordLength,
                 timeSeconds = currentState.timePassed
-            )
+            ),
+            settingsEngine.uiState.value.language
         ).getOrNull() ?: emptyList()
 
         val allAchieveChanges = achieveEvents.map { event ->
@@ -627,6 +662,8 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private suspend fun saveGameData(result: GameState) {
+//        val s = _state.value as? GameUiState.Ready ?: return
+//
         addStatisticData(result)
         settingsEngine.clearSavedGame()
     }
@@ -634,39 +671,29 @@ class GameViewModel @AssistedInject constructor(
     private suspend fun addStatisticData(result: GameState) {
         val s = _state.value as? GameUiState.Ready ?: return
 
-        getStatisticByModeUseCase(s.mode.id).fold(
-            onSuccess = { stat ->
-                val win = result == GameState.WIN
-                val currentStreak = if (win) stat.currentStreak + 1 else 0
-                val row = s.focusedCell / s.wordLength
-                val updated = stat.copy(
-                    countGame = stat.countGame + 1,
-                    currentStreak = currentStreak,
-                    bestStreak = if (stat.bestStreak < currentStreak) currentStreak else stat.bestStreak,
-                    winGame = if (win) stat.winGame + 1 else stat.winGame,
-                    sumTime = stat.sumTime + s.timePassed,
-                    firstTry = if (row == 1 && win) stat.firstTry + 1 else stat.firstTry, // первая попытка
-                    secondTry = if (row == 2 && win) stat.secondTry + 1 else stat.secondTry, // вторая попытка
-                    thirdTry = if (row == 3 && win) stat.thirdTry + 1 else stat.thirdTry, // третья попытка
-                    fourthTry = if (row == 4 && win) stat.fourthTry + 1 else stat.fourthTry, // четвертная попытка
-                    fifthTry = if (row == 5 && win) stat.fifthTry + 1 else stat.fifthTry, // пятая попытка
-                    sixthTry = if (row == 6 && win) stat.sixthTry + 1 else stat.sixthTry // шестая попытка
-                )
-
-                updateStatisticUseCase(updated).fold(
-                    onSuccess = {
-                        Log.d("GameFinish", "Статистика обновлена")
-                    },
-                    onFailure = {
-                        Log.d("GameFinish", "Ошибка обновления статистики")
-                    }
-                )
+        val row = s.focusedCell / s.wordLength
+        val win = result == GameState.WIN
+        updateStatisticUseCase(
+            OfflineStatistics(
+                id = 0,
+                modeId = s.mode.id,
+                result = if (win) 1 else 0,
+                timeGame = s.timePassed,
+                wordLength = s.wordLength,
+                wordLang = s.lang,
+                tryNumber = if (win) row+1 else null,
+                createdAt = Clock.System.now().toString()
+            )
+        ).fold(
+            onSuccess = {
+                Log.d("GameFinish", "Статистика обновлена")
             },
             onFailure = {
-                Log.d("GameFinish", "Ошибка получения статистики текущей")
+                Log.d("GameFinish", "Ошибка обновления статистики")
             }
         )
     }
+
 
     /** update-методы для атомарного обновления state */
 

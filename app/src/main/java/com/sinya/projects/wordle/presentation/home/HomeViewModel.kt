@@ -75,7 +75,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun sendSupportEmail() = viewModelScope.launch {
-        checkAchievementUseCase(AchievementTrigger.SupportMessageSent).fold(
+        checkAchievementUseCase(AchievementTrigger.SupportMessageSent, settingsEngine.uiState.value.language).fold(
             onSuccess = {
                 updateIfSuccess {
                     it.copy(errorMessage = "Письмо отправлено!")

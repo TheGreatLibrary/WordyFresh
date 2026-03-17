@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistic
+import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.ui.features.AnimationCard
 import com.sinya.projects.wordle.ui.features.CustomCard
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -121,7 +121,7 @@ private fun formatAverageTime(totalSeconds: Long, countGame: Int): String {
 @Composable
 fun StatisticWinRateCard(
     winRate: Float,
-    statistic: OfflineStatistic,
+    statistic: StatAggregated,
     modifier: Modifier = Modifier
 ) {
     var showLosses by remember { mutableStateOf(false) }
@@ -183,7 +183,7 @@ private fun StatisticContent(
 @Composable
 private fun WinRateContent(
     winRate: Float,
-    statistic: OfflineStatistic,
+    statistic: StatAggregated,
     showLosses: Boolean
 ) {
     val displayRate = if (showLosses) 1f - winRate else winRate

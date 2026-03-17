@@ -15,10 +15,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.sinya.projects.wordle.domain.model.AchieveItem
-import com.sinya.projects.wordle.ui.features.getLocalizedString
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
+import com.sinya.projects.wordle.utils.obfuscate
 
 @Composable
 fun AchieveDialog(
@@ -38,7 +38,7 @@ fun AchieveDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = getLocalizedString(achieveItem.title),
+                text = if (achieveItem.hidden && !achieveItem.isUnlocked) achieveItem.title.obfuscate() else achieveItem.title,
                 style = WordyTypography.titleLarge,
                 color = WordyColor.colors.textPrimary,
                 fontSize = 18.sp,
@@ -57,14 +57,14 @@ fun AchieveDialog(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = getLocalizedString(achieveItem.description),
+                text = if (achieveItem.hidden && !achieveItem.isUnlocked) achieveItem.description.obfuscate() else achieveItem.description,
                 style = WordyTypography.bodyMedium,
                 color = WordyColor.colors.textPrimary,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = getLocalizedString(achieveItem.condition),
+                text = if (achieveItem.hidden && !achieveItem.isUnlocked) achieveItem.condition.obfuscate() else achieveItem.condition,
                 style = WordyTypography.bodyMedium,
                 color = WordyColor.colors.textCardSecondary,
                 fontSize = 13.sp,

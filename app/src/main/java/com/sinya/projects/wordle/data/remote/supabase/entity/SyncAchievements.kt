@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.data.remote.supabase.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import com.sinya.projects.wordle.data.local.database.entity.Achievements
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -24,6 +25,10 @@ import kotlinx.serialization.Serializable
             childColumns = ["achieve_id"],
             onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        Index(value = ["achieve_id"]),
+        Index(value = ["user_id"])
     ]
 )
 data class SyncAchievements(

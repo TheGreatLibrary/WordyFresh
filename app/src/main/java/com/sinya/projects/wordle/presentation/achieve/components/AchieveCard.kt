@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.domain.model.AchieveItem
 import com.sinya.projects.wordle.ui.features.CustomCard
 import com.sinya.projects.wordle.ui.features.getDrawableId
-import com.sinya.projects.wordle.ui.features.getLocalizedString
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
+import com.sinya.projects.wordle.utils.obfuscate
 
 @Composable
 fun AchieveCard(
@@ -109,7 +109,7 @@ private fun AchieveCardContent(
         )
 
         Text(
-            text = getLocalizedString(achieveItem.title),
+            text = if (achieveItem.hidden && !achieveItem.isUnlocked) achieveItem.title.obfuscate() else achieveItem.title,
             style = WordyTypography.bodyMedium,
             color = WordyColor.colors.textCardPrimary,
             fontSize = 14.sp,
@@ -132,7 +132,7 @@ fun AchieveImage(
 
     Image(
         painter = painterResource(getDrawableId(achieveItem.image)),
-        contentDescription = getLocalizedString(achieveItem.title),
+        contentDescription = achieveItem.title,
         modifier = modifier
             .clip(CircleShape)
             .border(

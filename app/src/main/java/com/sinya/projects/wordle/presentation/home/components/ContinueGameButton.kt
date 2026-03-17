@@ -63,7 +63,7 @@ fun ContinueGameButton(
                     append(
                         String.format(
                             "%02d:%02d",
-                            TimeUnit.SECONDS.toMinutes(savedGame.totalSeconds).toInt(),
+                            TimeUnit.SECONDS.toMinutes(savedGame.totalSeconds.toLong()),
                             savedGame.totalSeconds % 60
                         )
                     )
