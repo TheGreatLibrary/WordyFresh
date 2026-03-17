@@ -455,7 +455,7 @@ private fun FinishAchieveCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(0.8f)
                         .height(7.dp)
                         .clip(RoundedCornerShape(27.dp))
                         .background(gray100),
