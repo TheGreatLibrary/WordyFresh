@@ -9,7 +9,7 @@ sealed class ScreenRoute(val route: String) {
 
     @Serializable data object Home : ScreenRoute("Home")
     @Serializable data object Statistic : ScreenRoute("Statistic")
-    @Serializable data object Achieves : ScreenRoute("Achieves")
+    @Serializable data class Achieves(val id: Int? = null) : ScreenRoute("Achieves")
     @Serializable data object Dictionary : ScreenRoute("Dictionary")
     @Serializable data object SettingWithBar : ScreenRoute("SettingWithBar")
     @Serializable data object SettingWithoutBar : ScreenRoute("SettingWithoutBar")
@@ -47,7 +47,7 @@ val ROUTES_WITHOUT_IMAGE = setOf(
 
 val ROUTES_WITHOUT_BOTTOM_BAR = setOf(
     ScreenRoute.Game(-1).route,
-    ScreenRoute.Achieves.route,
+    ScreenRoute.Achieves().route,
     ScreenRoute.SettingWithoutBar.route,
 )
 

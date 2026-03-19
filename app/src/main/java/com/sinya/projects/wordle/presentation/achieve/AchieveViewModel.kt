@@ -7,8 +7,10 @@ import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.useCase.ClearAllAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncAchievementUseCase
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -16,8 +18,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class AchieveViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = AchieveViewModel.Factory::class)
+class AchieveViewModel @AssistedInject constructor(
+    @Assisted("id") private val id: Int?,
     private val getAllAchievementUseCase: GetAllAchievementUseCase,
     private val syncAchievementUseCase: SyncAchievementUseCase,
     private val clearAllAchievementUseCase: ClearAllAchievementUseCase,
@@ -27,12 +30,20 @@ class AchieveViewModel @Inject constructor(
     private val _state = MutableStateFlow<AchieveUiState>(AchieveUiState.Loading)
     val state = _state.asStateFlow()
 
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("id") id: Int?,
+        ): AchieveViewModel
+    }
+
     init {
         viewModelScope.launch {
             getAllAchievementUseCase(settingsEngine.uiState.value.language)
                 .map { list ->
                     AchieveUiState.Success(
                         isRefreshing = false,
+                        showAchieveDialog = list.firstOrNull { it.id == id },
                         achieveList = list.groupBy { it.categoryName }
                     )
                 }
@@ -48,6 +59,8 @@ class AchieveViewModel @Inject constructor(
             AchieveEvent.OnClearAll -> clearAllAchievement()
 
             AchieveEvent.OnErrorShown -> onErrorShown()
+
+            is AchieveEvent.VisibleDialog -> updateIfSuccess { it.copy(showAchieveDialog = event.item) }
         }
     }
 

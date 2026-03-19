@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.domain.model.AchieveItem
+import com.sinya.projects.wordle.presentation.achieve.AchieveEvent
 import com.sinya.projects.wordle.ui.features.CustomCard
 import com.sinya.projects.wordle.ui.features.getDrawableId
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -39,9 +40,9 @@ import com.sinya.projects.wordle.utils.obfuscate
 @Composable
 fun AchieveCard(
     achieveItem: AchieveItem,
+    onEvent: (AchieveEvent) -> Unit,
     modifier: Modifier
 ) {
-    var showDialog by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
@@ -66,19 +67,14 @@ fun AchieveCard(
                         tryAwaitRelease()
                         isPressed = false
                     },
-                    onTap = { showDialog = true }
+                    onTap = { onEvent(AchieveEvent.VisibleDialog(achieveItem)) }
                 )
             }
     ) {
         AchieveCardContent(achieveItem = achieveItem)
     }
 
-    if (showDialog) {
-        AchieveDialog(
-            achieveItem = achieveItem,
-            onDismiss = { showDialog = false }
-        )
-    }
+
 }
 
 @Composable

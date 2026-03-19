@@ -8,6 +8,7 @@ sealed interface AchieveUiState {
     data class Success(
         val achieveList: Map<String, List<AchieveItem>> = emptyMap(),
         val isRefreshing: Boolean = false,
+        val showAchieveDialog: AchieveItem? = null,
         val errorMessage: String? = null
     ) : AchieveUiState
 }

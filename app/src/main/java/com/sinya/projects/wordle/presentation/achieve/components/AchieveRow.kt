@@ -12,10 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.sinya.projects.wordle.domain.model.AchieveItem
+import com.sinya.projects.wordle.presentation.achieve.AchieveEvent
 
 @Composable
 fun AchieveRow(
     items: List<AchieveItem>,
+    onEvent: (AchieveEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -32,6 +34,7 @@ fun AchieveRow(
                 items.getOrNull(index)?.let { item ->
                     AchieveCard(
                         achieveItem = item,
+                        onEvent = onEvent,
                         modifier = Modifier.fillMaxSize()
                     )
                 }

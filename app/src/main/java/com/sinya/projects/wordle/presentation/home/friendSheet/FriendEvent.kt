@@ -7,4 +7,6 @@ sealed interface FriendEvent {
     data object ClearState : FriendEvent
     data object DecodeCipher : FriendEvent
     data object EncodeCipher : FriendEvent
+    data object EncodeCipherToShare : FriendEvent
+    data object InviteCipherShown : FriendEvent
 }

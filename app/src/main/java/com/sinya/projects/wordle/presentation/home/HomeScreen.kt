@@ -29,7 +29,8 @@ import com.sinya.projects.wordle.presentation.home.components.MainContainers
 import com.sinya.projects.wordle.presentation.home.components.MainHeader
 import com.sinya.projects.wordle.presentation.home.components.NewGameBottomSheet
 import com.sinya.projects.wordle.presentation.home.components.NewGameButton
-import com.sinya.projects.wordle.presentation.home.friendSheet.FriendBottomSheet
+import com.sinya.projects.wordle.presentation.home.friendSheet.FriendSheet
+import com.sinya.projects.wordle.utils.findActivity
 import com.sinya.projects.wordle.utils.sendSupportEmail
 
 @Composable
@@ -39,6 +40,13 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val activity = context.findActivity()
+    LaunchedEffect(Unit) {
+        val deepLinkUri = activity?.intent
+        viewModel.handleDeepLink(deepLinkUri)
+        activity?.intent?.data = null
+    }
 
     Box(
         Modifier
@@ -58,6 +66,12 @@ fun HomeScreen(
                 },
                 onEvent = viewModel::onEvent
             )
+
+            is HomeUiState.Invite -> {
+                LaunchedEffect(Unit) {
+                    navigateTo((state as HomeUiState.Invite).game)
+                }
+            }
         }
     }
 }
@@ -134,7 +148,7 @@ private fun HomeScreenView(
     }
 
     if (state.showFriendBottomSheet) {
-        FriendBottomSheet(
+        FriendSheet(
             navigateTo = navigateTo,
             onDismissRequest = { onEvent(HomeEvent.FriendDialogUploadVisible(false)) }
         )

@@ -13,6 +13,7 @@ import com.sinya.projects.wordle.domain.model.DictionaryItem
 import com.sinya.projects.wordle.domain.source.DictionaryDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseDictionaryDataSource
+import com.sinya.projects.wordle.domain.source.WiktionaryDataSource
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -30,7 +31,7 @@ interface DictionaryRepository {
     suspend fun existWord(word: String, lang: String, length: Int, ratingStatus: Int): Result<Unit>
     suspend fun getWord(word: String): Result<Words>
     suspend fun getWordRating(word: String): Result<Boolean>
-    suspend fun fetchAndSaveDefinition(word: String): Result<String>
+    suspend fun saveDefinition(wordId: Int, definition: String)
     suspend fun getRandomWord(length: Int, lang: String, ratingStatus: Boolean): Result<String>
 
     // SyncViewModel
@@ -42,7 +43,7 @@ class DictionaryRepositoryImpl @Inject constructor(
     private val offlineDictionaryDao: OfflineDictionaryDao,
     private val syncDictionaryDao: SyncDictionaryDao,
     private val wordDao: WordDao,
-    private val dictionaryDataSource: DictionaryDataSource,
+    private val dictionaryDataSource: WiktionaryDataSource,
     private val supabaseAuthDataSource: SupabaseAuthDataSource,
     private val supabaseDictionaryDataSource: SupabaseDictionaryDataSource
 ) : DictionaryRepository {
@@ -81,33 +82,8 @@ class DictionaryRepositoryImpl @Inject constructor(
 
     // GameScreen
 
-    override suspend fun fetchAndSaveDefinition(word: String): Result<String> {
-        return try {
-            val wordObj = wordDao.getWord(word)
-                ?: return Result.failure(WordNotFoundException())
-
-            dictionaryDataSource.getDefinition(wordObj.word, wordObj.language).fold(
-                onSuccess = { definition ->
-                    Log.d("Dictionary", definition)
-                    offlineDictionaryDao.insertOrUpdateDescription(wordObj.id, definition)
-                    Result.success(definition)
-                },
-                onFailure = { exception ->
-                    Log.d("Dictionary", exception.toString() + exception.message)
-                    when (exception) {
-                        is NoInternetException,
-                        is DefinitionNotFoundException -> {
-                            offlineDictionaryDao.insertOrUpdateDescription(wordObj.id, exception.message ?: "")
-                            Result.success(exception.message ?: "")
-                        }
-                        else -> Result.failure(exception)
-                    }
-                }
-            )
-        }
-        catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun saveDefinition(wordId: Int, definition: String) {
+        offlineDictionaryDao.insertOrUpdateDescription(wordId, definition)
     }
 
     override suspend fun getWordRating(word: String): Result<Boolean> {
@@ -118,7 +94,11 @@ class DictionaryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getRandomWord(length: Int, lang: String, ratingStatus: Boolean): Result<String> {
+    override suspend fun getRandomWord(
+        length: Int,
+        lang: String,
+        ratingStatus: Boolean
+    ): Result<String> {
         return try {
             Result.success(wordDao.getRandomWord(length, lang, ratingStatus))
         } catch (e: Exception) {
@@ -137,7 +117,12 @@ class DictionaryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun existWord(word: String, lang: String, length: Int, ratingStatus: Int): Result<Unit> {
+    override suspend fun existWord(
+        word: String,
+        lang: String,
+        length: Int,
+        ratingStatus: Int
+    ): Result<Unit> {
         return try {
             val result = wordDao.existsWord(word, lang, length, ratingStatus)
 

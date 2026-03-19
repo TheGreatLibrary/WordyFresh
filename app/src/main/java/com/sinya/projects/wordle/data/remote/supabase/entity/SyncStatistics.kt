@@ -33,7 +33,7 @@ import kotlinx.serialization.Serializable
     ]
 )
 data class SyncStatistics(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: String,
 
     @ColumnInfo(name = "user_id")
     @SerialName("user_id")

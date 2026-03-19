@@ -1,12 +1,17 @@
 package com.sinya.projects.wordle.presentation.home
 
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
 import com.sinya.projects.wordle.data.local.datastore.SavedGameState
 import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.data.remote.supabase.SessionManager
+import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
+import com.sinya.projects.wordle.domain.useCase.GetDataWordUseCase
+import com.sinya.projects.wordle.navigation.ScreenRoute
+import com.sinya.projects.wordle.utils.decode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +26,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel @Inject constructor(
     private val settingsEngine: SettingsEngine,
     private val sessionManager: SessionManager,
+    private val getWordUseCase: GetDataWordUseCase,
     private val checkAchievementUseCase: CheckAchievementUseCase,
 ) : ViewModel() {
 
@@ -29,6 +35,33 @@ class HomeViewModel @Inject constructor(
 
     init {
         observeChanges()
+    }
+
+    fun handleDeepLink(intent: Intent?) {
+        if (intent?.data != null) {
+            val word = decode((intent.takeIf { it.action == Intent.ACTION_VIEW }
+                ?.data?.getQueryParameter("word") ?: "").trim())?.uppercase() ?: ""
+
+            viewModelScope.launch {
+                getWordUseCase(word).fold(
+                    onSuccess = { wordData ->
+                        _state.value = HomeUiState.Invite(
+                            ScreenRoute.Game(
+                                mode = GameMode.FRIENDLY.id,
+                                wordLength = wordData.length,
+                                lang = wordData.language,
+                                word = wordData.word
+                            )
+                        )
+                    },
+                    onFailure = {
+                        updateIfSuccess {
+                            it.copy(errorMessage = "Ошибка получения слова!")
+                        }
+                    }
+                )
+            }
+        }
     }
 
     private fun observeChanges() = viewModelScope.launch {
@@ -71,11 +104,15 @@ class HomeViewModel @Inject constructor(
             HomeEvent.OnErrorShown -> {
                 updateIfSuccess { it.copy(errorMessage = null) }
             }
+
         }
     }
 
     private fun sendSupportEmail() = viewModelScope.launch {
-        checkAchievementUseCase(AchievementTrigger.SupportMessageSent, settingsEngine.uiState.value.language).fold(
+        checkAchievementUseCase(
+            AchievementTrigger.SupportMessageSent,
+            settingsEngine.uiState.value.language
+        ).fold(
             onSuccess = {
                 updateIfSuccess {
                     it.copy(errorMessage = "Письмо отправлено!")

@@ -1,12 +1,13 @@
 package com.sinya.projects.wordle.presentation.home.friendSheet
 
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.useCase.GetDataWordUseCase
 import com.sinya.projects.wordle.navigation.ScreenRoute
+import com.sinya.projects.wordle.utils.decode
+import com.sinya.projects.wordle.utils.encode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -58,19 +59,13 @@ class FriendViewModel @Inject constructor(
             FriendEvent.EncodeCipher -> requestCopyCipher()
 
             FriendEvent.ClearState -> clearState()
+
+            FriendEvent.EncodeCipherToShare -> requestShareCipher()
+
+            FriendEvent.InviteCipherShown -> updateIFriendForm { it.copy(inviteWord = null) }
         }
     }
 
-    private fun encode(input: String): String =
-        Base64.encodeToString(input.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-
-    private fun decode(input: String): String? {
-        return try {
-            String(Base64.decode(input, Base64.NO_WRAP), Charsets.UTF_8)
-        } catch (e: IllegalArgumentException) {
-            null
-        }
-    }
     private fun clearState() {
         _state.value = FriendUiState.FriendForm(
             selectedTab = 0,
@@ -92,6 +87,29 @@ class FriendViewModel @Inject constructor(
                     _copyRequest.emit(cipher)
                     updateIFriendForm {
                         it.copy(isError = false, isLoading = false)
+                    }
+                },
+                onFailure = {
+                    Log.e("FriendViewModel", "Encode error", it)
+                    updateIFriendForm { form ->
+                        form.copy(isError = true, isLoading = false)
+                    }
+                }
+            )
+        }
+    }
+
+    private fun requestShareCipher() {
+        val s = _state.value as? FriendUiState.FriendForm ?: return
+        val word = s.hiddenPlace.trim().uppercase()
+        updateIFriendForm { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            getWordUseCase(word).fold(
+                onSuccess = {
+                    val cipher = encode(word)
+                    updateIFriendForm {
+                        it.copy(isError = false, isLoading = false, inviteWord = cipher)
                     }
                 },
                 onFailure = {

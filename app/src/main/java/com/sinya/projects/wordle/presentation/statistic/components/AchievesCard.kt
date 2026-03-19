@@ -32,7 +32,7 @@ fun AchievesCard(
 ) {
     AnimationCard(
         modifier = Modifier,
-        onClick = { navigateTo(ScreenRoute.Achieves) }
+        onClick = { navigateTo(ScreenRoute.Achieves()) }
     ) {
         Row(
             Modifier

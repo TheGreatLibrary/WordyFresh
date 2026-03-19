@@ -2,6 +2,7 @@ package com.sinya.projects.wordle.data.local.database
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import java.util.UUID
 
 object DatabaseMigrations {
     val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -281,12 +282,18 @@ object DatabaseMigrations {
                 val avgTime = if (countGame > 0) sumTime / countGame else 0L
                 val losses = countGame - winGame
                 var ts = 0L
-                fun ts() = "2025-01-01T${(ts / 3600).toString().padStart(2,'0')}:${((ts % 3600) / 60).toString().padStart(2,'0')}:${(ts++ % 60).toString().padStart(2,'0')}Z"
+                fun ts() = "2025-01-01T${
+                    (ts / 3600).toString().padStart(2, '0')
+                }:${((ts % 3600) / 60).toString().padStart(2, '0')}:${
+                    (ts++ % 60).toString().padStart(2, '0')
+                }Z"
 
                 // собираем список try_number для всех побед
                 val tryNumbers = mutableListOf<Int?>()
-                mapOf(1 to firstTry, 2 to secondTry, 3 to thirdTry,
-                    4 to fourthTry, 5 to fifthTry, 6 to sixthTry)
+                mapOf(
+                    1 to firstTry, 2 to secondTry, 3 to thirdTry,
+                    4 to fourthTry, 5 to fifthTry, 6 to sixthTry
+                )
                     .forEach { (tryNum, count) ->
                         repeat(count) { tryNumbers.add(tryNum) }
                     }
@@ -295,26 +302,32 @@ object DatabaseMigrations {
                 tryNumbers.shuffle() // перемешиваем чтобы не было паттерна
 
                 // нормальные победы (без currentStreak и bestStreak)
-                val normalWins = (winGame - currentStreak - if (bestStreak != currentStreak) bestStreak else 0)
-                    .coerceAtLeast(0)
+                val normalWins =
+                    (winGame - currentStreak - if (bestStreak != currentStreak) bestStreak else 0)
+                        .coerceAtLeast(0)
                 val normalTries = tryNumbers.take(normalWins).toMutableList()
                 val streakTries = tryNumbers.drop(normalWins)
 
                 // 1. проигрыши и нормальные победы вперемешку
                 var winsLeft = normalWins
                 var lossesLeft = losses - if (bestStreak != currentStreak) 1 else 0
-                val step = if (lossesLeft > 0) (winsLeft / (lossesLeft + 1)).coerceAtLeast(1) else winsLeft
+                val step =
+                    if (lossesLeft > 0) (winsLeft / (lossesLeft + 1)).coerceAtLeast(1) else winsLeft
 
                 while (winsLeft > 0 || lossesLeft > 0) {
                     val batch = minOf(step, winsLeft)
                     repeat(batch) {
-                        db.execSQL("INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
-                            arrayOf(modeId, normalTries.removeFirstOrNull(), avgTime, ts()))
+                        db.execSQL(
+                            "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
+                            arrayOf(modeId, normalTries.removeFirstOrNull(), avgTime, ts())
+                        )
                         winsLeft--
                     }
                     if (lossesLeft > 0) {
-                        db.execSQL("INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 0, NULL, NULL, NULL, ?, ?)",
-                            arrayOf(modeId, avgTime, ts()))
+                        db.execSQL(
+                            "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 0, NULL, NULL, NULL, ?, ?)",
+                            arrayOf(modeId, avgTime, ts())
+                        )
                         lossesLeft--
                     }
                     if (winsLeft <= 0 && lossesLeft <= 0) break
@@ -323,18 +336,24 @@ object DatabaseMigrations {
                 // 2. bestStreak если отличается
                 if (bestStreak != currentStreak) {
                     repeat(bestStreak) {
-                        db.execSQL("INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
-                            arrayOf(modeId, streakTries.getOrNull(it), avgTime, ts()))
+                        db.execSQL(
+                            "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
+                            arrayOf(modeId, streakTries.getOrNull(it), avgTime, ts())
+                        )
                     }
                     // поражение после bestStreak
-                    db.execSQL("INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 0, NULL, NULL, NULL, ?, ?)",
-                        arrayOf(modeId, avgTime, ts()))
+                    db.execSQL(
+                        "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 0, NULL, NULL, NULL, ?, ?)",
+                        arrayOf(modeId, avgTime, ts())
+                    )
                 }
 
                 // 3. currentStreak последними
                 repeat(currentStreak) {
-                    db.execSQL("INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
-                        arrayOf(modeId, streakTries.getOrNull(bestStreak + it), avgTime, ts()))
+                    db.execSQL(
+                        "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
+                        arrayOf(modeId, streakTries.getOrNull(bestStreak + it), avgTime, ts())
+                    )
                 }
             }
             cursor.close()
@@ -378,6 +397,78 @@ object DatabaseMigrations {
             db.execSQL("CREATE INDEX index_words_length ON words(length)")
             db.execSQL("CREATE INDEX index_words_word ON words(word)")
             db.execSQL("CREATE INDEX index_words_language_length ON words(language, length)")
+
+            db.execSQL("PRAGMA foreign_keys = ON")
+        }
+    }
+
+    val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("PRAGMA foreign_keys = OFF")
+
+            db.execSQL("""
+                CREATE TABLE offline_statistics_new (
+                    id TEXT PRIMARY KEY NOT NULL,
+                    mode_id INTEGER NOT NULL,
+                    result INTEGER NOT NULL,
+                    try_number INTEGER,
+                    word_length INTEGER,
+                    word_lang TEXT,
+                    time_game INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(mode_id) REFERENCES modes_statistics(id) ON DELETE CASCADE
+                )
+            """)
+
+            val cursor = db.query("SELECT * FROM offline_statistics")
+            while (cursor.moveToNext()) {
+                val tryNumIdx = cursor.getColumnIndexOrThrow("try_number")
+                val wordLenIdx = cursor.getColumnIndexOrThrow("word_length")
+                val wordLangIdx = cursor.getColumnIndexOrThrow("word_lang")
+
+                db.execSQL(
+                    "INSERT INTO offline_statistics_new (id, mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    arrayOf(
+                        UUID.randomUUID().toString(),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("mode_id")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("result")),
+                        if (cursor.isNull(tryNumIdx)) null else cursor.getInt(tryNumIdx),
+                        if (cursor.isNull(wordLenIdx)) null else cursor.getInt(wordLenIdx),
+                        if (cursor.isNull(wordLangIdx)) null else cursor.getString(wordLangIdx),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("time_game")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("created_at"))
+                    )
+                )
+            }
+            cursor.close()
+
+            db.execSQL("DROP TABLE offline_statistics")
+            db.execSQL("ALTER TABLE offline_statistics_new RENAME TO offline_statistics")
+            db.execSQL("CREATE INDEX index_offline_statistics_mode_id ON offline_statistics(mode_id)")
+            db.execSQL("CREATE INDEX index_offline_statistics_created_at ON offline_statistics(created_at)")
+
+            db.execSQL("DROP TABLE sync_statistics")
+
+            db.execSQL("""
+                CREATE TABLE sync_statistics (
+                    id TEXT PRIMARY KEY NOT NULL,
+                    user_id TEXT NOT NULL,
+                    mode_id INTEGER NOT NULL,
+                    result INTEGER NOT NULL,
+                    try_number INTEGER,
+                    word_length INTEGER,
+                    word_lang TEXT,
+                    time_game INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(user_id) REFERENCES profiles(id) ON DELETE CASCADE,
+                    FOREIGN KEY(mode_id) REFERENCES modes_statistics(id) ON DELETE CASCADE
+                )
+            """)
+
+            db.execSQL("CREATE INDEX index_sync_statistics_mode_id ON sync_statistics(mode_id)")
+            db.execSQL("CREATE INDEX index_sync_statistics_user_id ON sync_statistics(user_id)")
+            db.execSQL("CREATE INDEX index_sync_statistics_created_at ON sync_statistics(created_at)")
 
             db.execSQL("PRAGMA foreign_keys = ON")
         }

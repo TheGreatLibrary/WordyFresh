@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.presentation.achieve.components.AchieveDialog
 import com.sinya.projects.wordle.presentation.achieve.components.AchievePlaceholder
 import com.sinya.projects.wordle.presentation.achieve.components.AchieveRow
 import com.sinya.projects.wordle.presentation.achieve.components.CategoryHeader
@@ -37,9 +38,17 @@ import com.sinya.projects.wordle.ui.features.Header
 
 @Composable
 fun AchieveScreen(
-    navigateToBackStack: () -> Unit,
-    viewModel: AchieveViewModel = hiltViewModel()
+    id: Int?,
+    navigateToBackStack: () -> Unit
 ) {
+    val viewModel: AchieveViewModel = hiltViewModel(
+        creationCallback = { factory: AchieveViewModel.Factory ->
+            factory.create(
+                id = id
+            )
+        }
+    )
+
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     when (state) {
@@ -120,6 +129,7 @@ private fun AchieveScreenView(
                     item(key = "${category}_row_$rowIndex") {
                         AchieveRow(
                             items = row,
+                            onEvent = onEvent,
                             modifier = Modifier.padding(bottom = 9.dp)
                         )
                     }
@@ -129,6 +139,13 @@ private fun AchieveScreenView(
                     Spacer(Modifier)
                 }
             }
+        }
+
+        if (state.showAchieveDialog!=null) {
+            AchieveDialog(
+                achieveItem = state.showAchieveDialog,
+                onDismiss = { onEvent(AchieveEvent.VisibleDialog(null)) }
+            )
         }
 
         PullToRefreshContainer(

@@ -131,6 +131,7 @@
     <!-- Словарь -->
     <string name="put_text">Введите слово</string>
     <string name="share_text">Что такое %1$s? %2$s. Я узнал об этом в Wordy Fresh, которую можно найти тут: %3$s</string>
+    <string name="share_invite">Друг вызывает тебя на бой! Примешь вызов в игре Wordy Fresh? Переходи по ссылке: %1$s!</string>
     <string name="no_description">В словаре нет определения, нажмите на 1 кнопку для поиска в Интернете</string>
     <string name="shared_to">Поделиться через</string>
     <string name="definition_not_found">Определение не найдено</string>

@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.util.UUID
 
 @Entity(
     tableName = "offline_statistics",
@@ -22,7 +23,7 @@ import androidx.room.PrimaryKey
     ]
 )
 data class OfflineStatistics(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @ColumnInfo(name = "mode_id") val modeId: Int,
     @ColumnInfo(name = "result") val result: Int = 0,
     @ColumnInfo(name = "time_game") val timeGame: Int = 0,

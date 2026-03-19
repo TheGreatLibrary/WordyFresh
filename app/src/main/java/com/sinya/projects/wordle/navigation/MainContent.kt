@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sinya.projects.wordle.domain.enums.BackgroundSettings
+import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.enums.TypeBackground
 import com.sinya.projects.wordle.domain.model.PopUpStrategy
 import com.sinya.projects.wordle.ui.features.AchievementNotificationHost
@@ -114,7 +116,7 @@ fun MainContent(startRoute: ScreenRoute) {
                 ) {
                     AchievementNotificationHost(
                         onAchievementClick = {
-                            navigateTo(ScreenRoute.Achieves, PopUpStrategy.None)
+                            navigateTo(ScreenRoute.Achieves(it.id), PopUpStrategy.None)
                         }
                     )
                 }

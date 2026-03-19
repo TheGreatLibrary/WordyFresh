@@ -65,36 +65,6 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-//    private fun loadProfile() = viewModelScope.launch {
-//        getProfileUseCase().fold(
-//            onSuccess = { profile ->
-//                Log.d("Profile", "профиль $profile")
-//
-//                _state.value = ProfileUiState.InAccount(
-//                    profile = profile,
-//                    avatarUri = null,
-//                )
-//                combine(
-//                    sessionManager.avatar,
-//                    sessionManager.userInfo.map { it?.email ?: "" }
-//                ) { avatar, email1 -> avatar to email1 }.collect { (avatar, email) ->
-//                    _state.update { state ->
-//                        if (state is ProfileUiState.InAccount) state.copy(avatarUri = avatar, email = email)
-//                        else state
-//                    }
-//                }
-//            },
-//            onFailure = { error ->
-//                when (error) {
-//                    is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
-//                    is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
-//                    else ->  _state.value = ProfileUiState.NoAccount
-//                }
-//                Log.e("Profile", "Ошибка: ", error)
-//            }
-//        )
-//    }
-
     private fun signOut() = viewModelScope.launch {
         signOutUseCase().fold(
             onSuccess = {

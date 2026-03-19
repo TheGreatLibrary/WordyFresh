@@ -14,10 +14,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
-import com.sinya.projects.wordle.data.remote.supabase.SyncViewModel
 import com.sinya.projects.wordle.navigation.MainContent
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.ui.theme.LocalSettingsEngine
@@ -30,7 +28,8 @@ import kotlinx.coroutines.flow.drop
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject lateinit var engine: SettingsEngine
+    @Inject
+    lateinit var engine: SettingsEngine
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
@@ -45,7 +44,7 @@ class MainActivity : ComponentActivity() {
         applySystem()
 
         setContent {
-           App(engine)
+            App(engine)
         }
     }
 
@@ -62,7 +61,6 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun App(engine: SettingsEngine) {
         val config by engine.uiState.collectAsStateWithLifecycle()
-        val syncViewModel: SyncViewModel = hiltViewModel()
 
         DisposableEffect(config.dark) {
             WindowCompat.getInsetsController(window, window.decorView).apply {

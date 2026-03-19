@@ -91,7 +91,7 @@ fun CardMode(
                     Text(
                         stringResource(R.string.play),
                         fontSize = 12.sp,
-                        color = WordyColor.colors.textForActiveBtnMkII,
+                        color = color,
                         style = WordyTypography.bodyMedium
                     )
                 }

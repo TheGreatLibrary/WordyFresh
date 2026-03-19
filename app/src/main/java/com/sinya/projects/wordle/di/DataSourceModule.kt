@@ -18,6 +18,7 @@ import com.sinya.projects.wordle.domain.source.SupabaseProfileDataSourceImpl
 import com.sinya.projects.wordle.domain.source.SupabaseStatisticsDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseStatisticsDataSourceImpl
 import com.sinya.projects.wordle.domain.source.WikipediaDataSource
+import com.sinya.projects.wordle.domain.source.WiktionaryDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -68,6 +69,11 @@ abstract class DataSourceModule {
     @Binds
     abstract fun bindDictionaryDataSource(
         impl: WikipediaDataSource
+    ): DictionaryDataSource
+
+    @Binds
+    abstract fun bindDictionaryWiktionaryDataSource(
+        impl: WiktionaryDataSource
     ): DictionaryDataSource
 
     @Binds

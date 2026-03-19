@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -326,6 +328,7 @@ fun FinishBottomSheet(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Row(
+                            modifier = Modifier.height(45.dp).padding(vertical = 3.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -342,26 +345,23 @@ fun FinishBottomSheet(
                                     fontSize = 16.sp
                                 )
                             }
-                            Image(
-                                painter = painterResource(R.drawable.dict_share),
-                                contentDescription = null,
+                            Button(
                                 modifier = Modifier
-                                    .background(
-                                        WordyColor.colors.backgroundActiveBtnMkI,
-                                        WordyShapes.extraLarge
-                                    )
-                                    .clip(WordyShapes.extraLarge)
-                                    .clickable { onShare(state.hiddenWord, state.description?:"", state.colors) }
-                                    .padding(7.dp)
-                                    .wrapContentSize()
-                                    .shadow(
-                                        elevation = 16.dp,
-                                        shape = WordyShapes.extraLarge,
-                                        ambientColor = WordyColor.colors.textPrimary,
-                                        spotColor = WordyColor.colors.backgroundPassiveBtn
-                                    ),
-                                colorFilter = ColorFilter.tint(WordyColor.colors.textForActiveBtnMkI)
-                            )
+                                    .aspectRatio(1f),
+                                shape = WordyShapes.extraLarge,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = WordyColor.colors.backgroundActiveBtnMkI,
+                                    contentColor = WordyColor.colors.textForActiveBtnMkI
+                                ),
+                                contentPadding = PaddingValues(0.dp),
+                                onClick = { onShare(state.hiddenWord, state.description?:"", state.colors) }
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.game_share),
+                                    modifier = Modifier.size(24.dp),
+                                    contentDescription = null,
+                                )
+                            }
                         }
                         Spacer(Modifier.height(7.dp))
                         Text(
@@ -442,21 +442,21 @@ private fun FinishAchieveCard(
             achieveItem = achieve,
             modifier = Modifier.size(55.dp)
         )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Text(
                 text = achieve.title,
                 color = WordyColor.colors.textPrimary,
                 style = WordyTypography.bodyLarge,
                 fontSize = 16.sp
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+
                 Box(
                     modifier = Modifier
-                        .weight(0.8f)
-                        .height(7.dp)
+                        .fillMaxWidth()
+                        .height(6.dp)
                         .clip(RoundedCornerShape(27.dp))
                         .background(gray100),
                 ) {
@@ -473,9 +473,8 @@ private fun FinishAchieveCard(
                     fontSize = 14.sp,
                     textAlign = TextAlign.End,
                     style = WordyTypography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth(0.3f),
+                    modifier = Modifier.fillMaxWidth(),
                 )
-            }
         }
     }
 }

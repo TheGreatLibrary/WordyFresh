@@ -45,11 +45,20 @@ fun NavGraph(
     ) {
         composable<ScreenRoute.Onboarding> {
             OnboardingPager(
-                navigateTo = { navigateTo(ScreenRoute.Home, PopUpStrategy.ToRoute(ScreenRoute.Onboarding)) }
+                navigateTo = {
+                    navigateTo(
+                        ScreenRoute.Home,
+                        PopUpStrategy.ToRoute(ScreenRoute.Onboarding)
+                    )
+                }
             )
         }
 
-        composable<ScreenRoute.Home> {
+        composable<ScreenRoute.Home>(
+            deepLinks = listOf(
+                navDeepLink { uriPattern = LegalLinks.INVITE_GAME }
+            )
+        ) {
             HomeScreen(
                 navigateTo = { navigateTo(it, PopUpStrategy.None) },
             )
@@ -60,8 +69,11 @@ fun NavGraph(
                 navigateTo = { navigateTo(it, PopUpStrategy.None) }
             )
         }
-        composable<ScreenRoute.Achieves> {
+        composable<ScreenRoute.Achieves> { entry ->
+            val id = entry.toRoute<ScreenRoute.Achieves>().id
+
             AchieveScreen(
+                id = id,
                 navigateToBackStack = navigateToBackStack
             )
         }
@@ -107,7 +119,10 @@ fun NavGraph(
                 navigateBack = navigateToBackStack,
                 navigateTo = { navigateTo(it, PopUpStrategy.ToRoute(ScreenRoute.Register)) }
             ) { user ->
-                if (user != null) navigateTo(ScreenRoute.Profile, PopUpStrategy.ToRoute(ScreenRoute.Register))
+                if (user != null) navigateTo(
+                    ScreenRoute.Profile,
+                    PopUpStrategy.ToRoute(ScreenRoute.Register)
+                )
                 else navigateTo(ScreenRoute.Login, PopUpStrategy.ToRoute(ScreenRoute.Register))
             }
         }
@@ -126,7 +141,12 @@ fun NavGraph(
         composable<ScreenRoute.Edit> {
             EditScreen(
                 navigateBack = navigateToBackStack,
-                navigateTo = { navigateTo(ScreenRoute.Profile, PopUpStrategy.ToRoute(ScreenRoute.Edit)) },
+                navigateTo = {
+                    navigateTo(
+                        ScreenRoute.Profile,
+                        PopUpStrategy.ToRoute(ScreenRoute.Edit)
+                    )
+                },
             )
         }
         composable<ScreenRoute.CreateProfile>(
@@ -146,7 +166,12 @@ fun NavGraph(
         ) {
             ResetEmailScreen(
                 navigateToBackStack = navigateToBackStack,
-                navigateToProfile = { navigateTo(ScreenRoute.Profile, PopUpStrategy.ToRoute(ScreenRoute.ResetEmail)) }
+                navigateToProfile = {
+                    navigateTo(
+                        ScreenRoute.Profile,
+                        PopUpStrategy.ToRoute(ScreenRoute.ResetEmail)
+                    )
+                }
             )
         }
         composable<ScreenRoute.ResetPassword>(
@@ -156,7 +181,12 @@ fun NavGraph(
         ) {
             ResetPasswordScreen(
                 navigateToBackStack = navigateToBackStack,
-                navigateToProfile = { navigateTo(ScreenRoute.Profile, PopUpStrategy.ToRoute(ScreenRoute.ResetPassword)) }
+                navigateToProfile = {
+                    navigateTo(
+                        ScreenRoute.Profile,
+                        PopUpStrategy.ToRoute(ScreenRoute.ResetPassword)
+                    )
+                }
             )
         }
         composable<ScreenRoute.About> {

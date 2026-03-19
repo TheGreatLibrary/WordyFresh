@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.presentation.game
 
+import android.content.Intent
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
@@ -32,6 +33,7 @@ import com.sinya.projects.wordle.domain.useCase.ValidateWordColorsUseCase
 import com.sinya.projects.wordle.domain.useCase.WordExistsUseCase
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
 import com.sinya.projects.wordle.domain.model.UiText
+import com.sinya.projects.wordle.presentation.resetPassword.ResetPasswordUiState
 import com.sinya.projects.wordle.ui.theme.gray100
 import com.sinya.projects.wordle.ui.theme.gray30
 import com.sinya.projects.wordle.ui.theme.gray600
@@ -55,6 +57,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
+import java.util.UUID
 
 @HiltViewModel(assistedFactory = GameViewModel.Factory::class)
 class GameViewModel @AssistedInject constructor(
@@ -675,13 +678,13 @@ class GameViewModel @AssistedInject constructor(
         val win = result == GameState.WIN
         updateStatisticUseCase(
             OfflineStatistics(
-                id = 0,
+                id = UUID.randomUUID().toString(),
                 modeId = s.mode.id,
                 result = if (win) 1 else 0,
                 timeGame = s.timePassed,
                 wordLength = s.wordLength,
                 wordLang = s.lang,
-                tryNumber = if (win) row+1 else null,
+                tryNumber = if (win) row else null,
                 createdAt = Clock.System.now().toString()
             )
         ).fold(
