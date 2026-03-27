@@ -262,7 +262,7 @@
     <string name="stat_langs_progress_title">Games by Language</string>
     <string name="no_data">No data yet</string>
     <string name="over_your_step">Running out of tries?</string>
-    <string name="use_2_magic_of_game">Use up to 2 hints per game! They'll reveal a random missing letter.</string>
-    <string name="use_magic_with_brain">Revealed letters can't be removed — use them wisely!</string>
+    <string name="use_2_magic_of_game">Use up to 2 hints per game! They\'ll reveal a random missing letter.</string>
+    <string name="use_magic_with_brain">Revealed letters can\'t be removed — use them wisely!</string>
     <string name="simple_tap_btn"> — just tap the button</string>
 </resources>

@@ -45,7 +45,6 @@ import com.sinya.projects.wordle.domain.model.DictionaryItem
 import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryCard
 import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryPlaceholder
 import com.sinya.projects.wordle.presentation.dictionary.components.SearchContainer
-import com.sinya.projects.wordle.presentation.edit.EditEvent
 import com.sinya.projects.wordle.ui.features.Header
 
 @Composable

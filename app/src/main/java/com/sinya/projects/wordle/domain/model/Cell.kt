@@ -25,14 +25,6 @@ fun List<Cell>.updateHint(index: Int, hint: String): List<Cell> {
     }
 }
 
-fun List<Cell>.clearHints(row: Int, wordLength: Int): List<Cell> {
-    var grid = this
-    for (col in 0 until wordLength) {
-        grid = grid.updateHint(row * wordLength + col, "")
-    }
-    return grid
-}
-
 fun List<Cell>.updateText(index: Int, text: String): List<Cell> {
     if (index !in this.indices) return this
     if (this[index].backgroundColor == GameColors.GREEN) return this

@@ -29,8 +29,6 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.register.RegisterEvent
 import com.sinya.projects.wordle.presentation.register.RegisterUiState
-import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
-import com.sinya.projects.wordle.presentation.resetPassword.ResetPasswordEvent
 import com.sinya.projects.wordle.ui.features.AcceptPolicyCheckbox
 import com.sinya.projects.wordle.ui.features.AuthHeader
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel

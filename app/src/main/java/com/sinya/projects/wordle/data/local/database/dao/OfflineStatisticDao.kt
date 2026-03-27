@@ -8,7 +8,6 @@ import com.sinya.projects.wordle.data.local.database.entity.ModeStatisticsTransl
 import com.sinya.projects.wordle.data.local.database.entity.ModesStatistics
 import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
 import com.sinya.projects.wordle.domain.model.GameRow
-import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.domain.model.StatAggregatedEntity
 import com.sinya.projects.wordle.domain.model.StatBreakdown
 

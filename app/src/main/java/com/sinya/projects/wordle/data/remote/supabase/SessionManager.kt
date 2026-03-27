@@ -1,9 +1,6 @@
 package com.sinya.projects.wordle.data.remote.supabase
 
 import android.net.Uri
-import android.util.Log
-import com.sinya.projects.wordle.domain.checker.NetworkChecker
-import com.sinya.projects.wordle.domain.error.NoInternetException
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.repository.AvatarRepository
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource

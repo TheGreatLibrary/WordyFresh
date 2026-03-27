@@ -57,10 +57,10 @@ class DataStoreManager @Inject constructor(
         }
     }
 
-    private fun <T> read(key: Preferences.Key<T>, defaultValue: T): Flow<T> = context.dataStore.data
-        .map { settings ->
-            settings[key] ?: defaultValue
-        }
+//    private fun <T> read(key: Preferences.Key<T>, defaultValue: T): Flow<T> = context.dataStore.data
+//        .map { settings ->
+//            settings[key] ?: defaultValue
+//        }
 
     private suspend fun <T> remove(key: Preferences.Key<T>) {
         context.dataStore.edit { settings ->

@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.presentation.game.GameEvent
 import com.sinya.projects.wordle.presentation.game.components.WordCell
 import com.sinya.projects.wordle.presentation.onboarding.OnboardingData
 import com.sinya.projects.wordle.presentation.onboarding.components.OnboardingPageTemplate

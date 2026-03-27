@@ -26,16 +26,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.presentation.statistic.StatisticEvent
 import com.sinya.projects.wordle.ui.features.AuthHeader
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
+import com.sinya.projects.wordle.ui.features.LoadingConfirmScreen
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.features.ScreenColumn
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.ui.theme.white
-import com.sinya.projects.wordle.ui.features.LoadingConfirmScreen
 import com.sinya.projects.wordle.utils.findActivity
 import kotlinx.coroutines.delay
 

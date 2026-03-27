@@ -31,7 +31,6 @@ import com.sinya.projects.wordle.presentation.home.components.MainHeader
 import com.sinya.projects.wordle.presentation.home.components.NewGameBottomSheet
 import com.sinya.projects.wordle.presentation.home.components.NewGameButton
 import com.sinya.projects.wordle.presentation.home.friendSheet.FriendSheet
-import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
 import com.sinya.projects.wordle.utils.findActivity
 import com.sinya.projects.wordle.utils.sendSupportEmail
 

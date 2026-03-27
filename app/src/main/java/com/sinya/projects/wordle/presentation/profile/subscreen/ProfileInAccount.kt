@@ -36,7 +36,6 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.profile.ProfileEvent
 import com.sinya.projects.wordle.presentation.profile.ProfileUiState
-import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
 import com.sinya.projects.wordle.ui.features.AvatarPicker
 import com.sinya.projects.wordle.ui.features.CardColumn
 import com.sinya.projects.wordle.ui.features.CustomCard

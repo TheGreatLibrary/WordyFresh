@@ -1,6 +1,5 @@
 package com.sinya.projects.wordle.presentation.statistic
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.database.entity.ModeStatisticsTranslations

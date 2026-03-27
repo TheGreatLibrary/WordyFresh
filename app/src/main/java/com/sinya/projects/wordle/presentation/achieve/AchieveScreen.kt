@@ -34,7 +34,6 @@ import com.sinya.projects.wordle.presentation.achieve.components.AchieveDialog
 import com.sinya.projects.wordle.presentation.achieve.components.AchievePlaceholder
 import com.sinya.projects.wordle.presentation.achieve.components.AchieveRow
 import com.sinya.projects.wordle.presentation.achieve.components.CategoryHeader
-import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
 import com.sinya.projects.wordle.ui.features.Header
 
 @Composable

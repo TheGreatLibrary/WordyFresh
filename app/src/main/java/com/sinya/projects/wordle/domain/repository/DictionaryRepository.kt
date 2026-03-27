@@ -9,7 +9,6 @@ import com.sinya.projects.wordle.domain.error.WordNotFoundException
 import com.sinya.projects.wordle.domain.model.DictionaryItem
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseDictionaryDataSource
-import com.sinya.projects.wordle.domain.source.WiktionaryDataSource
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

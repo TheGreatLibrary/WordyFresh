@@ -14,9 +14,6 @@ enum class GameMode(
     RANDOM(2, R.string.random_m),
     FRIENDLY(3, R.string.friend_m);
 
-    val isForStats: Boolean
-        get() = this != SAVED
-
     companion object {
         fun fromCode(code: Int): GameMode =
             entries.find { it.id == code } ?: NORMAL
