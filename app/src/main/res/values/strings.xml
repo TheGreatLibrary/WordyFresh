@@ -13,12 +13,6 @@
     <string name="random_m">Случайный</string>
     <string name="friend_m">Дружеский</string>
 
-    <!-- Категории достижений -->
-    <string name="padawan">Падаван</string>
-    <string name="dilettant">Любитель</string>
-    <string name="veteran">Опытный</string>
-    <string name="the_old">Олд</string>
-
     <!-- Страницы -->
     <string name="create_account">Создание аккаунта</string>
     <string name="reset_password">Смена пароля</string>
@@ -242,4 +236,29 @@
     <string name="sum_time">Общее время</string>
     <string name="create_profile">Создание вашего профиля</string>
     <string name="put_nickname_and_avatar">Задай себе игровое имя и аватар!</string>
+    <string name="green_letters_hint">Подсказки зеленых букв</string>
+    <string name="load_saved_game_text_dialog">У вас есть недоигранная игра! Хотите продолжить или начать новую игру? Начав новую игру, вы перезапишете старую игру текущей!</string>
+    <string name="load_saved_game_title_dialog">Продолжить старую игру?</string>
+    <string name="load_saved_game">Продолжить игру</string>
+    <string name="dont_take_warning">Не показывать предупреждение в игре</string>
+    <string name="show_warning_dialog_in_game">С предупреждением в игре</string>
+    <string name="not_has_hints">Подсказки закончились</string>
+    <string name="hints_round_limit_reached">За раунд можно использовать только %1$s подсказки</string>
+
+    <!-- ОШИБКИ -->
+    <string name="error_definition_not_found">Определение не найдено.</string>
+    <string name="error_invalid_nickname">Никнейм не может быть пустым.</string>
+    <string name="error_no_internet">Нет интернета. Ограниченный доступ.</string>
+    <string name="error_no_profile">Профиль не настроен. Попробуйте снова.</string>
+    <string name="error_not_authenticated">Требуется авторизация.</string>
+    <string name="error_word_not_found">Слово не найдено.</string>
+    <string name="error_unknown">Что-то пошло не так. Попробуйте позже.</string>
+    <string name="error_session_restore">Ошибка восстановления сессии. Войдите снова.</string>
+    <string name="stat_lengths_progress_title">Распределение игр по длине слов</string>
+    <string name="stat_langs_progress_title">Распределение игр по языку слова</string>
+    <string name="no_data">Данные отсутствуют</string>
+    <string name="over_your_step">Попытки заканчиваются?</string>
+    <string name="use_2_magic_of_game">Используй до 2 подсказок за игру! Они покажут где находится случайная буква из тех, что ты не отгадал.</string>
+    <string name="use_magic_with_brain">Стереть подсказанную букву нельзя! Используй с умом. </string>
+    <string name="simple_tap_btn">" - просто нажмите кнопку"</string>
 </resources>

@@ -82,6 +82,7 @@ fun TabContent(
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
+                        color = WordyColor.colors.borderAchieve,
                         strokeWidth = 2.dp
                     )
                 } else {

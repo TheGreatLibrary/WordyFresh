@@ -23,24 +23,29 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.domain.model.UiText
+import com.sinya.projects.wordle.domain.model.WarningUiText
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
+import com.sinya.projects.wordle.utils.HintsConfig
 
 @Composable
 fun NotRightWordDialog(
-    showNotFoundDialog: Boolean,
-    showHardModeHint: UiText?
+    showHardModeHint: WarningUiText? = null
 ) {
     AnimatedVisibility(
-        visible = showNotFoundDialog || showHardModeHint != null,
+        visible = showHardModeHint != null,
         enter = fadeIn(animationSpec = tween(200)) + scaleIn(initialScale = 0.8f),
         exit = fadeOut(animationSpec = tween(150)) + scaleOut(targetScale = 0.9f),
-        modifier = Modifier.fillMaxSize() .background(Color.Black.copy(alpha = 0.4f)),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.4f)),
     ) {
-        val message = when {
-            showNotFoundDialog -> stringResource(R.string.not_found_word)
-            showHardModeHint != null -> showHardModeHint.asString()
+        val message = when (showHardModeHint) {
+            WarningUiText.HintsRoundLimitReached -> stringResource(R.string.hints_round_limit_reached, HintsConfig.MAX_HINTS_PER_ROUND)
+            WarningUiText.NotFoundWord -> stringResource(R.string.not_found_word)
+            WarningUiText.NotHasHints -> stringResource(R.string.not_has_hints)
+            is WarningUiText.NotFountLetter -> stringResource(R.string.hard_hint_letter_required, showHardModeHint.letter)
+            is WarningUiText.ExactPositionError -> stringResource(R.string.hard_hint_exact_position, showHardModeHint.char, showHardModeHint.position)
             else -> ""
         }
 
@@ -59,7 +64,7 @@ fun NotRightWordDialog(
             ) {
 
                 Text(
-                    message,
+                    text = message,
                     color = WordyColor.colors.textPrimary,
                     style = WordyTypography.bodyLarge,
                     fontSize = 18.sp,

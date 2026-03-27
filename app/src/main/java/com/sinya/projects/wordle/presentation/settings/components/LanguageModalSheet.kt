@@ -11,6 +11,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -30,7 +31,7 @@ fun LanguageModalSheet(
     onLanguageSelect: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    val languages = TypeLanguages.entries
+    val languages = remember { TypeLanguages.entries }
 
     CustomModalSheet(
         onDismissRequest = onDismissRequest

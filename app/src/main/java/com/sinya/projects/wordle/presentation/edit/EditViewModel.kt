@@ -2,9 +2,8 @@ package com.sinya.projects.wordle.presentation.edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sinya.projects.wordle.domain.error.InvalidNicknameException
-import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.useCase.UpdateNicknameUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,11 +57,7 @@ class EditViewModel @Inject constructor(
                     updateIfEditForm {
                         it.copy(
                             isLoading = false,
-                            errorMessage =  when (error) {
-                                is InvalidNicknameException -> "Никнейм не может быть пустым"
-                                is UserNotAuthenticatedException -> "Требуется авторизация"
-                                else -> error.localizedMessage ?: "Ошибка обновления"
-                            }
+                            errorMessage = error.getErrorMessage()
                         )
                     }
                 }

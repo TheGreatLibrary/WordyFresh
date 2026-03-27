@@ -132,7 +132,7 @@ class AchievementRepositoryImpl @Inject constructor(
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: return Result.failure(UserNotAuthenticatedException())
 
-            supabaseAchievementDataSource.syncFromSupabase(user.id)
+            supabaseAchievementDataSource.syncFromSupabase(user.id).getOrThrow()
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -145,7 +145,7 @@ class AchievementRepositoryImpl @Inject constructor(
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: return Result.failure(UserNotAuthenticatedException())
 
-            supabaseAchievementDataSource.syncToSupabase(user.id)
+            supabaseAchievementDataSource.syncToSupabase(user.id).getOrThrow()
 
             Result.success(Unit)
         } catch (e: Exception) {

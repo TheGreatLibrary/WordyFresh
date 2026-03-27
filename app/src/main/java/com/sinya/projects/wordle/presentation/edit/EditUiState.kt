@@ -1,5 +1,7 @@
 package com.sinya.projects.wordle.presentation.edit
 
+import androidx.annotation.StringRes
+
 sealed interface EditUiState {
     data object Success : EditUiState
 
@@ -7,6 +9,6 @@ sealed interface EditUiState {
         val nickname: String = "",
         val isNicknameError: Boolean = false,
         val isLoading: Boolean = false,
-        val errorMessage: String? = null
+        @StringRes val errorMessage: Int? = null
     ) : EditUiState
 }

@@ -12,6 +12,7 @@ import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.GetDataWordUseCase
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.utils.decode
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,10 +55,8 @@ class HomeViewModel @Inject constructor(
                             )
                         )
                     },
-                    onFailure = {
-                        updateIfSuccess {
-                            it.copy(errorMessage = "Ошибка получения слова!")
-                        }
+                    onFailure = { error ->
+                        updateIfSuccess { it.copy(errorMessage = error.getErrorMessage()) }
                     }
                 )
             }
@@ -104,7 +103,6 @@ class HomeViewModel @Inject constructor(
             HomeEvent.OnErrorShown -> {
                 updateIfSuccess { it.copy(errorMessage = null) }
             }
-
         }
     }
 
@@ -112,18 +110,9 @@ class HomeViewModel @Inject constructor(
         checkAchievementUseCase(
             AchievementTrigger.SupportMessageSent,
             settingsEngine.uiState.value.language
-        ).fold(
-            onSuccess = {
-                updateIfSuccess {
-                    it.copy(errorMessage = "Письмо отправлено!")
-                }
-            },
-            onFailure = { error ->
-                updateIfSuccess {
-                    it.copy(errorMessage = "Ошибка: ${error.message}")
-                }
-            }
-        )
+        ).onFailure { error ->
+            updateIfSuccess { it.copy(errorMessage = error.getErrorMessage()) }
+        }
     }
 
     private fun updateIfSuccess(transform: (HomeUiState.Success) -> HomeUiState.Success) {

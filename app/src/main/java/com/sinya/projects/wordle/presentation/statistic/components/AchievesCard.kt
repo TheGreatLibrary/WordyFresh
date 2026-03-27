@@ -64,7 +64,7 @@ fun AchievesCard(
             Image(
                 painter = painterResource(R.drawable.arrow),
                 modifier = Modifier.size(20.dp),
-                contentDescription = "Перейти",
+                contentDescription = "navigateTo",
                 colorFilter = ColorFilter.tint(WordyColor.colors.borderAchieve)
             )
         }

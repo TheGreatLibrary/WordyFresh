@@ -25,6 +25,9 @@ class SettingsEngine @Inject constructor(
             background = BackgroundSettings.DEFAULT.name,
             ratingWords = false,
             confetti = true,
+            showLetterHints = true,
+            vibrationStatus = true,
+            showSavedGameDialogState = true,
             keyboardMode = TypeKeyboards.WORDLE.code,
             lastGame = SavedGameState.Loading
         )
@@ -51,8 +54,11 @@ class SettingsEngine @Inject constructor(
             _state.update { current ->
                 current.copy(
                     background = prefs.background,
+                    vibrationStatus = prefs.vibrationStatus,
                     ratingWords = prefs.ratingWords,
                     confetti = prefs.confetti,
+                    showSavedGameDialogState = prefs.showSavedGameDialogState,
+                    showLetterHints = prefs.showLetterHint,
                     keyboardMode = prefs.keyboardMode,
                     lastGame = prefs.lastGame
                 )
@@ -95,9 +101,19 @@ class SettingsEngine @Inject constructor(
         persist { store.setOnboardingMode(v) }
     }
 
+    fun setShowLetterHints(v: Boolean) {
+        _state.update { it.copy(showLetterHints = v) }
+        persist { store.setShowLetterHints(v) }
+    }
+
     fun setKeyboardMode(v: Int) {
         _state.update { it.copy(keyboardMode = v) }
         persist { store.setKeyboardMode(v) }
+    }
+
+    fun setSavedGameDialogState(v: Boolean) {
+        _state.update { it.copy(showSavedGameDialogState = v) }
+        persist { store.setShowSavedGameDialogState(v) }
     }
 
     fun clearSavedGame() {
@@ -108,6 +124,11 @@ class SettingsEngine @Inject constructor(
     fun saveGame(game: Game) {
         _state.update { it.copy(lastGame = SavedGameState.Loaded(game)) }
         persist { store.saveGame(game) }
+    }
+
+    fun setVibrationState(v: Boolean) {
+        _state.update { it.copy(vibrationStatus = v) }
+        persist { store.setVibrationState(v) }
     }
 
     private fun persist(block: suspend () -> Unit) {

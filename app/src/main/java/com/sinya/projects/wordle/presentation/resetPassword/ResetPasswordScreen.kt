@@ -21,13 +21,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.presentation.statistic.StatisticEvent
 import com.sinya.projects.wordle.ui.features.AuthHeader
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
 import com.sinya.projects.wordle.ui.features.RoundedButton
@@ -78,14 +82,16 @@ private fun ResetPasswordScreenView(
     onEvent: (ResetPasswordEvent) -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorText = state.errorMessage?.let { stringResource(it) }
 
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { message ->
+        errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short
             )
             onEvent(ResetPasswordEvent.ErrorShown)
+
         }
     }
 
@@ -122,6 +128,8 @@ private fun ResetForm(
         .background(white, WordyShapes.extraLarge)
         .padding(horizontal = 26.dp, vertical = 14.dp)
 ) {
+    val focusRequester = remember { FocusRequester() }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
@@ -131,6 +139,8 @@ private fun ResetForm(
             placeholder = stringResource(R.string.password),
             onValueChange = { onEvent(ResetPasswordEvent.PasswordChanged(it)) },
             modifier = modifier,
+            imeAction = ImeAction.Next,
+            onNext = { focusRequester.requestFocus() },
             isError = state.isNewPasswordError,
             error = stringResource(R.string.is_password_error)
         )
@@ -139,7 +149,7 @@ private fun ResetForm(
             name = state.repeatNewPassword,
             placeholder = stringResource(R.string.password),
             onValueChange = { onEvent(ResetPasswordEvent.RepeatPasswordChanged(it)) },
-            modifier = modifier,
+            modifier = modifier.focusRequester(focusRequester),
             isError = state.isRepeatNewPasswordError,
             error = stringResource(R.string.is_password_error)
         )

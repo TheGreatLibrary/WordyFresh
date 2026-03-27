@@ -1,16 +1,14 @@
 package com.sinya.projects.wordle.presentation.dictionary
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sinya.projects.wordle.domain.error.DefinitionNotFoundException
-import com.sinya.projects.wordle.domain.error.NoInternetException
-import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.model.DictionaryItem
 import com.sinya.projects.wordle.domain.useCase.ClearAllDictionaryUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllWordsUseCase
 import com.sinya.projects.wordle.domain.useCase.InsertOrUpdateDefinitionUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncDictionaryUseCase
+import com.sinya.projects.wordle.utils.VibrationManager
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.FlowPreview
@@ -29,7 +27,8 @@ class DictionaryViewModel @Inject constructor(
     private val getAllWordsUseCase: GetAllWordsUseCase,
     private val updateWordDescriptionUseCase: InsertOrUpdateDefinitionUseCase,
     private val clearAllDictionaryUseCase: ClearAllDictionaryUseCase,
-    private val syncDictionaryUseCase: SyncDictionaryUseCase
+    private val syncDictionaryUseCase: SyncDictionaryUseCase,
+    private val vibrationManager: VibrationManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<DictionaryUiState>(DictionaryUiState.Loading)
@@ -77,6 +76,8 @@ class DictionaryViewModel @Inject constructor(
             DictionaryEvent.OnClearAll -> clearAllDictionary()
 
             DictionaryEvent.OnErrorShown -> updateIfSuccess { it.copy(errorMessage = null) }
+
+            is DictionaryEvent.OnVibrate -> vibrationManager.vibrate(event.type)
         }
     }
 
@@ -101,11 +102,12 @@ class DictionaryViewModel @Inject constructor(
                 onFailure = { exception ->
                     updateIfSuccess {
                         it.copy(
-                            errorMessage = getErrorMessage(exception),
+                            errorMessage = exception.getErrorMessage(),
                             dictionaryList = it.dictionaryList.map { items ->
                                 if (items.id == item.id) items.copy(isLoading = false)
                                 else items
-                            })
+                            }
+                        )
                     }
                 }
             )
@@ -113,14 +115,11 @@ class DictionaryViewModel @Inject constructor(
     }
 
     private fun clearAllDictionary() = viewModelScope.launch {
-        clearAllDictionaryUseCase().fold(
-            onSuccess = { },
-            onFailure = { exception ->
-                updateIfSuccess {
-                    it.copy(errorMessage = "Ошибка очистки: ${exception.message}")
-                }
+        clearAllDictionaryUseCase().onFailure { exception ->
+            updateIfSuccess {
+                it.copy(errorMessage = exception.getErrorMessage())
             }
-        )
+        }
     }
 
     private fun refreshDictionary() {
@@ -129,18 +128,16 @@ class DictionaryViewModel @Inject constructor(
         viewModelScope.launch {
             syncDictionaryUseCase().fold(
                 onSuccess = {
-                    Log.d("Dictionary", "Uspech")
                     updateIfSuccess {
                         it.copy(isRefreshing = false)
                     }
                 },
                 onFailure = { exception ->
-                    val errorMessage = when (exception) {
-                        is UserNotAuthenticatedException -> "Требуется авторизация"
-                        else -> "Ошибка синхронизации: ${exception.message}"
-                    }
                     updateIfSuccess {
-                        it.copy(isRefreshing = false, errorMessage = errorMessage)
+                        it.copy(
+                            isRefreshing = false,
+                            errorMessage = exception.getErrorMessage()
+                        )
                     }
                 }
             )
@@ -168,14 +165,6 @@ class DictionaryViewModel @Inject constructor(
             } else {
                 currentState
             }
-        }
-    }
-
-    private fun getErrorMessage(exception: Throwable): String {
-        return when (exception) {
-            is NoInternetException -> "Нет подключения к интернету"
-            is DefinitionNotFoundException -> "Определение не найдено"
-            else -> "Ошибка: ${exception.message}"
         }
     }
 }

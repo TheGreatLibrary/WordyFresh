@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
@@ -23,6 +25,7 @@ fun NavigationInstructions() {
             text = stringResource(R.string.navigation_btns),
             style = WordyTypography.bodyMedium,
             fontSize = 16.sp,
+            textAlign = TextAlign.Center,
             color = WordyColor.colors.textPrimary
         )
 

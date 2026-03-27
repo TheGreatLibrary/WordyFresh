@@ -20,11 +20,5 @@ enum class GameMode(
     companion object {
         fun fromCode(code: Int): GameMode =
             entries.find { it.id == code } ?: NORMAL
-
-        fun getStatsOptions(): List<GameMode> =
-            entries.filter { it.isForStats }
-
-        fun getStatsOfDataBase(): List<GameMode> =
-            entries.filter { it.id > -1 }
     }
 }

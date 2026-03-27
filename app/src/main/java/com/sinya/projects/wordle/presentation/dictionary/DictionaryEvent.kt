@@ -1,6 +1,7 @@
 package com.sinya.projects.wordle.presentation.dictionary
 
 import com.sinya.projects.wordle.domain.model.DictionaryItem
+import com.sinya.projects.wordle.domain.enums.VibrationType
 
 sealed interface DictionaryEvent {
     data object OnRefresh : DictionaryEvent
@@ -8,4 +9,5 @@ sealed interface DictionaryEvent {
     data object OnClearAll : DictionaryEvent
     data class OnSearchQueryChanged(val query: String) : DictionaryEvent
     data class OnReloadedDefinition(val item: DictionaryItem) : DictionaryEvent
+    data class OnVibrate(val type: VibrationType) : DictionaryEvent
 }

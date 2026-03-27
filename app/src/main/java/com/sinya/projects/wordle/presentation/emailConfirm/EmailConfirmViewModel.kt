@@ -4,6 +4,7 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.useCase.ResetPasswordUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +66,7 @@ class EmailConfirmViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     updateIfEmailConfirmForm {
-                        it.copy(errorMessage = error.localizedMessage ?: "Ошибка отправки письма")
+                        it.copy(errorMessage = error.getErrorMessage())
                     }
                 }
             )

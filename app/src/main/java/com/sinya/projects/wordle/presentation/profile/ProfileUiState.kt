@@ -1,6 +1,7 @@
 package com.sinya.projects.wordle.presentation.profile
 
 import android.net.Uri
+import androidx.annotation.StringRes
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 
 sealed interface ProfileUiState {
@@ -15,6 +16,6 @@ sealed interface ProfileUiState {
         val email: String = "",
         val avatarUri: Uri?,
         val isUploadingAvatar: Boolean = false,
-        val errorMessage: String? = null
+        @StringRes val errorMessage: Int? = null
     ) : ProfileUiState
 }

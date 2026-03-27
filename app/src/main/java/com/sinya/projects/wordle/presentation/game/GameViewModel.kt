@@ -1,19 +1,19 @@
 package com.sinya.projects.wordle.presentation.game
 
-import android.content.Intent
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.local.achievement.AchievementEvent
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
 import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
+import com.sinya.projects.wordle.data.local.datastore.HintsDataSource
 import com.sinya.projects.wordle.data.local.datastore.SavedGameState
 import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
+import com.sinya.projects.wordle.domain.enums.GameColors
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.enums.GameState
+import com.sinya.projects.wordle.domain.enums.VibrationType
 import com.sinya.projects.wordle.domain.model.Cell
 import com.sinya.projects.wordle.domain.model.Game
 import com.sinya.projects.wordle.domain.model.GameSettings
@@ -32,13 +32,12 @@ import com.sinya.projects.wordle.domain.useCase.InsertStatisticUseCase
 import com.sinya.projects.wordle.domain.useCase.ValidateWordColorsUseCase
 import com.sinya.projects.wordle.domain.useCase.WordExistsUseCase
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
-import com.sinya.projects.wordle.domain.model.UiText
-import com.sinya.projects.wordle.presentation.resetPassword.ResetPasswordUiState
-import com.sinya.projects.wordle.ui.theme.gray100
-import com.sinya.projects.wordle.ui.theme.gray30
-import com.sinya.projects.wordle.ui.theme.gray600
-import com.sinya.projects.wordle.ui.theme.green800
-import com.sinya.projects.wordle.ui.theme.yellow
+import com.sinya.projects.wordle.domain.model.WarningUiText
+import com.sinya.projects.wordle.domain.model.updateHint
+import com.sinya.projects.wordle.domain.useCase.GetHintsStateUseCase
+import com.sinya.projects.wordle.domain.model.UseHintResult
+import com.sinya.projects.wordle.domain.useCase.UseHintUseCase
+import com.sinya.projects.wordle.utils.VibrationManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -52,12 +51,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import java.util.UUID
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel(assistedFactory = GameViewModel.Factory::class)
 class GameViewModel @AssistedInject constructor(
@@ -67,6 +70,10 @@ class GameViewModel @AssistedInject constructor(
     @Assisted("hiddenWord") private val hiddenWord: String,
 
     private val settingsEngine: SettingsEngine,
+    private val vibrationManager: VibrationManager,
+    private val getHintsState: GetHintsStateUseCase,
+    private val useHint: UseHintUseCase,
+    private val hintsDataSource: HintsDataSource,
 
     private val generateKeyboardLayoutUseCase: GenerateKeyboardLayoutUseCase,
     private val validateWordColorsUseCase: ValidateWordColorsUseCase,
@@ -82,6 +89,7 @@ class GameViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private var timerJob: Job? = null
+    private var restoreTimerJob: Job? = null
 
     private val _state = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val state: StateFlow<GameUiState> = _state.asStateFlow()
@@ -106,49 +114,22 @@ class GameViewModel @AssistedInject constructor(
 
             launch { observeSettings() }
 
+            launch { observeHints() }
+
             val config = settingsEngine.uiState.value
             val game = (config.lastGame as? SavedGameState.Loaded)?.game
 
             when (mode) {
                 GameMode.SAVED -> {
-                    if (game != null) {
-                        restoreGame(game)
-                        startTimer()
-                    } else {
-                        updateFinishDialog(
-                            FinishStatisticGame(
-                                hiddenWord, "", GameState.NONE, 0, mode, "",
-                                emptyList(), emptyList(), emptyList(), emptyList()
-                            )
-                        )
-                    }
+                    loadSavedGame()
                 }
 
                 else -> {
-//                    if (game != null) {
-//                        val firstEmptyIndex =
-//                            game.board.indexOfFirst { it.backgroundColor == gray30.value }
-//                        addStatisticData(
-//                            GameState.LOSE, GameUiState.Ready(
-//                                ratingStatus = game.settings.ratingStatus,
-//                                confettiStatus = game.settings.confettiStatus,
-//                                keyboardCode = game.settings.keyboardCode,
-//                                mode = game.mode,
-//                                wordLength = game.length,
-//                                lang = game.lang,
-//                                hiddenWord = game.targetWord,
-//                                focusedCell = if (firstEmptyIndex != -1) firstEmptyIndex else 0,
-//                                timePassed = game.totalSeconds,
-//                                gridState = game.board.toList(),
-//                                keyboardState = game.keyboard.toList(),
-//                                showFinishDialog = null
-//                            )
-//                        )
-//                    }
-                    if (initialState.hiddenWord.isEmpty()) {
-                        getRandomWord()
+                    if (game != null && initialState.showGameDialog) {
+                        updateIfReady { it.copy(showLoadSavedGameDialog = true) }
+                    } else {
+                        loadNewGame()
                     }
-                    startTimer()
                 }
             }
         }
@@ -196,11 +177,31 @@ class GameViewModel @AssistedInject constructor(
             confettiStatus = config.confetti,
             ratingStatus = config.ratingWords,
             keyboardCode = config.keyboardMode,
+            showLetterHints = config.showLetterHints,
+            showGameDialog = config.showSavedGameDialogState,
             gridState = gridState,
             keyboardState = keyboardLayout,
             focusedCell = 0,
             timePassed = 0
         )
+    }
+
+    private fun observeHints() {
+        getHintsState()
+            .onEach { hints ->
+                Log.d("Magic", hints.toString())
+                updateIfReady { current ->
+                    current.copy(hintsState = hints)
+                }
+                if ((hints.available) == 0 && (hints.nextRestoreIn
+                        ?: Duration.ZERO) > Duration.ZERO
+                ) {
+                    startRestoreTimer()
+                } else {
+                    restoreTimerJob?.cancel()
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private suspend fun observeSettings() {
@@ -223,11 +224,19 @@ class GameViewModel @AssistedInject constructor(
                 gameState.ratingStatus
             }
 
+            val previousShowLetterHints = (_state.value as? GameUiState.Ready)?.showLetterHints
+
             updateIfReady { current ->
                 current.copy(
+                    showLetterHints = config.showLetterHints,
                     confettiStatus = config.confetti,
+                    showGameDialog = config.showSavedGameDialogState,
                     ratingStatus = ratingStatus
                 )
+            }
+
+            if (previousShowLetterHints != config.showLetterHints) {
+                refreshHints()
             }
             updateKeyboardLayout(config.keyboardMode)
         }
@@ -238,11 +247,16 @@ class GameViewModel @AssistedInject constructor(
             is GameEvent.GameFinished -> finishGame(event.message)
             is GameEvent.ShowFinishDialog -> updateFinishDialog(event.show)
             is GameEvent.ShowHardModeHint -> updateHardModeHintDialog(event.message)
-            is GameEvent.WordNotFound -> updateNotFoundDialog(event.show)
             is GameEvent.EnterLetter -> keyboardControl(event.char)
             is GameEvent.SetFocusCell -> updateFocusedCell(event.rowIndex, event.columnIndex)
             is GameEvent.ReloadGame -> reloadGame()
             is GameEvent.SaveGame -> saveGame()
+            is GameEvent.SetWarningDialogState -> settingsEngine.setSavedGameDialogState(event.state)
+            is GameEvent.OnVibrate -> vibrationManager.vibrate(event.type)
+            GameEvent.ShownLoadSavedGameDialog -> updateIfReady { it.copy(showLoadSavedGameDialog = false) }
+            GameEvent.LoadSavedGame -> loadSavedGame()
+            GameEvent.LoadNewGame -> viewModelScope.launch { loadNewGame() }
+            GameEvent.OnMagicClick -> onHintClicked()
         }
     }
 
@@ -270,7 +284,56 @@ class GameViewModel @AssistedInject constructor(
         stopTimer()
     }
 
+    private fun startRestoreTimer() {
+        restoreTimerJob?.cancel()
+        restoreTimerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                updateIfReady { current ->
+                    val hints = current.hintsState ?: return@updateIfReady current
+                    if (hints.available > 0) {
+                        restoreTimerJob?.cancel()
+                        return@updateIfReady current
+                    }
+                    val newRemaining = ((hints.nextRestoreIn
+                        ?: Duration.ZERO) - 1.seconds).coerceAtLeast(Duration.ZERO)
+                    current.copy(
+                        hintsState = hints.copy(nextRestoreIn = newRemaining)
+                    )
+                }
+            }
+        }
+    }
+
     /** сохраненная игра */
+
+    private fun loadSavedGame() = viewModelScope.launch {
+        val config = settingsEngine.uiState.value
+        val game = (config.lastGame as? SavedGameState.Loaded)?.game
+
+        if (game != null) {
+            restoreGame(game)
+            startTimer()
+        }
+        else {
+            updateFinishDialog(
+                FinishStatisticGame(
+                    hiddenWord, "", GameState.NONE, 0, mode, "",
+                    emptyList(), emptyList(), emptyList(), emptyList()
+                )
+            )
+        }
+    }
+
+    private suspend fun loadNewGame() {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        hintsDataSource.resetRoundUsage()
+        if (s.hiddenWord.isEmpty()) {
+            getRandomWord()
+        }
+        startTimer()
+    }
 
     private fun reloadGame() {
         updateIfReady {
@@ -283,19 +346,23 @@ class GameViewModel @AssistedInject constructor(
                 gridState = it.gridState.map { row ->
                     row.copy(
                         letter = "",
-                        backgroundColor = gray30.value
+                        backgroundColor = GameColors.DEFAULT_CELL,
+                        hint = ""
                     )
                 },
-                keyboardState = it.keyboardState.map { row -> row.map { key -> key.copy(color = gray100.value) } },
+                keyboardState = it.keyboardState.map { row -> row.map { key -> key.copy(color = GameColors.DEFAULT_KEY) } },
             )
         }
 
-        getRandomWord()
+        viewModelScope.launch {
+            hintsDataSource.resetRoundUsage()
+            getRandomWord()
+        }
         startTimer()
     }
 
     private fun restoreGame(game: Game) {
-        val firstEmptyIndex = game.board.indexOfFirst { it.backgroundColor == gray30.value }
+        val firstEmptyIndex = game.board.indexOfFirst { it.backgroundColor == GameColors.DEFAULT_CELL }
         updateIfReady {
             it.copy(
                 ratingStatus = game.settings.ratingStatus,
@@ -336,8 +403,8 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
-    private fun getRandomWord() = viewModelScope.launch {
-        val s = _state.value as? GameUiState.Ready ?: return@launch
+    private suspend fun getRandomWord() {
+        val s = _state.value as? GameUiState.Ready ?: return
 
         getRandomWordUseCase(
             length = s.wordLength,
@@ -373,7 +440,7 @@ class GameViewModel @AssistedInject constructor(
 
                 layout.map { row ->
                     row.map { key ->
-                        key.copy(color = currentColors[key.char] ?: gray100.value)
+                        key.copy(color = currentColors[key.char] ?: GameColors.DEFAULT_KEY)
                     }
                 }
             }
@@ -386,6 +453,8 @@ class GameViewModel @AssistedInject constructor(
 
         val row = state.focusedCell / state.wordLength
         val col = state.focusedCell % state.wordLength
+
+
 
         when (char) {
             '<' -> {
@@ -411,10 +480,16 @@ class GameViewModel @AssistedInject constructor(
                     updateFocusedCell(row, col - 1)
                     updateCellText(row, col - 1, "")
                 }
+            } else if (s.gridState[s.focusedCell].backgroundColor == GameColors.GREEN) {
+                if (col > 0) {
+                    updateFocusedCell(row, col - 1)
+                    updateCellText(row, col - 1, "")
+                } else updateFocusedCell(row, col - 1)
             } else {
                 updateCellText(row, col, "")
             }
         }
+        vibrationManager.vibrate(VibrationType.KEY_DELETE)
     }
 
     private fun enterSubmit(col: Int, row: Int) {
@@ -435,6 +510,8 @@ class GameViewModel @AssistedInject constructor(
         val enteredWord = s.gridState.getWord(row, s.wordLength)
         if (enteredWord.length < s.wordLength) return
 
+        vibrationManager.vibrate(VibrationType.KEY_ENTER)
+
         viewModelScope.launch {
             wordExistsUseCase(
                 enteredWord,
@@ -454,22 +531,22 @@ class GameViewModel @AssistedInject constructor(
                         )) {
                             is CheckHardModeRulesUseCase.HardModeResult.ExactPositionError -> {
                                 updateHardModeHintDialog(
-                                    UiText.StringResource(
-                                        R.string.hard_hint_exact_position,
+                                    WarningUiText.ExactPositionError(
                                         result.char,
                                         result.position
                                     )
                                 )
+                                vibrationManager.vibrate(VibrationType.WRONG_WORD)
                                 return@launch
                             }
 
                             is CheckHardModeRulesUseCase.HardModeResult.LetterRequiredError -> {
                                 updateHardModeHintDialog(
-                                    UiText.StringResource(
-                                        R.string.hard_hint_letter_required,
+                                    WarningUiText.NotFountLetter(
                                         result.char
                                     )
                                 )
+                                vibrationManager.vibrate(VibrationType.WRONG_WORD)
                                 return@launch
                             }
 
@@ -481,12 +558,14 @@ class GameViewModel @AssistedInject constructor(
                     updateFocusedCell(row + 1)
                 },
                 onFailure = {
-                    updateNotFoundDialog(true)
+                    updateHardModeHintDialog(WarningUiText.NotFoundWord)
+                    vibrationManager.vibrate(VibrationType.WRONG_WORD)
                     return@launch
                 }
             )
 
             checkFinishWithAnimation(enteredWord, row)
+
 
             if (row < 5) {
                 saveGame()
@@ -496,6 +575,8 @@ class GameViewModel @AssistedInject constructor(
 
     private fun enterLetter(char: Char, col: Int, row: Int) {
         val s = _state.value as? GameUiState.Ready ?: return
+
+        vibrationManager.vibrate(VibrationType.KEY_LETTER)
 
         if (s.result == GameState.IN_PROGRESS) {
             updateCellText(row, col, char.toString())
@@ -519,10 +600,15 @@ class GameViewModel @AssistedInject constructor(
             hiddenWord = s.hiddenWord
         )
 
+
         animateWordAndKeyboard(row, enteredWord, colors)
+        if (!isWin && !isLose) {
+            Log.d("GGG3", "load")
+            updateHintsForRow(row, enteredWord, colors)
+        }
     }
 
-    private fun animateWordAndKeyboard(row: Int, enteredWord: String, colors: List<Color>) {
+    private fun animateWordAndKeyboard(row: Int, enteredWord: String, colors: List<GameColors>) {
         val s = _state.value as? GameUiState.Ready ?: return
 
         val len = s.wordLength
@@ -543,15 +629,13 @@ class GameViewModel @AssistedInject constructor(
                     val currentColor = (_state.value as? GameUiState.Ready)?.keyboardState
                         ?.flatten()
                         ?.find { it.char == char }
-                        ?.color
-                        ?.let { Color(it) } ?: gray600
+                        ?.color ?: GameColors.GRAY
 
                     val finalColor = when {
-                        currentColor == green800 -> green800
-                        currentColor == yellow && newColor == gray600 -> yellow
+                        currentColor == GameColors.GREEN -> GameColors.GREEN
+                        currentColor == GameColors.YELLOW && newColor == GameColors.GRAY -> GameColors.YELLOW
                         else -> newColor
                     }
-                    Log.d("Game", ""+currentColor+finalColor)
 
                     updateKeyColor(char, finalColor)
                     delay(150L)
@@ -560,10 +644,172 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
+    private fun updateHintsForRow(
+        currentRow: Int,
+        enteredWord: String,
+        currentColors: List<GameColors>
+    ) {
+        val s = _state.value as? GameUiState.Ready ?: return
+
+        if (!s.showLetterHints) {
+            updateIfReady {
+                it.copy(
+                    gridState = it.gridState.map { row ->
+                        row.copy(
+                            hint = ""
+                        )
+                    }
+                )
+            }
+            return
+        }
+
+        val targetRow = currentRow + 1
+        if (targetRow > 5) return
+
+        val confirmedGreen = mutableMapOf<Int, String>()
+
+        for (r in 0 until currentRow) {
+            for (col in 0 until s.wordLength) {
+                val index = r * s.wordLength + col
+                val cell = s.gridState[index]
+                if (cell.backgroundColor == GameColors.GREEN) {
+                    confirmedGreen[col] = cell.letter
+                }
+            }
+        }
+
+        for (col in currentColors.indices) {
+            if (currentColors[col] == GameColors.GREEN) {
+                confirmedGreen[col] = enteredWord[col].toString()
+            }
+        }
+
+        var grid = s.gridState
+        for ((col, letter) in confirmedGreen) {
+            val index = targetRow * s.wordLength + col
+            if (grid[index].letter.isEmpty()) {
+                grid = grid.updateHint(index, letter)
+            }
+        }
+
+        _state.value = s.copy(gridState = grid)
+    }
+
+    private fun refreshHints() {
+        val s = _state.value as? GameUiState.Ready ?: return
+        if (s.result != GameState.IN_PROGRESS) return
+
+        if (!s.showLetterHints) {
+            updateIfReady { state ->
+                state.copy(gridState = state.gridState.map { it.copy(hint = "") })
+            }
+            return
+        }
+
+        val currentRow = s.focusedCell / s.wordLength
+        if (currentRow == 0 || currentRow > 5) return
+
+        val confirmedGreen = mutableMapOf<Int, String>()
+        for (r in 0 until currentRow) {
+            for (col in 0 until s.wordLength) {
+                val index = r * s.wordLength + col
+                val cell = s.gridState[index]
+                if (cell.backgroundColor == GameColors.GREEN) {
+                    confirmedGreen[col] = cell.letter
+                }
+            }
+        }
+
+        var grid = s.gridState
+        for (col in 0 until s.wordLength) {
+            grid = grid.updateHint(currentRow * s.wordLength + col, "")
+        }
+        for ((col, letter) in confirmedGreen) {
+            val index = currentRow * s.wordLength + col
+            if (grid[index].letter.isEmpty()) {
+                grid = grid.updateHint(index, letter)
+            }
+        }
+        _state.value = s.copy(gridState = grid)
+    }
+
+    private fun onHintClicked() {
+        val s = _state.value as? GameUiState.Ready ?: return
+        val state = s.hintsState ?: return
+        if (s.result != GameState.IN_PROGRESS || s.hiddenWord.isEmpty()) return
+
+        Log.d("Magic", "${s.result} LLL")
+        viewModelScope.launch {
+            when (useHint(state)) {
+                is UseHintResult.Success -> {
+                    revealRandomLetter()
+                }
+
+                UseHintResult.NoHints -> {
+                    updateHardModeHintDialog(WarningUiText.NotHasHints)
+                    Log.d("Magic", "нет подсказок, восстановятся через X")
+                }
+
+                UseHintResult.RoundLimitReached -> {
+                    updateHardModeHintDialog(WarningUiText.HintsRoundLimitReached)
+                    Log.d("Magic", "только 2 подсказки за раунд")
+                }
+            }
+
+        }
+        return
+    }
+
+    private fun revealRandomLetter() {
+        val state = _state.value as? GameUiState.Ready ?: return
+
+        vibrationManager.vibrate(VibrationType.HINT_USED)
+
+        val targetWord = state.hiddenWord
+        val grid = state.gridState
+
+        val alreadyRevealedPositions = (0 until state.wordLength)
+            .filter { col ->
+                grid.chunked(state.wordLength).any {
+                    it[col].backgroundColor == GameColors.GREEN
+                }
+            }
+            .toSet()
+
+        val unrevealedPositions = targetWord.indices
+            .filter { it !in alreadyRevealedPositions }
+
+        if (unrevealedPositions.isEmpty()) return
+
+        val randomPos = unrevealedPositions.random()
+        val letterToReveal = targetWord[randomPos]
+
+        Log.d("Magic", "${alreadyRevealedPositions} ${letterToReveal}")
+
+        updateCellText(
+            row = state.focusedCell / state.wordLength,
+            col = randomPos,
+            text = letterToReveal.toString()
+        )
+        updateCellColor(
+            state.focusedCell / state.wordLength * state.wordLength + randomPos,
+            GameColors.GREEN
+        )
+        updateKeyColor(letterToReveal, GameColors.GREEN)
+
+    }
+
     /** Конец игры, Обновление статистики */
 
     private fun finishGame(result: GameState) {
         stopTimer()
+
+        when (result) {
+            GameState.WIN -> vibrationManager.vibrate(VibrationType.WIN)
+            GameState.LOSE -> vibrationManager.vibrate(VibrationType.LOSE)
+            else -> Unit
+        }
 
         updateIfReady { it.copy(result = result) }
 
@@ -665,8 +911,6 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private suspend fun saveGameData(result: GameState) {
-//        val s = _state.value as? GameUiState.Ready ?: return
-//
         addStatisticData(result)
         settingsEngine.clearSavedGame()
     }
@@ -703,11 +947,8 @@ class GameViewModel @AssistedInject constructor(
     private fun updateFinishDialog(state: FinishStatisticGame?) =
         updateIfReady { it.copy(showFinishDialog = state) }
 
-    private fun updateNotFoundDialog(state: Boolean) =
-        updateIfReady { it.copy(showNotFoundDialog = state) }
-
-    private fun updateHardModeHintDialog(state: UiText?) =
-        updateIfReady { it.copy(showHardModeHint = state) }
+    private fun updateHardModeHintDialog(state: WarningUiText?) =
+        updateIfReady { it.copy(showWarningMessage = state) }
 
     private fun updateKeyboardLayout(newCode: Int) {
         val s = _state.value as? GameUiState.Ready ?: return
@@ -727,11 +968,11 @@ class GameViewModel @AssistedInject constructor(
         )
     }
 
-    private fun updateCellColor(index: Int, color: Color) = updateIfReady {
+    private fun updateCellColor(index: Int, color: GameColors) = updateIfReady {
         it.copy(gridState = it.gridState.updateColor(index, color))
     }
 
-    private fun updateKeyColor(char: Char, color: Color) = updateIfReady {
+    private fun updateKeyColor(char: Char, color: GameColors) = updateIfReady {
         it.copy(keyboardState = it.keyboardState.updateColor(char, color))
     }
 

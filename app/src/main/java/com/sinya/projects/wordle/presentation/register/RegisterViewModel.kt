@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.useCase.CheckEmailExistsUseCase
 import com.sinya.projects.wordle.domain.useCase.ResendEmailUseCase
 import com.sinya.projects.wordle.domain.useCase.SignUpUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +48,7 @@ class RegisterViewModel @Inject constructor(
 
             RegisterEvent.RegisterClicked -> registerUser()
 
-            RegisterEvent.ErrorShown ->  updateIfRegisterForm {
+            RegisterEvent.ErrorShown -> updateIfRegisterForm {
                 it.copy(errorMessage = null)
             }
         }
@@ -86,16 +87,13 @@ class RegisterViewModel @Inject constructor(
             checkEmailExistsUseCase(formState.email).fold(
                 onSuccess = { exist ->
                     if (exist) {
-                        Log.d("Register", "Почта уже есть, пробуем отправить письмо")
                         _state.value = RegisterUiState.LoadingConfirm(email = formState.email)
                         resendEmail()
                     } else {
-                        Log.d("Register", "Почты нет, регаемся")
                         proceedWithSignUp(formState)
                     }
                 },
                 onFailure = {
-                    Log.d("Register", "Ошибка??? Почты нет? регаемся")
                     proceedWithSignUp(formState)
                 }
             )
@@ -114,7 +112,7 @@ class RegisterViewModel @Inject constructor(
                     email = formState.email,
                     password = formState.password,
                     isLoading = false,
-                    errorMessage = error.localizedMessage ?: "Ошибка регистрации"
+                    errorMessage = error.getErrorMessage()
                 )
             }
         )
@@ -124,15 +122,14 @@ class RegisterViewModel @Inject constructor(
         val currentState = _state.value as? RegisterUiState.LoadingConfirm ?: return
 
         viewModelScope.launch {
-            resendEmailUseCase(currentState.email).fold(
-                onSuccess = {
-                    Log.d("Register", "Отправляем письмо!")
-                },
-                onFailure = { error ->
-                    Log.e("Register", "Ошибка отправки письма", error)
-                    _state.update { RegisterUiState.RegisterForm(currentState.email) }
+            resendEmailUseCase(currentState.email).onFailure { error ->
+                _state.update {
+                    RegisterUiState.RegisterForm(
+                        email = currentState.email,
+                        errorMessage = error.getErrorMessage()
+                    )
                 }
-            )
+            }
         }
     }
 

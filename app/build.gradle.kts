@@ -40,6 +40,11 @@ android {
             "SUPABASE_API_KEY",
             "\"${props.getProperty("SUPABASE_API_KEY") ?: ""}\""
         )
+        buildConfigField(
+            "String",
+            "HINTS_SALT",
+            "\"${props.getProperty("HINTS_SALT") ?: ""}\""
+        )
     }
 
     packagingOptions {

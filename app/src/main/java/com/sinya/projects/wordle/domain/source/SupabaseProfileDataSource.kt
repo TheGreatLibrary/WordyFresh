@@ -3,6 +3,8 @@ package com.sinya.projects.wordle.domain.source
 import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
+import com.sinya.projects.wordle.domain.checker.NetworkChecker
+import com.sinya.projects.wordle.domain.error.NoInternetException
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.annotations.SupabaseExperimental
@@ -17,7 +19,6 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
 interface SupabaseProfileDataSource {
-    suspend fun fetchProfile(userId: String): Profiles?
     suspend fun updateProfile(profile: Profiles): Result<Unit>
     suspend fun updateImagePath(urlPath: String, id: String): Result<Unit>
     suspend fun updateNickname(nickname: String, id: String): Result<Unit>
@@ -28,22 +29,9 @@ interface SupabaseProfileDataSource {
 
 class SupabaseProfileDataSourceImpl @Inject constructor(
     private val supabaseClient: SupabaseClient,
-    private val profilesDao: ProfilesDao
+    private val profilesDao: ProfilesDao,
+    private val networkChecker: NetworkChecker
 ) : SupabaseProfileDataSource {
-
-    override suspend fun fetchProfile(userId: String): Profiles? {
-        return withContext(Dispatchers.IO) {
-            try {
-                supabaseClient
-                    .from("profiles")
-                    .select { filter { eq("id", userId) } }
-                    .decodeSingleOrNull<Profiles>()
-            } catch (e: Exception) {
-                Log.e("SupabaseProfileDataSource", "Error fetching profile", e)
-                null
-            }
-        }
-    }
 
     @OptIn(SupabaseExperimental::class)
     override suspend fun observeProfile(userId: String): Flow<Profiles?> =
@@ -53,9 +41,10 @@ class SupabaseProfileDataSourceImpl @Inject constructor(
                 eq("id", userId)
             }
 
-
     override suspend fun updateProfile(profile: Profiles): Result<Unit> {
         return withContext(Dispatchers.IO) {
+            if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
             try {
                 val json = Json { encodeDefaults = true }
                 val payload = json.encodeToJsonElement(profile).jsonObject
@@ -69,11 +58,11 @@ class SupabaseProfileDataSourceImpl @Inject constructor(
         }
     }
 
-
-
     override suspend fun updateImagePath(urlPath: String, id: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 supabaseClient.from("profiles").update({ Profiles::avatarUrl setTo urlPath }) {
                     filter { Profiles::id eq id }
                 }
@@ -88,6 +77,8 @@ class SupabaseProfileDataSourceImpl @Inject constructor(
     override suspend fun updateNickname(nickname: String, id: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 supabaseClient.from("profiles").update({ Profiles::nickname setTo nickname }) {
                     filter { Profiles::id eq id }
                 }
@@ -102,6 +93,8 @@ class SupabaseProfileDataSourceImpl @Inject constructor(
     override suspend fun syncToSupabase(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val profile = profilesDao.getProfileById(userId)
                     ?: return@withContext Result.failure(UserNotAuthenticatedException())
 
@@ -120,6 +113,8 @@ class SupabaseProfileDataSourceImpl @Inject constructor(
     override suspend fun syncFromSupabase(userId: String): Result<Profiles?> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val profile = supabaseClient
                     .from("profiles")
                     .select { filter { eq("id", userId) } }

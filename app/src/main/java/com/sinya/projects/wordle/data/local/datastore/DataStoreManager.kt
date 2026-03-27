@@ -37,6 +37,10 @@ class DataStoreManager @Inject constructor(
     private val RATING_WORDS_KEY = booleanPreferencesKey("rating_words")
     private val CONFETTI_KEY = booleanPreferencesKey("confetti")
     private val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
+    private val SHOW_LETTER_HINTS = booleanPreferencesKey("show_letter_hints")
+    private val SHOW_SAVED_GAME_DIALOG = booleanPreferencesKey("show_saved_game_dialog")
+    private val VIBRATION_STATUS = booleanPreferencesKey("vibration_status")
+
 
     private val KEYBOARD_MODE_KEY = intPreferencesKey("keyboard_mode")
 
@@ -77,8 +81,11 @@ class DataStoreManager @Inject constructor(
         val prefs = context.dataStore.data.first()
         return OptionalPrefs(
             background = prefs[BACKGROUND_SETTING_KEY] ?: BackgroundSettings.DEFAULT.name,
+            vibrationStatus = prefs[VIBRATION_STATUS] ?: true,
             ratingWords = prefs[RATING_WORDS_KEY] ?: false,
             confetti = prefs[CONFETTI_KEY] ?: true,
+            showLetterHint = prefs[SHOW_LETTER_HINTS] ?: true,
+            showSavedGameDialogState = prefs[SHOW_SAVED_GAME_DIALOG] ?: true,
             keyboardMode = prefs[KEYBOARD_MODE_KEY] ?: TypeKeyboards.WORDLE.code,
             lastGame = SavedGameState.Loaded(prefs[LAST_GAME_STATE_KEY]?.let {
                 try {
@@ -92,52 +99,16 @@ class DataStoreManager @Inject constructor(
 
     suspend fun setBackground(value: BackgroundSettings) = save(BACKGROUND_SETTING_KEY, value.name)
     suspend fun clearBackground() = remove(BACKGROUND_SETTING_KEY)
-//    fun getBackground(): Flow<String> = read(BACKGROUND_SETTING_KEY, BackgroundSettings.DEFAULT.name)
-
     suspend fun setDarkMode(value: Boolean) = save(DARK_MODE_KEY, value)
-//    fun getDarkMode(): Flow<Boolean> = read(DARK_MODE_KEY, TypeThemes.LIGHT.isDark)
-
     suspend fun setRatingWordMode(value: Boolean) = save(RATING_WORDS_KEY, value)
-//    fun getRatingWordMode(): Flow<Boolean> = read(RATING_WORDS_KEY, false)
-
     suspend fun setConfettiMode(value: Boolean) = save(CONFETTI_KEY, value)
-//    fun getConfettiMode(): Flow<Boolean> = read(CONFETTI_KEY, true)
-
     suspend fun setLanguage(value: String) = save(LANGUAGE_KEY, value)
-//    fun getLanguage(): Flow<String> = read(LANGUAGE_KEY, TypeLanguages.RU.code)
-
     suspend fun setOnboardingMode(value: Boolean) = save(ONBOARDING_KEY, value)
-//    fun getOnboardingMode(): Flow<Boolean> = read(ONBOARDING_KEY, false)
-
     suspend fun setKeyboardMode(value: Int) = save(KEYBOARD_MODE_KEY, value)
-//    fun getKeyboardMode(): Flow<Int> = read(KEYBOARD_MODE_KEY, TypeKeyboards.WORDLE.code)
-
     suspend fun saveGame(value: Game) = save(LAST_GAME_STATE_KEY, Json.encodeToString(value))
     suspend fun clearSavedGame() = remove(LAST_GAME_STATE_KEY)
-//    suspend fun loadGame(): Game? {
-//        val json = context.dataStore.data
-//            .map { it[LAST_GAME_STATE_KEY] }
-//            .firstOrNull()
-//
-//        return json?.let {
-//            try {
-//                Json.decodeFromString<Game>(it)
-//            } catch (e: Exception) {
-//                null
-//            }
-//        }
-//    }
-//
-//    fun getSavedGame(): Flow<Game?> =
-//        context.dataStore.data.map { prefs ->
-//            prefs[LAST_GAME_STATE_KEY]?.let {
-//                try {
-//                    Json.decodeFromString<Game>(it)
-//                } catch (e: Exception) {
-//                    Log.e("AppDataStore", "Ошибка при разборе Game: $e")
-//                    null
-//                }
-//            }
-//        }
+    suspend fun setShowLetterHints(value: Boolean) = save(SHOW_LETTER_HINTS, value)
+    suspend fun setShowSavedGameDialogState(value: Boolean) = save(SHOW_SAVED_GAME_DIALOG, value)
+    suspend fun setVibrationState(value: Boolean) = save(VIBRATION_STATUS, value)
 }
 

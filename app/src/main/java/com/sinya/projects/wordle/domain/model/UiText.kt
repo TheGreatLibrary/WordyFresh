@@ -1,22 +1,13 @@
 package com.sinya.projects.wordle.domain.model
 
-import androidx.annotation.StringRes
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+sealed interface WarningUiText {
+    data object NotFoundWord : WarningUiText
 
-sealed class UiText {
-    data class DynamicString(val value: String) : UiText()
+    data class NotFountLetter(val letter: Char) : WarningUiText
 
-    class StringResource(
-        @StringRes val resId: Int,
-        vararg val args: Any
-    ) : UiText()
+    data class ExactPositionError(val char: Char, val position: Int) : WarningUiText
 
-    @Composable
-    fun asString(): String {
-        return when (this) {
-            is DynamicString -> value
-            is StringResource -> stringResource(resId, *args)
-        }
-    }
+    data object NotHasHints : WarningUiText
+
+    data object HintsRoundLimitReached : WarningUiText
 }

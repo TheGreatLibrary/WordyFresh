@@ -216,7 +216,6 @@ private fun WinRateContent(
                 val diameter = size.width
                 val center = Offset(diameter / 2, diameter / 2)
 
-                // Background arc
                 drawArc(
                     color = Color.Gray.copy(alpha = 0.2f),
                     startAngle = 180f,

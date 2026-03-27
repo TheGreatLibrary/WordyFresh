@@ -28,6 +28,7 @@ import com.sinya.projects.wordle.presentation.game.components.CustomKeyboard
 import com.sinya.projects.wordle.presentation.game.components.GameHeader
 import com.sinya.projects.wordle.presentation.game.components.GamePlace
 import com.sinya.projects.wordle.presentation.game.components.GamePlaceholder
+import com.sinya.projects.wordle.presentation.game.components.LoadSavedGameDialog
 import com.sinya.projects.wordle.presentation.game.components.NotRightWordDialog
 import com.sinya.projects.wordle.presentation.game.components.ReactiveConfetti
 import com.sinya.projects.wordle.presentation.game.components.TextResult
@@ -96,16 +97,9 @@ private fun GameScreenView(
         state = state.showFinishDialog,
         onEvent = onEvent
     ) { paddingValues, onClick ->
-        LaunchedEffect(state.showNotFoundDialog) {
-            if (state.showNotFoundDialog) {
-                delay(400)
-                onEvent(GameEvent.WordNotFound(false))
-            }
-        }
-
-        LaunchedEffect(state.showHardModeHint) {
-            if (state.showHardModeHint != null) {
-                delay(800)
+        LaunchedEffect(state.showWarningMessage) {
+            if (state.showWarningMessage != null) {
+                delay(600)
                 onEvent(GameEvent.ShowHardModeHint(null))
             }
         }
@@ -150,8 +144,15 @@ private fun GameScreenView(
         }
 
         NotRightWordDialog(
-            state.showNotFoundDialog,
-            state.showHardModeHint
+            state.showWarningMessage
+        )
+
+        if (state.showLoadSavedGameDialog) LoadSavedGameDialog(
+            onLoadGameClick = { onEvent(GameEvent.LoadSavedGame) },
+            onNewGameClick = { onEvent(GameEvent.LoadNewGame) },
+            onDismissRequest = { onEvent(GameEvent.ShownLoadSavedGameDialog) },
+            checked = !state.showGameDialog,
+            checkBoxToggle = { onEvent(GameEvent.SetWarningDialogState(it)) }
         )
 
         if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)

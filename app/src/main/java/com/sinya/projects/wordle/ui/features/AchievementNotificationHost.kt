@@ -25,12 +25,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,53 +34,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.data.local.achievement.AchievementEvent
 import com.sinya.projects.wordle.data.local.achievement.AchievementNotificationViewModel
 import com.sinya.projects.wordle.domain.model.AchieveItem
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.utils.obfuscate
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun AchievementNotificationHost(
     viewModel: AchievementNotificationViewModel = hiltViewModel(),
     onAchievementClick: (AchieveItem) -> Unit = {}
 ) {
-    var currentAchievement by remember { mutableStateOf<AchieveItem?>(null) }
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        viewModel.achievementEventBus.events.collect { event ->
-            when (event) {
-                is AchievementEvent.Unlocked -> {
-                    currentAchievement = event.achievement
-                    // Автоскрытие через 4 секунды
-                    scope.launch {
-                        delay(8000)
-                        currentAchievement = null
-                    }
-                }
-                else -> {}
-            }
-        }
-    }
+    val achievements by viewModel.currentAchievement.collectAsStateWithLifecycle()
 
     AnimatedVisibility(
-        visible = currentAchievement != null,
+        visible = achievements != null,
         enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
     ) {
         
-        currentAchievement?.let { achievement ->
+        achievements?.let { achievement ->
             AchievementNotificationCard(
                 achievement = achievement,
-                onDismiss = { currentAchievement = null },
+                onDismiss = viewModel::dismiss,
                 onClick = {
                     onAchievementClick(achievement)
-                    currentAchievement = null
+                    viewModel.dismiss()
                 }
             )
         }
@@ -94,7 +70,7 @@ fun AchievementNotificationHost(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AchievementNotificationCard(
+private fun AchievementNotificationCard(
     achievement: AchieveItem,
     onDismiss: () -> Unit,
     onClick: () -> Unit

@@ -5,6 +5,8 @@ import com.sinya.projects.wordle.data.local.database.dao.OfflineStatisticDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncStatisticDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistics
 import com.sinya.projects.wordle.data.remote.supabase.mapper.toSyncList
+import com.sinya.projects.wordle.domain.checker.NetworkChecker
+import com.sinya.projects.wordle.domain.error.NoInternetException
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import jakarta.inject.Inject
@@ -24,12 +26,15 @@ interface SupabaseStatisticsDataSource {
 class SupabaseStatisticsDataSourceImpl @Inject constructor(
     private val supabaseClient: SupabaseClient,
     private val offlineStatisticDao: OfflineStatisticDao,
-    private val syncStatisticDao: SyncStatisticDao
+    private val syncStatisticDao: SyncStatisticDao,
+    private val networkChecker: NetworkChecker
 ) : SupabaseStatisticsDataSource {
 
     override suspend fun fetchStatistics(userId: String): Result<List<SyncStatistics>> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val statistics = supabaseClient
                     .from("sync_statistics")
                     .select { filter { eq("user_id", userId) } }
@@ -46,6 +51,8 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
     override suspend fun upsertStatistics(statistics: List<SyncStatistics>): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val json = Json { encodeDefaults = true }
 
                 val jsonString = statistics.map {
@@ -64,8 +71,11 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
     override suspend fun clearAllStatistics(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 supabaseClient.from("sync_statistics")
                     .delete { filter { eq("user_id", userId) } }
+
                 syncFromSupabase(userId).getOrThrow()
                 Result.success(Unit)
             } catch (e: Exception) {
@@ -79,6 +89,8 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
     override suspend fun syncToSupabase(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val offline = offlineStatisticDao
                     .getAllStatistic()
                     .toSyncList(userId)
@@ -100,12 +112,13 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
     override suspend fun syncFromSupabase(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val remote = fetchStatistics(userId).getOrThrow()
                 syncStatisticDao.clearAll()
 
                 if (remote.isNotEmpty()) {
                     syncStatisticDao.insertStatistic(remote)
-
                 }
 
                 Result.success(Unit)

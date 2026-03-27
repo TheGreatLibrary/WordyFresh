@@ -1,7 +1,6 @@
 package com.sinya.projects.wordle.domain.useCase
 
-import com.sinya.projects.wordle.ui.theme.green800
-import com.sinya.projects.wordle.ui.theme.yellow
+import com.sinya.projects.wordle.domain.enums.GameColors
 import jakarta.inject.Inject
 
 class CheckHardModeRulesUseCase @Inject constructor(
@@ -20,11 +19,11 @@ class CheckHardModeRulesUseCase @Inject constructor(
             val lastColor = lastColorArr[i]
             val prevChar = previousWord[i]
 
-            if (lastColor == green800 && enteredWord[i] != prevChar) {
+            if (lastColor == GameColors.GREEN && enteredWord[i] != prevChar) {
                 return HardModeResult.ExactPositionError(prevChar, i + 1)
             }
 
-            if (lastColor == green800 || lastColor == yellow) {
+            if (lastColor == GameColors.GREEN || lastColor == GameColors.YELLOW) {
                 requiredLetters.add(prevChar)
             }
         }

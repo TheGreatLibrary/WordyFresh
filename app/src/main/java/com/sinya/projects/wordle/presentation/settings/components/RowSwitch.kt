@@ -32,7 +32,7 @@ fun RowSwitch(
         verticalAlignment = Alignment.CenterVertically
     ) {
         RowImageWithText(
-            modifier = Modifier.weight(0.7f),
+            modifier = Modifier.weight(0.7f).padding(end = 12.dp),
             icon = icon,
             title = title
         )

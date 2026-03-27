@@ -1,7 +1,5 @@
 package com.sinya.projects.wordle.presentation.createProfile
 
-import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
@@ -9,9 +7,11 @@ import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.data.remote.supabase.SessionManager
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
+import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.ImportSessionUseCase
 import com.sinya.projects.wordle.domain.useCase.InsertProfileUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +41,7 @@ class CreateProfileViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     _state.value = CreateProfileUiState.CreateForm(
-                        errorMessage = "Ошибка восстановления сессии: ${error.localizedMessage}"
+                        errorMessage = error.getErrorMessage()
                     )
                 }
             )
@@ -62,7 +62,7 @@ class CreateProfileViewModel @Inject constructor(
                 it.copy(nickname = event.it, isNickNameError = false)
             }
 
-            is CreateProfileEvent.UpdateAvatar -> updateAvatar(event.it)
+            is CreateProfileEvent.UpdateAvatar -> updateIfSuccess { it.copy(avatarUri = event.it) }
         }
     }
 
@@ -72,9 +72,10 @@ class CreateProfileViewModel @Inject constructor(
         val cs = _state.value as? CreateProfileUiState.CreateForm ?: return
 
         val userId = sessionManager.currentUserId ?: run {
-            updateIfSuccess { it.copy(errorMessage = "Ошибка: нет сессии") }
+            updateIfSuccess { it.copy(errorMessage = UserNotAuthenticatedException().getErrorMessage()) }
             return
         }
+
         viewModelScope.launch {
             val profile = Profiles(
                 id = userId,
@@ -83,18 +84,19 @@ class CreateProfileViewModel @Inject constructor(
                 createdAt = Clock.System.now().toString()
             )
 
-            insertProfileUseCase(profile).onFailure {
-                updateIfSuccess { it.copy(errorMessage = "Ошибка создания профиля") }
+            insertProfileUseCase(profile).onFailure { error ->
+                updateIfSuccess { it.copy(errorMessage = error.getErrorMessage()) }
                 return@launch
             }
 
             cs.avatarUri?.let { uri ->
-                sessionManager.uploadAvatar(uri).onFailure {
-                    Log.e("CreateProfileVM", "Avatar upload failed", it)
-                }
+                sessionManager.uploadAvatar(uri)
             }
 
-            checkAchievementUseCase(AchievementTrigger.AccountRegistered, settingsEngine.uiState.value.language)
+            checkAchievementUseCase(
+                AchievementTrigger.AccountRegistered,
+                settingsEngine.uiState.value.language
+            )
 
             _state.value = CreateProfileUiState.Success
         }
@@ -114,10 +116,6 @@ class CreateProfileViewModel @Inject constructor(
         }
 
         return isNicknameValid
-    }
-
-    private fun updateAvatar(uri: Uri) {
-        updateIfSuccess { it.copy(avatarUri = uri) }
     }
 
     private fun updateIfSuccess(transform: (CreateProfileUiState.CreateForm) -> CreateProfileUiState.CreateForm) {

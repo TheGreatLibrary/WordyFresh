@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.presentation.register
 
+import androidx.annotation.StringRes
 import io.github.jan.supabase.auth.user.UserInfo
 
 sealed interface RegisterUiState {
@@ -11,7 +12,7 @@ sealed interface RegisterUiState {
         val isPasswordError: Boolean = false,
         val isCheckboxError: Boolean = false,
         val isLoading: Boolean = false,
-        val errorMessage: String? = null
+        @StringRes val errorMessage: Int? = null
     ) : RegisterUiState
 
     data class LoadingConfirm(

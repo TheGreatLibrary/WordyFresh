@@ -12,7 +12,10 @@ sealed interface SettingsEvent {
 
     data class ToggleTheme(val isDark: Boolean) : SettingsEvent
     data class ToggleConfetti(val enabled: Boolean) : SettingsEvent
+    data class ToggleShowLetterHints(val enabled: Boolean) : SettingsEvent
     data class ToggleRating(val enabled: Boolean) : SettingsEvent
+    data class ToggleShowSavedGameDialog(val enabled: Boolean): SettingsEvent
+    data class ToggleVibration(val enabled: Boolean) : SettingsEvent
 
     data object ClearBackground : SettingsEvent
     data object SendSupport : SettingsEvent

@@ -2,7 +2,7 @@ package com.sinya.projects.wordle.domain.useCase
 
 import com.sinya.projects.wordle.domain.error.DefinitionNotFoundException
 import com.sinya.projects.wordle.domain.error.NoInternetException
-import com.sinya.projects.wordle.domain.source.DictionaryDataSource
+import com.sinya.projects.wordle.domain.source.DefinitionDataSource
 import com.sinya.projects.wordle.domain.source.WikipediaDataSource
 import com.sinya.projects.wordle.domain.source.WiktionaryDataSource
 import jakarta.inject.Inject
@@ -11,9 +11,9 @@ class GetDefinitionWordUseCase @Inject constructor(
     private val wikipediaDataSource: WikipediaDataSource,
     private val wiktionaryDataSource: WiktionaryDataSource,
 ) {
-    private val sources: List<DictionaryDataSource> = listOf(
-        wiktionaryDataSource,
-        wikipediaDataSource
+    private val sources: List<DefinitionDataSource> = listOf(
+        wikipediaDataSource,
+        wiktionaryDataSource
     )
 
     suspend operator fun invoke(word: String, lang: String): Result<String> {
@@ -25,8 +25,8 @@ class GetDefinitionWordUseCase @Inject constructor(
                 onSuccess = { return Result.success(it) },
                 onFailure = { error ->
                     when (error) {
-                        is NoInternetException -> return Result.failure(error)  // сразу выходим
-                        else -> lastError = error  // пробуем следующий источник
+                        is NoInternetException -> return Result.failure(error)
+                        else -> lastError = error
                     }
                 }
             )

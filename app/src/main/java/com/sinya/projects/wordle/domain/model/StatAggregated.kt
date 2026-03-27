@@ -6,12 +6,10 @@ data class StatAggregated(
     val winGame: Int = 0,
     val lossGame: Int = 0,
     val sumTime: Int = 0,
-    val firstTry: Int = 0,
-    val secondTry: Int = 0,
-    val thirdTry: Int = 0,
-    val fourthTry: Int = 0,
-    val fifthTry: Int = 0,
-    val sixthTry: Int = 0,
     val currentStreak: Int = 0,
-    val bestStreak: Int = 0
+    val bestStreak: Int = 0,
+    val attemptStats: List<AttemptData> = emptyList(),
+    val langStats: List<AttemptData> = emptyList(),
+    val lengthStats: List<AttemptData> = emptyList()
 )
+

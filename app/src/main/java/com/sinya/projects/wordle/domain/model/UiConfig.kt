@@ -10,5 +10,8 @@ data class UiConfig(
     val ratingWords: Boolean,
     val confetti: Boolean,
     val keyboardMode: Int,
-    val lastGame: SavedGameState = SavedGameState.Loading
+    val lastGame: SavedGameState = SavedGameState.Loading,
+    val showLetterHints: Boolean,
+    val showSavedGameDialogState: Boolean,
+    val vibrationStatus: Boolean
 )

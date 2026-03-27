@@ -1,11 +1,11 @@
 package com.sinya.projects.wordle.presentation.resetEmail
 
-import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.useCase.ImportSessionUseCase
 import com.sinya.projects.wordle.domain.useCase.UpdateEmailUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +31,7 @@ class ResetEmailViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     _state.value = ResetEmailUiState.ResetForm(
-                        errorMessage = "Ошибка восстановления сессии: ${error.localizedMessage}"
+                        errorMessage = error.getErrorMessage()
                     )
                 }
             )
@@ -82,17 +82,12 @@ class ResetEmailViewModel @Inject constructor(
         _state.value = ResetEmailUiState.LoadingConfirm(email = formState.newEmail)
 
         viewModelScope.launch {
-            updateEmailUseCase(formState.newEmail).fold(
-                onSuccess = {
-                    Log.d("ResetEmailViewModel", "Письмо успешно отправлено")
-                },
-                onFailure = { error ->
-                    _state.value = ResetEmailUiState.ResetForm(
-                        newEmail = formState.newEmail,
-                        errorMessage = error.localizedMessage ?: "Ошибка отправки письма"
-                    )
-                }
-            )
+            updateEmailUseCase(formState.newEmail).onFailure { error ->
+                _state.value = ResetEmailUiState.ResetForm(
+                    newEmail = formState.newEmail,
+                    errorMessage = error.getErrorMessage()
+                )
+            }
         }
     }
 

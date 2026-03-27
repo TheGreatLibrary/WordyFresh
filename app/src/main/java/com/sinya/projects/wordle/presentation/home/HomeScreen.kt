@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,6 +31,7 @@ import com.sinya.projects.wordle.presentation.home.components.MainHeader
 import com.sinya.projects.wordle.presentation.home.components.NewGameBottomSheet
 import com.sinya.projects.wordle.presentation.home.components.NewGameButton
 import com.sinya.projects.wordle.presentation.home.friendSheet.FriendSheet
+import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
 import com.sinya.projects.wordle.utils.findActivity
 import com.sinya.projects.wordle.utils.sendSupportEmail
 
@@ -84,9 +86,10 @@ private fun HomeScreenView(
     onEvent: (HomeEvent) -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorText = state.errorMessage?.let { stringResource(it) }
 
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { message ->
+        errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short

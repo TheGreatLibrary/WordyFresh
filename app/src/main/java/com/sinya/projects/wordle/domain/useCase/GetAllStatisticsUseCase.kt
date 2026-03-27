@@ -10,10 +10,6 @@ class GetAllStatisticsUseCase @Inject constructor(
     private val repository: StatisticRepository
 ) {
     suspend operator fun invoke(): Result<List<StatAggregated>> = withContext(Dispatchers.IO) {
-        try {
-            Result.success(repository.getAggregatedAll())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        repository.getAggregatedAll()
     }
 }

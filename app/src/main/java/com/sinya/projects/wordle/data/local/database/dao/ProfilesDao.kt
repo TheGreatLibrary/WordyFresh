@@ -25,6 +25,9 @@ interface ProfilesDao {
     """)
     suspend fun updateNickname(nickname: String, id: String)
 
+    @Query("SELECT * FROM profiles LIMIT 1")
+    suspend fun getLocalFirstProfile(): Profiles?
+
     @Query("SELECT * FROM profiles WHERE id = :id")
     suspend fun getProfileById(id: String): Profiles?
 

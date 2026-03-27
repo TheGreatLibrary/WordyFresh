@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sinya.projects.sportsdiary.presentation.error.ErrorScreen
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.statistic.components.AchievesCard
@@ -50,6 +51,8 @@ fun StatisticScreen(
             navigateToBackStack = navigateToBackStack,
             navigateTo = navigateTo
         )
+
+        is StatisticUiState.Error -> ErrorScreen((state as StatisticUiState.Error).errorMessage)
     }
 }
 
@@ -63,9 +66,10 @@ private fun StatisticScreenView(
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorText = state.errorMessage?.let { stringResource(it) }
 
     LaunchedEffect(state.errorMessage, state.isRefreshing) {
-        state.errorMessage?.let { message ->
+        errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short
@@ -93,6 +97,7 @@ private fun StatisticScreenView(
         ) {
             ScrollHorizontalModes(
                 selectedMode = state.selectedMode,
+                modes = state.modes,
                 onModeSelect = { mode ->
                     onEvent(StatisticEvent.SelectMode(mode))
                 }

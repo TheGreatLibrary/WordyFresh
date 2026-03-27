@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.features.ScreenColumn
@@ -59,9 +60,10 @@ private fun EmailConfirmScreenView(
     onEvent: (EmailConfirmEvent) -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorText = state.errorMessage?.let { stringResource(it) }
 
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { message ->
+        errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short

@@ -7,27 +7,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sinya.projects.wordle.domain.enums.GameMode
+import com.sinya.projects.wordle.data.local.database.entity.ModeStatisticsTranslations
 import com.sinya.projects.wordle.ui.features.RoundedButton
+import com.sinya.projects.wordle.ui.features.getLocalizedString
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun ScrollHorizontalModes(
-    selectedMode: GameMode,
-    onModeSelect: (GameMode) -> Unit
+    modes: List<ModeStatisticsTranslations>,
+    selectedMode: ModeStatisticsTranslations,
+    onModeSelect: (ModeStatisticsTranslations) -> Unit
 ) {
-    val modes = remember { GameMode.getStatsOptions() }
-
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         items(
             items = modes,
-            key = { it.id }
+            key = { it.modeId }
         ) { mode ->
             val isSelected = mode == selectedMode
 
@@ -49,7 +47,7 @@ fun ScrollHorizontalModes(
                 onClick = { onModeSelect(mode) },
             ) {
                 Text(
-                    text = stringResource(mode.res),
+                    text = getLocalizedString(mode.name),
                     fontSize = 14.sp,
                     style = WordyTypography.bodyMedium
                 )

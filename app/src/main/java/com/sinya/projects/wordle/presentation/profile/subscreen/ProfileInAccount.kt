@@ -36,6 +36,7 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.profile.ProfileEvent
 import com.sinya.projects.wordle.presentation.profile.ProfileUiState
+import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
 import com.sinya.projects.wordle.ui.features.AvatarPicker
 import com.sinya.projects.wordle.ui.features.CardColumn
 import com.sinya.projects.wordle.ui.features.CustomCard
@@ -61,9 +62,10 @@ fun ProfileInAccount(
     ) { uri ->
         uri?.let { onEvent(ProfileEvent.UpdateAvatar(it)) }
     }
+    val errorText = state.errorMessage?.let { stringResource(it) }
 
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { message ->
+        errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short
@@ -128,21 +130,6 @@ fun ProfileInAccount(
                     icon2 = R.drawable.arrow,
                     navigateTo = { navigateTo(ScreenRoute.About) }
                 )
-
-//            RowLink(
-//                title = stringResource(R.string.friends_screen),
-//                mode = "",
-//                icon = R.drawable.prof_friends,
-//                icon2 = R.drawable.arrow,
-//                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
-//            )
-//            RowLink(
-//                title = stringResource(R.string.notification_screen),
-//                mode = "",
-//                icon = R.drawable.prof_notify,
-//                icon2 = R.drawable.arrow,
-//                navigateTo = { navigateTo(ScreenRoute.SettingWithBar) }
-//            )
             }
 
             CustomCard(

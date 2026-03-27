@@ -12,11 +12,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-interface DictionaryDataSource {
+interface DefinitionDataSource {
     suspend fun getDefinition(word: String, lang: String): Result<String>
 }
 
-class WikipediaDataSource @Inject constructor() : DictionaryDataSource {
+class WikipediaDataSource @Inject constructor() : DefinitionDataSource {
     override suspend fun getDefinition(word: String, lang: String): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
@@ -35,6 +35,10 @@ class WikipediaDataSource @Inject constructor() : DictionaryDataSource {
                     inputStream.bufferedReader().use { reader ->
                         val json = JSONObject(reader.readText())
 
+                        if (json.optString("type") == "disambiguation") {
+                            return@withContext Result.failure(DefinitionNotFoundException())
+                        }
+
                         val text = json.optString("extract", null)
                         if (!text.isNullOrBlank() && json.optString("title") != "Not found.") {
                             return@withContext Result.success(text)
@@ -50,7 +54,7 @@ class WikipediaDataSource @Inject constructor() : DictionaryDataSource {
     }
 }
 
-class WiktionaryDataSource @Inject constructor() : DictionaryDataSource {
+class WiktionaryDataSource @Inject constructor() : DefinitionDataSource {
 
     override suspend fun getDefinition(word: String, lang: String): Result<String> {
         return withContext(Dispatchers.IO) {

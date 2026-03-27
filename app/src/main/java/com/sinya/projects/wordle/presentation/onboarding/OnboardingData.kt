@@ -1,70 +1,96 @@
 package com.sinya.projects.wordle.presentation.onboarding
 
+import com.sinya.projects.wordle.domain.enums.GameColors
 import com.sinya.projects.wordle.domain.model.Cell
-import com.sinya.projects.wordle.ui.theme.gray600
-import com.sinya.projects.wordle.ui.theme.green800
-import com.sinya.projects.wordle.ui.theme.yellow
 
 object OnboardingData {
     fun getCellColorsExample(): List<Cell> = listOf(
-        Cell(letter = "Б", backgroundColor = green800.value),
-        Cell(letter = "О", backgroundColor = yellow.value),
-        Cell(letter = "Б", backgroundColor = green800.value),
-        Cell(letter = "Е", backgroundColor = yellow.value),
-        Cell(letter = "Р", backgroundColor = gray600.value)
+        Cell(letter = "Б", backgroundColor = GameColors.GREEN),
+        Cell(letter = "О", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "Б", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Е", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "Р", backgroundColor = GameColors.GRAY)
     )
 
     fun getAttemptsExample(): List<Cell> = listOf(
-        Cell(letter = "С", backgroundColor = gray600.value),
-        Cell(letter = "Е", backgroundColor = green800.value),
-        Cell(letter = "Ч", backgroundColor = gray600.value),
-        Cell(letter = "К", backgroundColor = gray600.value),
-        Cell(letter = "А", backgroundColor = gray600.value),
-        Cell(letter = "М", backgroundColor = gray600.value),
-        Cell(letter = "Е", backgroundColor = green800.value),
-        Cell(letter = "Р", backgroundColor = gray600.value),
-        Cell(letter = "И", backgroundColor = gray600.value),
-        Cell(letter = "Н", backgroundColor = green800.value),
-        Cell(letter = "Б", backgroundColor = green800.value),
-        Cell(letter = "О", backgroundColor = gray600.value),
-        Cell(letter = "Б", backgroundColor = gray600.value),
-        Cell(letter = "Е", backgroundColor = yellow.value),
-        Cell(letter = "Р", backgroundColor = gray600.value),
+        Cell(letter = "С", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Е", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Ч", backgroundColor = GameColors.GRAY),
+        Cell(letter = "К", backgroundColor = GameColors.GRAY),
+        Cell(letter = "А", backgroundColor = GameColors.GRAY),
+        Cell(letter = "М", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Е", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Р", backgroundColor = GameColors.GRAY),
+        Cell(letter = "И", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Н", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Б", backgroundColor = GameColors.GREEN),
+        Cell(letter = "О", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Б", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Е", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "Р", backgroundColor = GameColors.GRAY),
         Cell(letter = "Б"),
         Cell(letter = "О"),
         Cell(letter = "Ч"),
-        Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell()
+        Cell(), Cell(hint = "Н"), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell(), Cell()
     )
 
     fun getRulesExample1(): List<Cell> = listOf(
-        Cell(letter = "Б", backgroundColor = yellow.value),
-        Cell(letter = "Р", backgroundColor = yellow.value),
-        Cell(letter = "Ю", backgroundColor = yellow.value),
-        Cell(letter = "К", backgroundColor = yellow.value),
-        Cell(letter = "И", backgroundColor = green800.value)
+        Cell(letter = "Б", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "Р", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "Ю", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "К", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "И", backgroundColor = GameColors.GREEN)
     )
 
     fun getRulesExample2(): List<Cell> = listOf(
-        Cell(letter = "Б", backgroundColor = gray600.value),
-        Cell(letter = "О", backgroundColor = gray600.value),
-        Cell(letter = "Б", backgroundColor = gray600.value),
-        Cell(letter = "Е", backgroundColor = green800.value),
-        Cell(letter = "Р", backgroundColor = gray600.value)
+        Cell(letter = "Б", backgroundColor = GameColors.GRAY),
+        Cell(letter = "О", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Б", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Е", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Р", backgroundColor = GameColors.GRAY)
+    )
+
+    fun getMagicExamples(): List<Cell> = listOf(
+        Cell(letter = "С", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Е", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Ч", backgroundColor = GameColors.GRAY),
+        Cell(letter = "К", backgroundColor = GameColors.GRAY),
+        Cell(letter = "А", backgroundColor = GameColors.GRAY),
+        Cell(letter = "М", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Е", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Р", backgroundColor = GameColors.GRAY),
+        Cell(letter = "И", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Н", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Б", backgroundColor = GameColors.GREEN),
+        Cell(letter = "О", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Б", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Е", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "Р", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Б", backgroundColor = GameColors.GREEN),
+        Cell(letter = "О", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "Ч", backgroundColor = GameColors.GRAY),
+        Cell(letter = "К", backgroundColor = GameColors.YELLOW),
+        Cell(letter = "А", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Б"),
+        Cell(letter = "Е"),
+        Cell(letter = "К"),
+        Cell(letter = "О", backgroundColor = GameColors.GREEN),
+        Cell(hint = "Н"), Cell(), Cell(), Cell(), Cell(), Cell()
     )
 
     fun getFinishExample1(): List<Cell> = listOf(
-        Cell(letter = "С", backgroundColor = green800.value),
-        Cell(letter = "А", backgroundColor = green800.value),
-        Cell(letter = "Л", backgroundColor = green800.value),
-        Cell(letter = "А", backgroundColor = green800.value),
-        Cell(letter = "Т", backgroundColor = green800.value)
+        Cell(letter = "С", backgroundColor = GameColors.GREEN),
+        Cell(letter = "А", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Л", backgroundColor = GameColors.GREEN),
+        Cell(letter = "А", backgroundColor = GameColors.GREEN),
+        Cell(letter = "Т", backgroundColor = GameColors.GREEN)
     )
 
     fun getFinishExample2(): List<Cell> = listOf(
-        Cell(letter = "Б", backgroundColor = gray600.value),
-        Cell(letter = "О", backgroundColor = gray600.value),
-        Cell(letter = "Ч", backgroundColor = gray600.value),
-        Cell(letter = "К", backgroundColor = gray600.value),
-        Cell(letter = "А", backgroundColor = green800.value)
+        Cell(letter = "Б", backgroundColor = GameColors.GRAY),
+        Cell(letter = "О", backgroundColor = GameColors.GRAY),
+        Cell(letter = "Ч", backgroundColor = GameColors.GRAY),
+        Cell(letter = "К", backgroundColor = GameColors.GRAY),
+        Cell(letter = "А", backgroundColor = GameColors.GREEN)
     )
 }

@@ -1,17 +1,24 @@
 package com.sinya.projects.wordle.presentation.game.components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
@@ -21,6 +28,7 @@ import com.sinya.projects.wordle.presentation.game.GameEvent
 import com.sinya.projects.wordle.presentation.game.GameUiState
 import com.sinya.projects.wordle.ui.features.ImageButton
 import com.sinya.projects.wordle.ui.theme.WordyColor
+import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 import java.util.concurrent.TimeUnit
 
@@ -38,7 +46,10 @@ fun GameHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(Modifier.weight(1f)) {
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
             ImageButton(
                 image = R.drawable.arrow_back,
                 modifierImage = Modifier.size(32.dp),
@@ -59,10 +70,11 @@ fun GameHeader(
         ) {
             TimerDisplay(totalSeconds = state.timePassed)
         }
-        Box(
-            Modifier.weight(1f),
-            contentAlignment = Alignment.CenterEnd
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(2.dp, alignment = Alignment.End)
         ) {
+            MagicIcon(state, onEvent)
             ImageButton(
                 image = R.drawable.nav_set,
                 modifierImage = Modifier.size(32.dp),
@@ -75,7 +87,7 @@ fun GameHeader(
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TimerDisplay(
+private fun TimerDisplay(
     modifier: Modifier = Modifier.padding(16.dp),
     totalSeconds: Int
 ) {
@@ -92,5 +104,50 @@ fun TimerDisplay(
             color = WordyColor.colors.textPrimary,
             style = WordyTypography.bodyMedium
         )
+    }
+}
+
+@Composable
+private fun MagicIcon(state: GameUiState.Ready, onEvent: (GameEvent) -> Unit) {
+    val magicText = remember(state.hintsState) {
+        if (((state.hintsState?.available) ?: 0) > 0) {
+            "${state.hintsState?.available ?: 0}/${state.hintsState?.maxHints ?: 0}"
+        } else {
+            val duration = state.hintsState?.nextRestoreIn
+            if (duration != null) {
+                val hours = duration.inWholeHours
+                val minutes = (duration.inWholeMinutes % 60)
+                val seconds = (duration.inWholeSeconds % 60)
+                "%02d:%02d:%02d".format(hours, minutes, seconds)
+            } else {
+                "--:--:--"
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .size(height = 40.dp, width = 60.dp)
+            .clip(WordyShapes.small)
+            .clickable {
+                onEvent(GameEvent.OnMagicClick)
+            },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(R.drawable.game_magic),
+            contentDescription = null,
+            modifier = Modifier.height(21.dp),
+            colorFilter = ColorFilter.tint(WordyColor.colors.textPrimary),
+        )
+        Box {
+            Text(
+                text = magicText,
+                fontSize = 11.sp,
+                color = WordyColor.colors.textPrimary,
+                style = WordyTypography.bodyMedium
+            )
+        }
     }
 }

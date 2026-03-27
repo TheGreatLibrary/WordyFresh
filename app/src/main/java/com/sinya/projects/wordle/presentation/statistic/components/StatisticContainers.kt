@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.presentation.statistic.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,6 +20,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
@@ -24,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.domain.model.AttemptData
 import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.ui.features.CustomCard
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -105,9 +110,7 @@ fun StatisticContainers(
                 modifier = Modifier.weight(1f)
             )
         }
-
         key(smallFontSize) {
-
             StatisticCountCard(
                 value = statisticByMode.bestStreak,
                 description = stringResource(R.string.best_serial),
@@ -118,7 +121,6 @@ fun StatisticContainers(
             )
         }
         key(smallFontSize) {
-
             StatisticTimeCard(
                 timeText = animatedTime,
                 countGame = statisticByMode.countGame,
@@ -130,58 +132,78 @@ fun StatisticContainers(
         }
     }
 
-    AttemptsProgressCard(statisticByMode)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        AttemptsProgressCard(
+            Modifier.size(width = 300.dp, height = 280.dp),
+            stringResource(R.string.stat_progress_title),
+            statisticByMode.attemptStats
+        )
+        AttemptsProgressCard(
+            Modifier.size(width = 300.dp, height = 280.dp),
+            stringResource(R.string.stat_langs_progress_title),
+            statisticByMode.langStats,
+            true
+        )
+        AttemptsProgressCard(
+            Modifier.size(width = 300.dp, height = 280.dp),
+            stringResource(R.string.stat_lengths_progress_title),
+            statisticByMode.lengthStats,
+            true
+        )
+    }
 }
 
 @Composable
-private fun AttemptsProgressCard(statistic: StatAggregated) {
-    val attempts = remember(statistic) {
-        listOf(
-            "#1" to statistic.firstTry,
-            "#2" to statistic.secondTry,
-            "#3" to statistic.thirdTry,
-            "#4" to statistic.fourthTry,
-            "#5" to statistic.fifthTry,
-            "#6" to statistic.sixthTry
-        ).map { (number, count) ->
-            AttemptData(
-                number = number,
-                count = count,
-                percent = if (statistic.winGame > 0) {
-                    count.toFloat() / statistic.winGame
-                } else {
-                    0f
-                }
-            )
-        }
-    }
-
-    CustomCard(Modifier) {
+private fun AttemptsProgressCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    attempts: List<AttemptData>,
+    vertical: Boolean = false,
+) {
+    CustomCard(modifier) {
         Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 17.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             Text(
-                stringResource(R.string.stat_progress_title),
+                text = title,
                 fontSize = 18.sp,
                 color = WordyColor.colors.textCardPrimary,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 style = WordyTypography.bodyLarge
             )
-            attempts.forEach { attemptData ->
-                HorizontalProgressBar(
-                    number = attemptData.number,
-                    count = attemptData.count.toString(),
-                    percent = attemptData.percent
-                )
+            when (vertical) {
+                true -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(20.dp, alignment = Alignment.CenterHorizontally)
+                    ) {
+                        attempts.forEach { attemptData ->
+                            VerticalProgressBar(
+                                number = attemptData.number,
+                                count = attemptData.count.toString(),
+                                percent = attemptData.percent
+                            )
+                        }
+                    }
+                }
+
+                false -> attempts.forEach { attemptData ->
+                    HorizontalProgressBar(
+                        number = attemptData.number,
+                        count = attemptData.count.toString(),
+                        percent = attemptData.percent
+                    )
+                }
             }
         }
     }
 }
 
-private data class AttemptData(
-    val number: String,
-    val count: Int,
-    val percent: Float
-)

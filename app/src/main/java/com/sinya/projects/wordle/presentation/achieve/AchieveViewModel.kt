@@ -3,10 +3,10 @@ package com.sinya.projects.wordle.presentation.achieve
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
-import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.useCase.ClearAllAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncAchievementUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -47,7 +47,7 @@ class AchieveViewModel @AssistedInject constructor(
                         achieveList = list.groupBy { it.categoryName }
                     )
                 }
-                .catch { emit(AchieveUiState.Success(errorMessage = it.toString())) }
+                .catch { emit(AchieveUiState.Success(errorMessage = it.getErrorMessage())) }
                 .collect { _state.value = it }
         }
     }
@@ -58,19 +58,9 @@ class AchieveViewModel @AssistedInject constructor(
 
             AchieveEvent.OnClearAll -> clearAllAchievement()
 
-            AchieveEvent.OnErrorShown -> onErrorShown()
+            AchieveEvent.OnErrorShown -> updateIfSuccess { it.copy(errorMessage = null) }
 
             is AchieveEvent.VisibleDialog -> updateIfSuccess { it.copy(showAchieveDialog = event.item) }
-        }
-    }
-
-    private fun onErrorShown() {
-        _state.update { currentState ->
-            if (currentState is AchieveUiState.Success) {
-                currentState.copy(errorMessage = null)
-            } else {
-                currentState
-            }
         }
     }
 
@@ -86,15 +76,10 @@ class AchieveViewModel @AssistedInject constructor(
                 }
             },
             onFailure = { exception ->
-                val errorMessage = when (exception) {
-                    is UserNotAuthenticatedException -> "Требуется авторизация"
-                    else -> "Ошибка синхронизации: ${exception.message}"
-                }
-
                 updateIfSuccess {
                     it.copy(
                         isRefreshing = false,
-                        errorMessage = errorMessage
+                        errorMessage = exception.getErrorMessage()
                     )
                 }
             }
@@ -102,17 +87,11 @@ class AchieveViewModel @AssistedInject constructor(
     }
 
     private fun clearAllAchievement() = viewModelScope.launch {
-        clearAllAchievementUseCase().fold(
-            onSuccess = {
-            },
-            onFailure = { exception ->
-                updateIfSuccess {
-                    it.copy(
-                        errorMessage = "Ошибка очистки: ${exception.message}"
-                    )
-                }
+        clearAllAchievementUseCase().onFailure { exception ->
+            updateIfSuccess {
+                it.copy(errorMessage = exception.getErrorMessage())
             }
-        )
+        }
     }
 
     private fun updateIfSuccess(transform: (AchieveUiState.Success) -> AchieveUiState.Success) {

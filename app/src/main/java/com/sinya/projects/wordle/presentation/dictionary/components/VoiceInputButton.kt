@@ -1,13 +1,8 @@
 package com.sinya.projects.wordle.presentation.dictionary.components
 
 import android.Manifest.permission.RECORD_AUDIO
-import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.speech.RecognitionListener
 import android.speech.SpeechRecognizer
 import android.util.Log
@@ -42,34 +37,15 @@ import androidx.core.content.ContextCompat
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
+import com.sinya.projects.wordle.domain.enums.VibrationType
 import com.sinya.projects.wordle.utils.startListening
 
 @Composable
 fun VoiceInputButton(
-    onVoiceInput: (String) -> Unit
+    onVoiceInput: (String) -> Unit,
+    onVibrate: (VibrationType) -> Unit
 ) {
     val context = LocalContext.current
-
-    val vibrator = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+ (API 31+)
-            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            // Старые версии Android
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-
-
-    }
-
-    fun vibrate(duration: Long) {
-        if (vibrator.hasVibrator()) {
-            vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
-        }
-    }
-
     var isListening by remember { mutableStateOf(false) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "micPulse")
@@ -101,7 +77,7 @@ fun VoiceInputButton(
         speechRecognizer.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) {
                 isListening = true
-                vibrate(50)
+                onVibrate(VibrationType.VOICE_START)
             }
 
             override fun onBeginningOfSpeech() {}
@@ -110,13 +86,13 @@ fun VoiceInputButton(
 
             override fun onEndOfSpeech() {
                 isListening = false
-                vibrate(30)
+                onVibrate(VibrationType.VOICE_END)
             }
 
             override fun onError(error: Int) {
                 Log.e("VoiceInput", "Ошибка: $error")
                 isListening = false
-                vibrate(100)
+                onVibrate(VibrationType.WRONG_LETTER)
             }
 
             override fun onPartialResults(partialResults: Bundle?) {}
@@ -128,7 +104,7 @@ fun VoiceInputButton(
                     onVoiceInput(text)
                 }
                 isListening = false
-                vibrate(30)
+                onVibrate(VibrationType.VOICE_END)
             }
         })
 
@@ -168,12 +144,12 @@ fun VoiceInputButton(
                 when {
                     isListening -> {
                         speechRecognizer.stopListening()
-                        vibrate(30)
+                        onVibrate(VibrationType.VOICE_END)
                     }
                     ContextCompat.checkSelfPermission(context, RECORD_AUDIO) ==
                             PackageManager.PERMISSION_GRANTED -> {
                         startListening(speechRecognizer)
-                        vibrate(100)
+                        onVibrate(VibrationType.WRONG_LETTER)
                     }
                     else -> permissionLauncher.launch(RECORD_AUDIO)
                 }
@@ -188,5 +164,3 @@ fun VoiceInputButton(
         }
     }
 }
-
-

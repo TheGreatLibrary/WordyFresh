@@ -10,6 +10,7 @@ import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
@@ -33,7 +34,10 @@ class SyncManager @Inject constructor(
         sessionManager.userInfo
             .scan(Pair<UserInfo?, UserInfo?>(null, null)) { acc, new -> Pair(acc.second, new) }
             .filter { (prev, curr) -> prev == null && curr != null }  // null → authed
-            .collect { performSync() }
+            .collect {
+                delay(1500)
+                performSync()
+            }
     }
 
     private fun observeLifecycle() {

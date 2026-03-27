@@ -34,6 +34,7 @@ import com.sinya.projects.wordle.presentation.achieve.components.AchieveDialog
 import com.sinya.projects.wordle.presentation.achieve.components.AchievePlaceholder
 import com.sinya.projects.wordle.presentation.achieve.components.AchieveRow
 import com.sinya.projects.wordle.presentation.achieve.components.CategoryHeader
+import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
 import com.sinya.projects.wordle.ui.features.Header
 
 @Composable
@@ -74,9 +75,10 @@ private fun AchieveScreenView(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val pullToRefreshState = rememberPullToRefreshState()
+    val errorText = state.errorMessage?.let { stringResource(it) }
 
     LaunchedEffect(state.isRefreshing, state.errorMessage) {
-        state.errorMessage?.let { message ->
+        errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short

@@ -74,7 +74,7 @@ fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modi
                 scaleY = scale.value
             }
             .background(
-                color = if (showingFront) Color(prevColor) else Color(cell.backgroundColor),
+                color = if (showingFront) Color(prevColor.value) else Color(cell.backgroundColor.value),
                 shape = RoundedCornerShape(6.dp)
             )
             .clip(RoundedCornerShape(6.dp))
@@ -87,16 +87,18 @@ fun WordCell(cell: Cell, isFocused: Boolean, onClick: () -> Unit, modifier: Modi
                 calculated.value.coerceIn(14f, 35f).sp
             }
         }
+        val displayText = cell.letter.ifEmpty { cell.hint }
+        val textColor = if (cell.letter.isNotEmpty()) Color.White else Color.White.copy(alpha = 0.30f)
 
         Text(
-            text = cell.letter,
+            text = displayText,
             fontSize = fontSize,
             modifier = Modifier
                 .graphicsLayer {
                     if (!showingFront) this.rotationY = 180f
                 }
                 .padding(horizontal = 4.dp, vertical = 8.dp),
-            color = Color.White,
+            color = textColor,
             style = WordyTypography.bodyLarge
         )
 

@@ -1,6 +1,8 @@
 package com.sinya.projects.wordle.domain.useCase
 
 import android.util.Log
+import com.sinya.projects.wordle.domain.checker.NetworkChecker
+import com.sinya.projects.wordle.domain.error.NoInternetException
 import com.sinya.projects.wordle.domain.repository.AchievementRepository
 import com.sinya.projects.wordle.domain.repository.AvatarRepository
 import com.sinya.projects.wordle.domain.repository.DictionaryRepository
@@ -17,22 +19,22 @@ class SignOutUseCase @Inject constructor(
     private val dictionaryRepository: DictionaryRepository,
     private val achievementsRepository: AchievementRepository,
     private val profileRepository: ProfileRepository,
-    private val avatarRepository: AvatarRepository
+    private val avatarRepository: AvatarRepository,
+    private val networkChecker: NetworkChecker
 ) {
     suspend operator fun invoke(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val user = authRepository.getCurrentUser()
-                ?: return@withContext Result.success(Unit) // Уже вышли
+            if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
 
-            // 1. Синхронизируем все данные в Supabase перед выходом
+            val user = authRepository.getCurrentUser()
+                ?: return@withContext Result.success(Unit)
+
             statisticsRepository.syncFromLocal().getOrThrow()
             dictionaryRepository.syncFromLocal().getOrThrow()
             achievementsRepository.syncFromLocal().getOrThrow()
 
-            // 2. Удаляем локальный аватар
             avatarRepository.deleteLocalAvatar(user.id)
 
-            // 3. Очищаем все локальные данные
             statisticsRepository.clearLocal()
             dictionaryRepository.clearLocal()
             achievementsRepository.clearLocal()

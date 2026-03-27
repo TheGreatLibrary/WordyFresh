@@ -3,7 +3,9 @@ package com.sinya.projects.wordle.domain.repository
 import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
-import com.sinya.projects.wordle.domain.error.InvalidSendMailException
+import com.sinya.projects.wordle.domain.checker.NetworkChecker
+import com.sinya.projects.wordle.domain.error.NoInternetException
+import com.sinya.projects.wordle.domain.error.SessionRestoreException
 import com.sinya.projects.wordle.domain.error.UserHasNotProfileException
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
@@ -35,10 +37,10 @@ interface ProfileRepository {
     suspend fun updateNickname(nickname: String): Result<Unit>
 
     // ProfileScreen
+    suspend fun getLocalProfile(): Result<Profiles>
     suspend fun updateImage(image: String): Result<Unit>
     suspend fun clearProfile()
     suspend fun getProfileFlow(): Flow<Result<Profiles?>>
-    suspend fun getProfile(): Result<Profiles>
 
     // SyncViewModel
     suspend fun syncFromSupabase(): Result<Unit>
@@ -48,7 +50,8 @@ interface ProfileRepository {
 class ProfileRepositoryImpl @Inject constructor(
     private val profileDao: ProfilesDao,
     private val supabaseAuthDataSource: SupabaseAuthDataSource,
-    private val supabaseProfileDataSource: SupabaseProfileDataSource
+    private val supabaseProfileDataSource: SupabaseProfileDataSource,
+    private val networkChecker: NetworkChecker
 ) : ProfileRepository {
 
     // RegistrationScreen
@@ -56,14 +59,6 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun signUp(email: String, password: String): Result<Unit> {
         return try {
             supabaseAuthDataSource.signUp(email, password)
-
-//            val user = supabaseAuthDataSource.getCurrentUser()
-//                ?: return Result.failure(UserNotAuthenticatedException())
-//
-//            val profile = supabaseProfileDataSource.fetchProfile(user.id)
-//                ?: return Result.failure(UserNotAuthenticatedException())
-//
-//            profileDao.insertProfile(profile)
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -95,11 +90,6 @@ class ProfileRepositoryImpl @Inject constructor(
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: return Result.failure(UserNotAuthenticatedException())
 
-//            val profile = supabaseProfileDataSource.fetchProfile(user.id)
-//                ?: return Result.failure(UserNotAuthenticatedException())
-
-//            profileDao.insertProfile(profile)
-
             Result.success(user)
         } catch (e: Exception) {
             Log.e("LoginUseCase", "Error during login", e)
@@ -109,9 +99,6 @@ class ProfileRepositoryImpl @Inject constructor(
 
     override suspend fun updatePassword(password: String): Result<Unit> {
         return try {
-//            supabaseAuthDataSource.getCurrentUser()
-//            ?: return Result.failure(UserNotAuthenticatedException())
-
             supabaseAuthDataSource.updatePassword(password)
 
             Result.success(Unit)
@@ -124,7 +111,6 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun resetPassword(email: String): Result<Unit> {
         return try {
             supabaseAuthDataSource.resetPassword(email)
-                ?: return Result.failure(InvalidSendMailException())
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -153,7 +139,7 @@ class ProfileRepositoryImpl @Inject constructor(
         return try {
             val fragment = deepLinkUri.substringAfter("#", "")
             if (fragment.isEmpty()) {
-                return Result.failure(Exception("Invalid deep link"))
+                return Result.failure(SessionRestoreException())
             }
 
             supabaseAuthDataSource.parseSessionFromFragment(fragment).fold(
@@ -229,19 +215,13 @@ class ProfileRepositoryImpl @Inject constructor(
         profileDao.clearAll()
     }
 
-    override suspend fun getProfile(): Result<Profiles> {
-        Log.d("ЫЫЫ", "начинаю получать профиль")
-        val user = supabaseAuthDataSource.getCurrentUser()
-            ?: return Result.failure(UserNotAuthenticatedException())
-
-        Log.d("ЫЫЫ", "что-то получил $user")
-
+    override suspend fun getLocalProfile(): Result<Profiles> {
         return try {
-            val profile = supabaseProfileDataSource.fetchProfile(user.id)
-            Log.d("ЫЫЫ", "профиль $profile")
+            val profile = profileDao.getLocalFirstProfile()
 
             if (profile != null) Result.success(profile)
             else Result.failure(UserHasNotProfileException())
+
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -249,12 +229,15 @@ class ProfileRepositoryImpl @Inject constructor(
 
     override suspend fun getProfileFlow(): Flow<Result<Profiles?>> = flow {
         try {
+            if (!networkChecker.isInternetAvailable()) throw NoInternetException()
+
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: throw UserNotAuthenticatedException()
 
             supabaseProfileDataSource.observeProfile(user.id)
                 .collect { profile ->
                     if (profile != null) {
+                        profileDao.insertProfile(profile)
                         emit(Result.success(profile))
                     } else {
                         emit(Result.failure(UserHasNotProfileException()))
@@ -273,7 +256,7 @@ class ProfileRepositoryImpl @Inject constructor(
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: return Result.failure(UserNotAuthenticatedException())
 
-            supabaseProfileDataSource.syncFromSupabase(user.id)
+            supabaseProfileDataSource.syncFromSupabase(user.id).getOrThrow()
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -286,7 +269,7 @@ class ProfileRepositoryImpl @Inject constructor(
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: return Result.failure(UserNotAuthenticatedException())
 
-            supabaseProfileDataSource.syncToSupabase(user.id)
+            supabaseProfileDataSource.syncToSupabase(user.id).getOrThrow()
 
             Result.success(Unit)
         } catch (e: Exception) {

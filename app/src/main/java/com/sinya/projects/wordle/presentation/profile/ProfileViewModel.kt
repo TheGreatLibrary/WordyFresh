@@ -1,16 +1,18 @@
 package com.sinya.projects.wordle.presentation.profile
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.remote.supabase.SessionManager
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
+import com.sinya.projects.wordle.domain.error.NoInternetException
 import com.sinya.projects.wordle.domain.error.UserHasNotProfileException
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
+import com.sinya.projects.wordle.domain.useCase.GetLocalProfileUseCase
 import com.sinya.projects.wordle.domain.useCase.GetProfileUseCase
 import com.sinya.projects.wordle.domain.useCase.SignOutUseCase
 import com.sinya.projects.wordle.domain.useCase.UpdateImageUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +26,7 @@ class ProfileViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     private val getProfileUseCase: GetProfileUseCase,
     private val updateImageUseCase: UpdateImageUseCase,
+    private val getLocalProfileUseCase: GetLocalProfileUseCase,
     private val signOutUseCase: SignOutUseCase
 ) : ViewModel() {
 
@@ -37,7 +40,7 @@ class ProfileViewModel @Inject constructor(
     fun onEvent(event: ProfileEvent) {
         when (event) {
             ProfileEvent.SignOut -> signOut()
-            ProfileEvent.ErrorShown -> errorShown()
+            ProfileEvent.ErrorShown -> updateIfInAccount { it.copy(errorMessage = null) }
             is ProfileEvent.UpdateAvatar -> updateAvatar(event.uri)
         }
     }
@@ -46,7 +49,6 @@ class ProfileViewModel @Inject constructor(
         getProfileUseCase().collect { result ->
             result.fold(
                 onSuccess = { profile ->
-                    Log.d("Profile", profile.toString())
                     _state.value = ProfileUiState.InAccount(
                         profile = profile!!,
                         avatarUri = sessionManager.avatar.value,
@@ -55,11 +57,26 @@ class ProfileViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     when (error) {
+                        is NoInternetException -> {
+                            getLocalProfileUseCase().fold(
+                                onSuccess = {
+                                    _state.value = ProfileUiState.InAccount(
+                                        profile = it,
+                                        avatarUri = sessionManager.avatar.value,
+                                        email = sessionManager.userInfo.value?.email ?: "",
+                                        errorMessage = error.getErrorMessage()
+                                    )
+                                },
+                                onFailure = {
+                                    _state.value = ProfileUiState.NoAccount
+                                }
+                            )
+
+                        }
                         is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
                         is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
                         else -> _state.value = ProfileUiState.NoAccount
                     }
-                    Log.e("Profile", "Ошибка: ", error)
                 }
             )
         }
@@ -68,66 +85,54 @@ class ProfileViewModel @Inject constructor(
     private fun signOut() = viewModelScope.launch {
         signOutUseCase().fold(
             onSuccess = {
-                Log.d("ProfileVM", "Sign out successful")
                 _state.value = ProfileUiState.NoAccount
             },
             onFailure = { error ->
-                Log.e("ProfileViewModel", "Sign out error", error)
-                updateIfSuccess {
-                    it.copy(errorMessage = "Ошибка: $error")
-                }
+                updateIfInAccount { it.copy(errorMessage = error.getErrorMessage()) }
             }
         )
     }
 
     private fun updateAvatar(uri: Uri) {
         val id = (_state.value as? ProfileUiState.InAccount)?.profile?.id ?: return
-        updateIfSuccess { it.copy(isUploadingAvatar = true, errorMessage = null) }
+
+        updateIfInAccount { it.copy(isUploadingAvatar = true, errorMessage = null) }
+
         viewModelScope.launch {
             sessionManager.uploadAvatar(uri)
-                .onFailure { error ->
-                    Log.e("ProfileVM", "uploadAvatar failed", error)
-                    updateIfSuccess {
-                        it.copy(
-                            isUploadingAvatar = false,
-                            errorMessage = "Ошибка обновления аватара"
-                        )
-                    }
-                }
                 .onSuccess {
                     updateImageUseCase(LegalLinks.getAvatarFileName(id)).fold(
                         onSuccess = {
-                            _state.update { state ->
-                                if (state is ProfileUiState.InAccount) {
-                                    state.copy(
-                                        avatarUri = uri,
-                                        isUploadingAvatar = false
-                                    )
-                                } else {
-                                    state
-                                }
+                            updateIfInAccount {
+                                it.copy(
+                                    avatarUri = uri,
+                                    isUploadingAvatar = false
+                                )
                             }
                         },
                         onFailure = { error ->
-                            Log.e("ProfileVM", "Failed to update avatar URL", error)
-                            updateIfSuccess {
+                            updateIfInAccount {
                                 it.copy(
                                     isUploadingAvatar = false,
-                                    errorMessage = "Ошибка обновления аватара"
+                                    errorMessage = error.getErrorMessage()
                                 )
                             }
                         }
                     )
-                    updateIfSuccess { it.copy(isUploadingAvatar = false) }
+                    updateIfInAccount { it.copy(isUploadingAvatar = false) }
+                }
+                .onFailure { error ->
+                    updateIfInAccount {
+                        it.copy(
+                            isUploadingAvatar = false,
+                            errorMessage = error.getErrorMessage()
+                        )
+                    }
                 }
         }
     }
 
-    private fun errorShown() = updateIfSuccess {
-        it.copy(errorMessage = null)
-    }
-
-    private fun updateIfSuccess(transform: (ProfileUiState.InAccount) -> ProfileUiState.InAccount) {
+    private fun updateIfInAccount(transform: (ProfileUiState.InAccount) -> ProfileUiState.InAccount) {
         _state.update { currentState ->
             if (currentState is ProfileUiState.InAccount) {
                 transform(currentState)

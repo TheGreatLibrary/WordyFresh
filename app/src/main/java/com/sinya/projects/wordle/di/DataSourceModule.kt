@@ -2,10 +2,10 @@ package com.sinya.projects.wordle.di
 
 import com.sinya.projects.wordle.domain.source.AvatarLocalDataSource
 import com.sinya.projects.wordle.domain.source.AvatarRemoteDataSource
-import com.sinya.projects.wordle.domain.source.BitmapImageCompressor
-import com.sinya.projects.wordle.domain.source.DictionaryDataSource
+import com.sinya.projects.wordle.utils.BitmapImageCompressor
+import com.sinya.projects.wordle.domain.source.DefinitionDataSource
 import com.sinya.projects.wordle.domain.source.FileAvatarLocalDataSource
-import com.sinya.projects.wordle.domain.source.ImageCompressor
+import com.sinya.projects.wordle.utils.ImageCompressor
 import com.sinya.projects.wordle.domain.source.SupabaseAchievementDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseAchievementDataSourceImpl
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
@@ -69,12 +69,12 @@ abstract class DataSourceModule {
     @Binds
     abstract fun bindDictionaryDataSource(
         impl: WikipediaDataSource
-    ): DictionaryDataSource
+    ): DefinitionDataSource
 
     @Binds
     abstract fun bindDictionaryWiktionaryDataSource(
         impl: WiktionaryDataSource
-    ): DictionaryDataSource
+    ): DefinitionDataSource
 
     @Binds
     abstract fun bindImageCompressor(

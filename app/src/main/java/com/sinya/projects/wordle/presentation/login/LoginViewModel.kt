@@ -3,8 +3,8 @@ package com.sinya.projects.wordle.presentation.login
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.useCase.LoginUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,10 +86,7 @@ class LoginViewModel @Inject constructor(
                    updateIfLoginForm {
                        it.copy(
                            isLoading = false,
-                           errorMessage = when (error) {
-                               is UserNotAuthenticatedException -> "Ошибка входа"
-                               else -> error.localizedMessage ?: "Ошибка загрузки профиля"
-                           }
+                           errorMessage = error.getErrorMessage()
                        )
                    }
                 }

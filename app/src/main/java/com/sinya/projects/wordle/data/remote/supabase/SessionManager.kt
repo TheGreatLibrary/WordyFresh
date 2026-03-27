@@ -2,6 +2,9 @@ package com.sinya.projects.wordle.data.remote.supabase
 
 import android.net.Uri
 import android.util.Log
+import com.sinya.projects.wordle.domain.checker.NetworkChecker
+import com.sinya.projects.wordle.domain.error.NoInternetException
+import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.repository.AvatarRepository
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import io.github.jan.supabase.auth.status.SessionStatus
@@ -38,11 +41,9 @@ class SessionManager @Inject constructor(
 
     private fun observeAuth() = scope.launch {
         authDataSource.sessionStatusFlow().collect { status ->
-            Log.d("SessionManager", "status: $status")
             when (status) {
                 is SessionStatus.Authenticated -> {
                     val user = status.session.user
-                    Log.d("SessionManager", "user: $user")
                     _userInfo.value =
                         user?.let { UserInfo(aud = it.aud, id = it.id, email = it.email ?: "") }
                     user?.id?.let { loadAvatar(it) }
@@ -63,7 +64,7 @@ class SessionManager @Inject constructor(
     }
 
     suspend fun uploadAvatar(uri: Uri): Result<Unit> {
-        val userId = currentUserId ?: return Result.failure(Exception("Not authenticated"))
+        val userId = currentUserId ?: return Result.failure(UserNotAuthenticatedException())
         _avatar.value = uri
         return avatarRepository.uploadAvatar(userId, uri)
             .map { }

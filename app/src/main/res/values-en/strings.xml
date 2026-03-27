@@ -14,12 +14,6 @@
     <string name="random_m">Random</string>
     <string name="friend_m">Friendly</string>
 
-    <!-- Категории достижений -->
-    <string name="padawan">Padawan</string>
-    <string name="dilettant">Amateur</string>
-    <string name="veteran">Veteran</string>
-    <string name="the_old">Old-Timer</string>
-
     <!-- Страницы -->
     <string name="statistic_screen">Stats</string>
     <string name="settings_screen">Settings</string>
@@ -53,7 +47,6 @@
     <string name="keyboard_wordle">Wordle</string>
     <string name="keyboard_reverse">Mirrored</string>
     <string name="keyboard_big_enter">Big Enter</string>
-
 
     <string name="play">Play</string>
     <string name="continue_text">Continue</string>
@@ -245,4 +238,31 @@
     <string name="put_nickname_and_avatar">Pick a nickname and avatar!</string>
 
     <string name="share_invite">A friend is challenging you to a battle! Ready to accept in Wordy Fresh? Follow the link: %1$s!</string>
+    <string name="load_saved_game_text_dialog">You have an unfinished game! Would you like to continue or start a new one? Starting a new game will overwrite your saved progress!</string>
+    <string name="load_saved_game_title_dialog">Continue saved game?</string>
+    <string name="load_saved_game">Continue game</string>
+    <string name="green_letters_hint">Green letter hints</string>
+    <string name="dont_take_warning">Don\'t show warnings in game</string>
+    <string name="show_warning_dialog_in_game">Show warning in game</string>
+
+    <string name="not_has_hints">Out of hints</string>
+    <string name="hints_round_limit_reached">Limit of %1$s hint(s) per round reached</string>
+
+    <!-- ОШИБКИ -->
+    <string name="error_definition_not_found">Definition not found.</string>
+    <string name="error_invalid_nickname">Nickname cannot be empty.</string>
+    <string name="error_no_internet">No internet. Limited access.</string>
+    <string name="error_no_profile">Account setup incomplete. Please try again.</string>
+    <string name="error_not_authenticated">Authorization required.</string>
+    <string name="error_word_not_found">Word not found.</string>
+    <string name="error_unknown">Something went wrong. Try again later.</string>
+    <string name="error_session_restore">Failed to restore session. Please sign in again.</string>
+
+    <string name="stat_lengths_progress_title">Games by Word Length</string>
+    <string name="stat_langs_progress_title">Games by Language</string>
+    <string name="no_data">No data yet</string>
+    <string name="over_your_step">Running out of tries?</string>
+    <string name="use_2_magic_of_game">Use up to 2 hints per game! They'll reveal a random missing letter.</string>
+    <string name="use_magic_with_brain">Revealed letters can't be removed — use them wisely!</string>
+    <string name="simple_tap_btn"> — just tap the button</string>
 </resources>

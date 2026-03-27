@@ -34,6 +34,9 @@ class SettingsViewModel @Inject constructor(
                 currentLang = TypeLanguages.fromCode(config.language),
                 currentKeyboard = TypeKeyboards.fromCode(config.keyboardMode),
                 confettiEnabled = config.confetti,
+                vibrationEnabled = config.vibrationStatus,
+                showSavedGameDialogState = config.showSavedGameDialogState,
+                showLetterHints = config.showLetterHints,
                 ratingModeEnabled = config.ratingWords
             )
         }
@@ -58,6 +61,9 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetKeyboard -> setKeyboard(event.code)
             is SettingsEvent.KeyboardSheetState -> _showKeyboardSheet.update { event.show }
             is SettingsEvent.LanguageSheetState -> _showLanguageSheet.update { event.show }
+            is SettingsEvent.ToggleShowLetterHints -> setShowLetterHints(event.enabled)
+            is SettingsEvent.ToggleShowSavedGameDialog -> setShowSavedGameDialog(event.enabled)
+            is SettingsEvent.ToggleVibration -> setVibrationState(event.enabled)
 
             SettingsEvent.SendSupport -> onSupportClick()
             SettingsEvent.ClearBackground -> clearBackground()
@@ -72,9 +78,15 @@ class SettingsViewModel @Inject constructor(
 
     private fun setConfetti(state: Boolean) = settingsEngine.setConfetti(state)
 
+    private fun setShowLetterHints(state: Boolean) = settingsEngine.setShowLetterHints(state)
+
+    private fun setVibrationState(state: Boolean) = settingsEngine.setVibrationState(state)
+
+    private fun setShowSavedGameDialog(state: Boolean) = settingsEngine.setSavedGameDialogState(state)
+
     private fun clearBackground() = settingsEngine.clearBackground()
 
-    private fun setTheme(isDark: Boolean)  {
+    private fun setTheme(isDark: Boolean) {
         settingsEngine.clearBackground()
         settingsEngine.setDark(isDark)
     }
@@ -84,13 +96,10 @@ class SettingsViewModel @Inject constructor(
         settingsEngine.setDark(item.theme.isDark)
     }
 
-    private fun onSupportClick() {
-        viewModelScope.launch {
-            checkAchievementUseCase(AchievementTrigger.SupportMessageSent, settingsEngine.uiState.value.language)
-                .fold(
-                    onSuccess = { },
-                    onFailure = { }
-                )
-        }
+    private fun onSupportClick() = viewModelScope.launch {
+        checkAchievementUseCase(
+            AchievementTrigger.SupportMessageSent,
+            settingsEngine.uiState.value.language
+        )
     }
 }

@@ -21,11 +21,13 @@ import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
 import com.sinya.projects.wordle.ui.theme.gray800
 import com.sinya.projects.wordle.ui.theme.white
+import com.sinya.projects.wordle.domain.enums.VibrationType
 
 @Composable
 fun SearchContainer(
     searchQuery: String,
-    onValueChanged: (String) -> Unit
+    onValueChanged: (String) -> Unit,
+    onVibrate: (VibrationType) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -65,7 +67,7 @@ fun SearchContainer(
                         .padding(horizontal = 8.dp)
                 )
             }
-            VoiceInputButton(onValueChanged)
+            VoiceInputButton(onValueChanged, onVibrate)
         }
     }
 }

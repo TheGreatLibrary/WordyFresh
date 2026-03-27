@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Text
@@ -18,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.ui.theme.Montserrat
@@ -37,7 +40,9 @@ fun CustomTextField(
     minLines: Int = 1,
     isError: Boolean = false,
     errorMessage: String? = null,
-    color: Color = Color.Transparent
+    color: Color = Color.Transparent,
+    imeAction: ImeAction = ImeAction.Done,
+    onNext: (() -> Unit) = { }
 ) {
     val customSelectionColors = TextSelectionColors(
         backgroundColor = green400,
@@ -66,6 +71,8 @@ fun CustomTextField(
                         shape = WordyShapes.extraLarge
                     )
                     .then(modifier),
+                keyboardOptions = KeyboardOptions(imeAction = imeAction),
+                keyboardActions = KeyboardActions(onNext = { onNext() }),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier.fillMaxWidth()
@@ -109,6 +116,8 @@ fun CustomTextFieldWithLabel(
     modifier: Modifier,
     isError: Boolean,
     error: String,
+    imeAction: ImeAction = ImeAction.Done,
+    onNext: (() -> Unit) = { }
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -121,6 +130,8 @@ fun CustomTextFieldWithLabel(
             modifier = modifier,
             isError = isError,
             errorMessage = error,
+            imeAction = imeAction,
+            onNext = onNext,
             color = WordyColor.colors.primary
         )
     }

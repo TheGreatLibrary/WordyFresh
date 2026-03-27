@@ -45,6 +45,7 @@ import com.sinya.projects.wordle.domain.model.DictionaryItem
 import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryCard
 import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryPlaceholder
 import com.sinya.projects.wordle.presentation.dictionary.components.SearchContainer
+import com.sinya.projects.wordle.presentation.edit.EditEvent
 import com.sinya.projects.wordle.ui.features.Header
 
 @Composable
@@ -107,9 +108,10 @@ private fun DictionaryScreenView(
 
     val pullToRefreshState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorText = state.errorMessage?.let { stringResource(it) }
 
     LaunchedEffect(state.errorMessage, state.isRefreshing) {
-        state.errorMessage?.let { message ->
+        errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short
@@ -164,6 +166,9 @@ private fun DictionaryScreenView(
                             searchQuery = state.searchQuery,
                             onValueChanged = { query ->
                                 onEvent(DictionaryEvent.OnSearchQueryChanged(query))
+                            },
+                            onVibrate = { type ->
+                                onEvent(DictionaryEvent.OnVibrate(type))
                             }
                         )
                         Spacer(Modifier.height(18.dp))

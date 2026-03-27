@@ -1,4 +1,4 @@
-package com.sinya.projects.wordle.domain.source
+package com.sinya.projects.wordle.utils
 
 import android.content.Context
 import android.graphics.Bitmap

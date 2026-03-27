@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.domain.useCase.ImportSessionUseCase
 import com.sinya.projects.wordle.domain.useCase.UpdatePasswordUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,7 @@ class ResetPasswordViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     _state.value = ResetPasswordUiState.ResetForm(
-                        errorMessage = "Ошибка восстановления сессии: ${error.localizedMessage}"
+                        errorMessage = error.getErrorMessage()
                     )
                 }
             )
@@ -116,7 +117,7 @@ class ResetPasswordViewModel @Inject constructor(
                         isLoading = false,
                         newPassword = formState.newPassword,
                         repeatNewPassword = formState.repeatNewPassword,
-                        errorMessage = error.localizedMessage ?: "Ошибка смены пароля"
+                        errorMessage = error.getErrorMessage()
                     )
                 }
             )

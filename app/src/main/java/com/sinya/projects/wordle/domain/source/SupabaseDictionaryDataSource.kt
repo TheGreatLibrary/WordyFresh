@@ -5,6 +5,8 @@ import com.sinya.projects.wordle.data.local.database.dao.OfflineDictionaryDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncDictionaryDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncDictionary
 import com.sinya.projects.wordle.data.remote.supabase.mapper.toSyncList
+import com.sinya.projects.wordle.domain.checker.NetworkChecker
+import com.sinya.projects.wordle.domain.error.NoInternetException
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import jakarta.inject.Inject
@@ -24,12 +26,15 @@ interface SupabaseDictionaryDataSource {
 class SupabaseDictionaryDataSourceImpl @Inject constructor(
     private val supabaseClient: SupabaseClient,
     private val syncDictionaryDao: SyncDictionaryDao,
-    private val offlineDictionaryDao: OfflineDictionaryDao
+    private val offlineDictionaryDao: OfflineDictionaryDao,
+    private val networkChecker: NetworkChecker
 ) : SupabaseDictionaryDataSource {
 
     override suspend fun fetchDictionary(userId: String): Result<List<SyncDictionary>> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val dictionary = supabaseClient
                     .from("sync_dictionary")
                     .select { filter { eq("user_id", userId) } }
@@ -46,6 +51,8 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
     override suspend fun upsertDictionary(dictionary: List<SyncDictionary>): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val json = Json { encodeDefaults = true }
 
                 val jsonList = dictionary.map {
@@ -66,8 +73,11 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
     override suspend fun clearAllDictionary(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 supabaseClient.from("sync_dictionary")
                     .delete { filter { eq("user_id", userId) } }
+
                 syncFromSupabase(userId).getOrThrow()
                 Result.success(Unit)
             } catch (e: Exception) {
@@ -80,6 +90,8 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
     override suspend fun syncToSupabase(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val offline = offlineDictionaryDao
                     .getDictionary()
                     .toSyncList(userId)
@@ -101,8 +113,12 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
     override suspend fun syncFromSupabase(userId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
+
                 val remote = fetchDictionary(userId).getOrThrow()
+
                 syncDictionaryDao.clearAll()
+
                 if (remote.isNotEmpty()) {
                     syncDictionaryDao.insertList(remote)
                 }

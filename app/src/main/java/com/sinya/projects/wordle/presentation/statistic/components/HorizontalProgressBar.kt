@@ -49,7 +49,7 @@ fun HorizontalProgressBar(number: String, count: String, percent: Float) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.75f)
-                .height(16.dp)
+                .height(14.dp)
                 .clip(RoundedCornerShape(27.dp))
                 .background(gray100),
         ) {

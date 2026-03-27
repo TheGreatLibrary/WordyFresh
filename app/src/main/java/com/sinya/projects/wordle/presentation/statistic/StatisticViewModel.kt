@@ -3,11 +3,14 @@ package com.sinya.projects.wordle.presentation.statistic
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sinya.projects.wordle.data.local.database.entity.ModeStatisticsTranslations
+import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.domain.enums.GameMode
-import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.useCase.ClearAllStatisticsUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllStatisticsUseCase
+import com.sinya.projects.wordle.domain.useCase.GetModesUseCase
 import com.sinya.projects.wordle.domain.useCase.SyncStatisticUseCase
+import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +23,8 @@ import kotlinx.coroutines.launch
 class StatisticViewModel @Inject constructor(
     private val getAllStatisticsUseCase: GetAllStatisticsUseCase,
     private val syncStatisticUseCase: SyncStatisticUseCase,
+    private val getModesUseCase: GetModesUseCase,
+    private val settingsEngine: SettingsEngine,
     private val clearAllStatisticsUseCase: ClearAllStatisticsUseCase,
 ) : ViewModel() {
 
@@ -38,37 +43,42 @@ class StatisticViewModel @Inject constructor(
 
             StatisticEvent.OnClearAll -> clearAllStatistics()
 
-            StatisticEvent.OnErrorShown -> onErrorShown()
+            StatisticEvent.OnErrorShown -> updateIfSuccess {
+                it.copy(errorMessage = null)
+            }
 
             is StatisticEvent.SelectMode -> selectMode(event.mode)
         }
     }
 
-    private fun onErrorShown() = updateIfSuccess {
-        it.copy(errorMessage = null)
-    }
-
-    private fun selectMode(mode: GameMode) = updateIfSuccess { success ->
+    private fun selectMode(mode: ModeStatisticsTranslations) = updateIfSuccess { success ->
         success.copy(
             selectedMode = mode,
-            currentStatistic = success.statisticList.first { it.modeId == mode.id }
+            currentStatistic = success.statisticList.first { it.modeId == mode.modeId }
         )
     }
 
     private suspend fun loadStatistic() {
-        getAllStatisticsUseCase().fold(
-            onSuccess = { stats ->
-                _state.value = StatisticUiState.Success(
-                    statisticList = stats,
-                    currentStatistic = stats.first { it.modeId == GameMode.ALL.id }
-                )
-            },
-            onFailure = { throwable ->
-                Log.d("Error", throwable.toString())
-                _state.value = StatisticUiState.Success(
-                    errorMessage = throwable.message,
-                )
-            }
+        val lang = settingsEngine.uiState.value.language
+
+        val statsResult = getAllStatisticsUseCase()
+        val modesResult = getModesUseCase(lang)
+
+        if (statsResult.isFailure || modesResult.isFailure) {
+            _state.value = StatisticUiState.Error(
+                errorMessage = (statsResult.exceptionOrNull() ?: Exception()).getErrorMessage()
+            )
+            return
+        }
+
+        val stats = statsResult.getOrThrow()
+        val modes = modesResult.getOrThrow()
+
+        _state.value = StatisticUiState.Success(
+            statisticList = stats,
+            modes = modes,
+            currentStatistic = stats.first { it.modeId == GameMode.ALL.id },
+            selectedMode = modes.first { it.modeId == GameMode.ALL.id }
         )
     }
 
@@ -83,15 +93,10 @@ class StatisticViewModel @Inject constructor(
                     loadStatistic()
                 },
                 onFailure = { exception ->
-                    val errorMessage = when (exception) {
-                        is UserNotAuthenticatedException -> "Требуется авторизация"
-                        else -> "Ошибка синхронизации: ${exception.message}"
-                    }
-
                     updateIfSuccess {
                         it.copy(
                             isRefreshing = false,
-                            errorMessage = errorMessage
+                            errorMessage = exception.getErrorMessage()
                         )
                     }
                 }
@@ -100,18 +105,7 @@ class StatisticViewModel @Inject constructor(
     }
 
     private fun clearAllStatistics() = viewModelScope.launch {
-        clearAllStatisticsUseCase().fold(
-            onSuccess = {
-                loadStatistic()
-            },
-            onFailure = { exception ->
-                updateIfSuccess {
-                    it.copy(
-                        errorMessage = "Ошибка очистки: ${exception.message}"
-                    )
-                }
-            }
-        )
+        clearAllStatisticsUseCase().onSuccess { loadStatistic() }
     }
 
     private fun updateIfSuccess(transform: (StatisticUiState.Success) -> StatisticUiState.Success) {

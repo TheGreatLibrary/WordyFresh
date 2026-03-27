@@ -5,6 +5,7 @@ enum class OnboardingState {
     CELL_COLORS,
     ATTEMPTS,
     RULES,
+    MAGIC,
     FINISH;
 
     companion object {

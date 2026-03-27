@@ -7,5 +7,8 @@ data class OptionalPrefs(
     val ratingWords: Boolean,
     val confetti: Boolean,
     val keyboardMode: Int,
-    val lastGame: SavedGameState
+    val lastGame: SavedGameState,
+    val showLetterHint: Boolean,
+    val showSavedGameDialogState: Boolean,
+    val vibrationStatus: Boolean
 )

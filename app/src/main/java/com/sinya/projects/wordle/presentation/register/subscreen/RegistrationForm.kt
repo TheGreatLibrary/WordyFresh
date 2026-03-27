@@ -16,15 +16,21 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.register.RegisterEvent
 import com.sinya.projects.wordle.presentation.register.RegisterUiState
+import com.sinya.projects.wordle.presentation.resetEmail.ResetEmailEvent
+import com.sinya.projects.wordle.presentation.resetPassword.ResetPasswordEvent
 import com.sinya.projects.wordle.ui.features.AcceptPolicyCheckbox
 import com.sinya.projects.wordle.ui.features.AuthHeader
 import com.sinya.projects.wordle.ui.features.CustomTextFieldWithLabel
@@ -44,8 +50,10 @@ fun RegisterFormView(
     navigateTo: (ScreenRoute) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val errorText = state.errorMessage?.let { stringResource(it) }
+
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { message ->
+        errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short
@@ -83,6 +91,8 @@ private fun RegisterForm(
         .background(white, WordyShapes.extraLarge)
         .padding(horizontal = 26.dp, vertical = 14.dp)
 ) {
+    val focusRequester = remember { FocusRequester() }
+
     Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
         CustomTextFieldWithLabel(
             label = stringResource(R.string.email),
@@ -90,6 +100,8 @@ private fun RegisterForm(
             placeholder = stringResource(R.string.email_sample),
             onValueChange = { onEvent(RegisterEvent.EmailChanged(it)) },
             modifier = modifier,
+            imeAction = ImeAction.Next,
+            onNext = { focusRequester.requestFocus() },
             isError = state.isEmailError,
             error = stringResource(R.string.is_email_error)
         )
@@ -98,7 +110,7 @@ private fun RegisterForm(
             name = state.password,
             placeholder = stringResource(R.string.password_sample),
             onValueChange = { onEvent(RegisterEvent.PasswordChanged(it)) },
-            modifier = modifier,
+            modifier = modifier.focusRequester(focusRequester),
             isError = state.isPasswordError,
             error = stringResource(R.string.is_password_error)
         )

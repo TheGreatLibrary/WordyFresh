@@ -1,5 +1,7 @@
 package com.sinya.projects.wordle.presentation.resetPassword
 
+import androidx.annotation.StringRes
+
 sealed interface ResetPasswordUiState {
     data object Success : ResetPasswordUiState
 
@@ -9,6 +11,6 @@ sealed interface ResetPasswordUiState {
         val isNewPasswordError: Boolean = false,
         val isRepeatNewPasswordError: Boolean = false,
         val isLoading: Boolean = false,
-        val errorMessage: String? = null
+        @StringRes val errorMessage: Int? = null
     ) : ResetPasswordUiState
 }

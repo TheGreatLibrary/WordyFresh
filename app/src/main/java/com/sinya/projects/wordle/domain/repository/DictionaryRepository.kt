@@ -1,16 +1,12 @@
 package com.sinya.projects.wordle.domain.repository
 
-import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.OfflineDictionaryDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncDictionaryDao
 import com.sinya.projects.wordle.data.local.database.dao.WordDao
 import com.sinya.projects.wordle.data.local.database.entity.Words
-import com.sinya.projects.wordle.domain.error.DefinitionNotFoundException
-import com.sinya.projects.wordle.domain.error.NoInternetException
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.error.WordNotFoundException
 import com.sinya.projects.wordle.domain.model.DictionaryItem
-import com.sinya.projects.wordle.domain.source.DictionaryDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import com.sinya.projects.wordle.domain.source.SupabaseDictionaryDataSource
 import com.sinya.projects.wordle.domain.source.WiktionaryDataSource
@@ -43,7 +39,6 @@ class DictionaryRepositoryImpl @Inject constructor(
     private val offlineDictionaryDao: OfflineDictionaryDao,
     private val syncDictionaryDao: SyncDictionaryDao,
     private val wordDao: WordDao,
-    private val dictionaryDataSource: WiktionaryDataSource,
     private val supabaseAuthDataSource: SupabaseAuthDataSource,
     private val supabaseDictionaryDataSource: SupabaseDictionaryDataSource
 ) : DictionaryRepository {
@@ -141,7 +136,7 @@ class DictionaryRepositoryImpl @Inject constructor(
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: return Result.failure(UserNotAuthenticatedException())
 
-            supabaseDictionaryDataSource.syncFromSupabase(user.id)
+            supabaseDictionaryDataSource.syncFromSupabase(user.id).getOrThrow()
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -154,7 +149,7 @@ class DictionaryRepositoryImpl @Inject constructor(
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: return Result.failure(UserNotAuthenticatedException())
 
-            supabaseDictionaryDataSource.syncToSupabase(user.id)
+            supabaseDictionaryDataSource.syncToSupabase(user.id).getOrThrow()
 
             Result.success(Unit)
         } catch (e: Exception) {

@@ -45,6 +45,9 @@ fun CustomKeyboard(
                                 }
                             }
                         },
+                        onRepeat = if (key.char == '<') {
+                            { onEvent(GameEvent.EnterLetter('<')) }  // повтор только в IN_PROGRESS не нужно — backspace вне игры всё равно ничего не делает
+                        } else null,
                         modifier = Modifier.weight(if (key.char == '<' || key.char == '>') 2f else 1f)
                     )
                 }

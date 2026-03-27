@@ -33,6 +33,7 @@ import com.sinya.projects.wordle.presentation.onboarding.components.DotsIndicato
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageAttempts
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageCellColors
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageFinish
+import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageMagic
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageRules
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageWelcome
 import com.sinya.projects.wordle.ui.features.ImageButton
@@ -132,6 +133,8 @@ fun OnboardingPager(
                 OnboardingState.ATTEMPTS -> PageAttempts()
 
                 OnboardingState.RULES -> PageRules()
+
+                OnboardingState.MAGIC -> PageMagic()
 
                 OnboardingState.FINISH -> PageFinish {
                     engine.setOnboardingState(true)
