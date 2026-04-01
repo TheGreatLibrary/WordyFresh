@@ -4,6 +4,7 @@ import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.ProfilesDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.Profiles
 import com.sinya.projects.wordle.domain.checker.NetworkChecker
+import com.sinya.projects.wordle.domain.error.InvalidNicknameException
 import com.sinya.projects.wordle.domain.error.NoInternetException
 import com.sinya.projects.wordle.domain.error.SessionRestoreException
 import com.sinya.projects.wordle.domain.error.UserHasNotProfileException
@@ -174,6 +175,10 @@ class ProfileRepositoryImpl @Inject constructor(
     // EditScreen
 
     override suspend fun updateNickname(nickname: String): Result<Unit> {
+        if (nickname.trim().isEmpty()) {
+            return Result.failure(InvalidNicknameException())
+        }
+
         val user = supabaseAuthDataSource.getCurrentUser()
             ?: return Result.failure(UserNotAuthenticatedException())
 

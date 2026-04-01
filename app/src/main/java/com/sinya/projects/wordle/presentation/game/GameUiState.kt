@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.presentation.game
 import com.sinya.projects.wordle.domain.enums.GameState
 import com.sinya.projects.wordle.domain.model.Cell
 import com.sinya.projects.wordle.domain.enums.GameMode
+import com.sinya.projects.wordle.domain.enums.TypeLanguages
 import com.sinya.projects.wordle.domain.model.HintsState
 import com.sinya.projects.wordle.domain.model.Key
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
@@ -24,7 +25,7 @@ sealed interface GameUiState {
         val timePassed: Int = 0,
         val mode: GameMode = GameMode.NORMAL,
         val wordLength: Int = 5,
-        val lang: String = "ru",
+        val lang: String = TypeLanguages.RU.code,
         val hiddenWord: String = "",
 
         val hintsState: HintsState? = null,

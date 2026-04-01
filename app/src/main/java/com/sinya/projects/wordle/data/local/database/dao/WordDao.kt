@@ -6,6 +6,8 @@ import com.sinya.projects.wordle.data.local.database.entity.Words
 
 @Dao
 interface WordDao {
+
+
     @Query("SELECT EXISTS(SELECT 1 FROM words WHERE word = :word AND language = :lang AND length = :len AND (:rating OR rating = 0))")
     suspend fun existsWord(word: String, lang: String, len: Int, rating: Int): Boolean
 

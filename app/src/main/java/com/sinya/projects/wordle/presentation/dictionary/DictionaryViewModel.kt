@@ -36,17 +36,21 @@ class DictionaryViewModel @Inject constructor(
 
     @OptIn(FlowPreview::class)
     val filteredList: StateFlow<List<DictionaryItem>> = state
-        .debounce(300)
+        .debounce(200)
         .map { currentState ->
             when (currentState) {
                 is DictionaryUiState.Success -> {
                     val query = currentState.searchQuery
-                    if (query.isEmpty()) {
+                    val list = if (query.isEmpty()) {
                         currentState.dictionaryList
                     } else {
                         currentState.dictionaryList.filter {
                             it.word.contains(query, ignoreCase = true)
                         }
+                    }
+
+                    currentState.modes.fold(list) { exercises, mode ->
+                        mode.filter(exercises)
                     }
                 }
 
@@ -78,8 +82,22 @@ class DictionaryViewModel @Inject constructor(
             DictionaryEvent.OnErrorShown -> updateIfSuccess { it.copy(errorMessage = null) }
 
             is DictionaryEvent.OnVibrate -> vibrationManager.vibrate(event.type)
+            is DictionaryEvent.SortParamChange -> updateIfSuccess {
+                val updatedList = it.modes.map { mode ->
+                    if (mode == event.mode) {
+                        mode.apply(event.onSelect)
+                    } else {
+                        mode
+                    }
+                }
+                it.copy(
+                    modes = updatedList
+
+                )
+            }
         }
     }
+
 
     private fun reloadDefinition(item: DictionaryItem) {
         updateIfSuccess {

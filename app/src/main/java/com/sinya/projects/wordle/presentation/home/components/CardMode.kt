@@ -65,7 +65,10 @@ fun CardMode(
                 color = WordyColor.colors.textOnColorCard,
                 style = WordyTypography.titleLarge
             )
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Image(
                     painter = painterResource(imageRes),
                     contentDescription = null,
@@ -80,9 +83,8 @@ fun CardMode(
                 )
                 Button(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(22.dp)
-                        .padding(horizontal = 17.dp),
+                        .fillMaxWidth(0.7f)
+                        .height(22.dp),
                     shape = WordyShapes.large,
                     colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkII),
                     onClick = onClick,

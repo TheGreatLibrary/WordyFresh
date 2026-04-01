@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 class ClearAllDictionaryUseCase @Inject constructor(
     private val repository: DictionaryRepository
 ) {
-    suspend operator fun invoke(): Result<Unit> = withContext(Dispatchers.IO) {
-        repository.clearAllDictionary()
+    suspend operator fun invoke(): Result<Unit> {
+        return repository.clearAllDictionary()
     }
 }

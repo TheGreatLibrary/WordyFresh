@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.presentation.onboarding.subscreen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.presentation.onboarding.OnboardingData
+import com.sinya.projects.wordle.utils.OnboardingData
 import com.sinya.projects.wordle.presentation.onboarding.components.LetterDescription
 import com.sinya.projects.wordle.presentation.onboarding.components.WordRow
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -34,6 +35,7 @@ fun PageCellColors() {
             text = stringResource(R.string.color_cell),
             style = WordyTypography.titleLarge,
             fontSize = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
             color = WordyColor.colors.textPrimary,
             textAlign = TextAlign.Center
         )
@@ -50,9 +52,9 @@ fun PageCellColors() {
                 modifier = Modifier
             )
 
-                LetterDescription(cell = cells[0], text = R.string.good_try)
-                LetterDescription(cell = cells[1], text = R.string.not_bad_try)
-                LetterDescription(cell = cells[4], text = R.string.bad_try)
+            LetterDescription(cell = cells[0], text = R.string.good_try)
+            LetterDescription(cell = cells[1], text = R.string.not_bad_try)
+            LetterDescription(cell = cells[4], text = R.string.bad_try)
         }
     }
 }

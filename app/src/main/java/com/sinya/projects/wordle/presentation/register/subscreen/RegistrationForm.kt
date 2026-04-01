@@ -123,7 +123,7 @@ private fun RegisterForm(
             contentAlignment = Alignment.Center
         ) {
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.7f),
+                modifier = Modifier.fillMaxWidth(0.6f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = { onEvent(RegisterEvent.RegisterClicked) },

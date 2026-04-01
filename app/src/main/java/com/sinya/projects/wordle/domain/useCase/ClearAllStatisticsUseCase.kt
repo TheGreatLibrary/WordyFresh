@@ -8,13 +8,8 @@ import kotlinx.coroutines.withContext
 class ClearAllStatisticsUseCase @Inject constructor(
     private val repository: StatisticRepository
 ) {
-    suspend operator fun invoke(): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            repository.clearAllStatistics()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    suspend operator fun invoke(): Result<Unit> {
+        return repository.clearAllStatistics()
     }
 }
 

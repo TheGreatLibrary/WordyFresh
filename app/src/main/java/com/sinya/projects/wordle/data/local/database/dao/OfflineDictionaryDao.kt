@@ -18,6 +18,8 @@ interface OfflineDictionaryDao {
         COALESCE(od.word_id, sd.word_id) as id,
         w.word,
         COALESCE(od.description, sd.description) as description,
+        w.language AS lang,
+        w.length AS length,
         0 AS isLoading
     FROM words w
     LEFT JOIN offline_dictionary od ON w.id = od.word_id

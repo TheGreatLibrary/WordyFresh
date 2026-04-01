@@ -88,6 +88,7 @@ fun MainContent(startRoute: ScreenRoute) {
         }
 
         Scaffold(
+            modifier = Modifier.fillMaxSize(),
             bottomBar = {
                 if (!withOutBottomBar) {
                     BottomNavigation(

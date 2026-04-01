@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -49,9 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -62,9 +59,10 @@ import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.domain.model.AchieveItem
+import com.sinya.projects.wordle.navigation.ScreenRoute
 import com.sinya.projects.wordle.presentation.achieve.components.AchieveImage
 import com.sinya.projects.wordle.presentation.game.GameEvent
-import com.sinya.projects.wordle.ui.features.CustomCard
+import com.sinya.projects.wordle.ui.features.AnimationCard
 import com.sinya.projects.wordle.ui.features.PlaceholderBox
 import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -78,6 +76,7 @@ import kotlinx.coroutines.launch
 fun FinishBottomSheet(
     state: FinishStatisticGame?,
     onEvent: (GameEvent) -> Unit,
+    navigateTo: (ScreenRoute) -> Unit,
     content: @Composable (PaddingValues, () -> Unit) -> Unit
 ) {
     val context = LocalContext.current
@@ -147,179 +146,176 @@ fun FinishBottomSheet(
                         state.avgTime?.let { calculateTimeDiff(it) }
                     }
 
-                Column(
-                    modifier = Modifier
-                        .weight(1f, fill = false)
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(state.result.res),
-                        color = WordyColor.colors.textPrimary,
-                        style = WordyTypography.titleLarge,
-                        fontSize = 22.sp
-                    )
-                    Spacer(Modifier.height(10.dp))
-
-                    Text(
-                        text = stringResource(R.string.hidden_word),
-                        color = WordyColor.colors.textPrimary,
-                        style = WordyTypography.bodyMedium,
-                        fontSize = 16.sp
-                    )
-                    Spacer(Modifier.height(7.dp))
-
-                    Text(
-                        text = state.hiddenWord,
-                        color = WordyColor.colors.textFinishHiddenWord,
-                        style = WordyTypography.titleLarge,
-                        fontSize = 26.sp,
+                    Column(
                         modifier = Modifier
-                            .background(
-                                WordyColor.colors.backgroundFinishHiddenWord,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .padding(10.dp)
-                    )
-                    Spacer(Modifier.height(7.dp))
-
-                    Text(
-                        text = stringResource(R.string.parsing_word),
-                        color = WordyColor.colors.textLinkColor,
-                        style = WordyTypography.bodyMedium,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.clickable {
-                            val url = LegalLinks.formatAcademicUrl(state.hiddenWord)
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            context.startActivity(intent)
-                        }
-                    )
-                    Spacer(Modifier.height(15.dp))
-
-                    AnimatedVisibility(
-                        visible = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded,
-                        enter = fadeIn(
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessMedium
-                            )
-                        ) + expandVertically(
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessMedium
-                            )
-                        ),
-                        exit = fadeOut(
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessMedium
-                            )
-                        ) + shrinkVertically(
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessMedium
-                            )
-                        )
+                            .weight(1f, fill = false)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column {
-                            if (state.description != null) {
-                                Text(
-                                    text = state.description,
-                                    color = WordyColor.colors.textPrimary,
-                                    style = WordyTypography.bodyMedium,
-                                    fontSize = 16.sp
-                                )
-                            } else {
-                                PlaceholderBox(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(75.dp),
-                                    shape = WordyShapes.small
-                                )
-                            }
-                            Spacer(Modifier.height(15.dp))
+                        Text(
+                            text = stringResource(state.result.res),
+                            color = WordyColor.colors.textPrimary,
+                            style = WordyTypography.titleLarge,
+                            fontSize = 22.sp
+                        )
+                        Spacer(Modifier.height(10.dp))
 
-                            FinishRowStats(
-                                title = stringResource(R.string.current_mode),
-                                stat = StatDiff(stringResource(state.mode.res), "", null)
+                        Text(
+                            text = stringResource(R.string.hidden_word),
+                            color = WordyColor.colors.textPrimary,
+                            style = WordyTypography.bodyMedium,
+                            fontSize = 16.sp
+                        )
+                        Spacer(Modifier.height(7.dp))
+
+                        Text(
+                            text = state.hiddenWord,
+                            color = WordyColor.colors.textFinishHiddenWord,
+                            style = WordyTypography.titleLarge,
+                            fontSize = 26.sp,
+                            modifier = Modifier
+                                .background(
+                                    WordyColor.colors.backgroundFinishHiddenWord,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(10.dp)
+                        )
+                        Spacer(Modifier.height(7.dp))
+
+                        Text(
+                            text = stringResource(R.string.parsing_word),
+                            color = WordyColor.colors.textLinkColor,
+                            style = WordyTypography.bodyMedium,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.clickable {
+                                val url = LegalLinks.formatAcademicUrl(state.hiddenWord)
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                context.startActivity(intent)
+                            }
+                        )
+                        Spacer(Modifier.height(15.dp))
+
+                        AnimatedVisibility(
+                            visible = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded,
+                            enter = fadeIn(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMedium
+                                )
+                            ) + expandVertically(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMedium
+                                )
+                            ),
+                            exit = fadeOut(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMedium
+                                )
+                            ) + shrinkVertically(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMedium
+                                )
                             )
-                            Spacer(Modifier.height(15.dp))
+                        ) {
+                            Column {
+                                if (state.description != null) {
+                                    Text(
+                                        text = state.description,
+                                        color = WordyColor.colors.textPrimary,
+                                        style = WordyTypography.bodyMedium,
+                                        fontSize = 16.sp
+                                    )
+                                } else {
+                                    PlaceholderBox(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(75.dp),
+                                        shape = WordyShapes.small
+                                    )
+                                }
+                                Spacer(Modifier.height(15.dp))
 
-                            if (percentStat != null) {
                                 FinishRowStats(
-                                    title = stringResource(R.string.per_win),
-                                    stat = percentStat
+                                    title = stringResource(R.string.current_mode),
+                                    stat = StatDiff(stringResource(state.mode.res), "", null)
                                 )
-                            } else {
-                                PlaceholderBox(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(18.dp),
-                                    shape = WordyShapes.small
-                                )
-                            }
-                            Spacer(Modifier.height(15.dp))
+                                Spacer(Modifier.height(15.dp))
 
-                            if (streakStat != null) {
-                                FinishRowStats(
-                                    title = stringResource(R.string.current_streak),
-                                    stat = streakStat
-                                )
-                            } else {
-                                PlaceholderBox(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(18.dp),
-                                    shape = WordyShapes.small
-                                )
-                            }
-                            Spacer(Modifier.height(15.dp))
+                                if (percentStat != null) {
+                                    FinishRowStats(
+                                        title = stringResource(R.string.per_win),
+                                        stat = percentStat
+                                    )
+                                } else {
+                                    PlaceholderBox(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(18.dp),
+                                        shape = WordyShapes.small
+                                    )
+                                }
+                                Spacer(Modifier.height(15.dp))
 
-                            if (timeStat != null) {
-                                FinishRowStats(
-                                    title = stringResource(R.string.avg_time),
-                                    stat = timeStat
-                                )
-                            } else {
-                                PlaceholderBox(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(18.dp),
-                                    shape = WordyShapes.small
-                                )
-                            }
-                            Spacer(Modifier.height(15.dp))
+                                if (streakStat != null) {
+                                    FinishRowStats(
+                                        title = stringResource(R.string.current_streak),
+                                        stat = streakStat
+                                    )
+                                } else {
+                                    PlaceholderBox(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(18.dp),
+                                        shape = WordyShapes.small
+                                    )
+                                }
+                                Spacer(Modifier.height(15.dp))
 
-                            if (!state.achieves.isNullOrEmpty()) state.achieves.forEach {
-                                CustomCard(
-                                    modifier = Modifier
-                                ) {
+                                if (timeStat != null) {
+                                    FinishRowStats(
+                                        title = stringResource(R.string.avg_time),
+                                        stat = timeStat
+                                    )
+                                } else {
+                                    PlaceholderBox(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(18.dp),
+                                        shape = WordyShapes.small
+                                    )
+                                }
+                                Spacer(Modifier.height(15.dp))
+
+                                if (!state.achieves.isNullOrEmpty()) state.achieves.forEach {
                                     FinishAchieveCard(
                                         modifier = Modifier
                                             .padding(16.dp)
                                             .fillMaxWidth(),
-                                        achieve = it
-                                    )
-                                }
-                                Spacer(Modifier.height(10.dp))
-                            }
-                            else {
-                                repeat(2) {
-                                    PlaceholderBox(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(65.dp),
-                                        shape = WordyShapes.small
+                                        achieve = it,
+                                        navigateTo = navigateTo
                                     )
                                     Spacer(Modifier.height(10.dp))
                                 }
+                                else {
+                                    repeat(2) {
+                                        PlaceholderBox(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(65.dp),
+                                            shape = WordyShapes.small
+                                        )
+                                        Spacer(Modifier.height(10.dp))
+                                    }
+                                }
+                                Spacer(Modifier.height(15.dp))
                             }
-                            Spacer(Modifier.height(15.dp))
                         }
                     }
-                }
 
                     Column(
                         modifier = Modifier
@@ -328,7 +324,9 @@ fun FinishBottomSheet(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Row(
-                            modifier = Modifier.height(45.dp).padding(vertical = 3.dp),
+                            modifier = Modifier
+                                .height(45.dp)
+                                .padding(vertical = 3.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -354,7 +352,13 @@ fun FinishBottomSheet(
                                     contentColor = WordyColor.colors.textForActiveBtnMkI
                                 ),
                                 contentPadding = PaddingValues(0.dp),
-                                onClick = { onShare(state.hiddenWord, state.description?:"", state.colors) }
+                                onClick = {
+                                    onShare(
+                                        state.hiddenWord,
+                                        state.description ?: "",
+                                        state.colors
+                                    )
+                                }
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.game_share),
@@ -375,7 +379,7 @@ fun FinishBottomSheet(
                 }
             }
         }) {
-        content(PaddingValues(bottom = 10.dp))  {
+        content(PaddingValues(bottom = 10.dp)) {
             scope.launch {
                 scaffoldState.bottomSheetState.partialExpand()
             }
@@ -429,29 +433,34 @@ private fun FinishRowStats(
 @Composable
 private fun FinishAchieveCard(
     modifier: Modifier,
-    achieve: AchieveItem
+    achieve: AchieveItem,
+    navigateTo: (ScreenRoute) -> Unit
 ) {
     val animPercent = remember { achieve.count.toFloat() / achieve.maxCount.toFloat() }
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    AnimationCard(
+        modifier = Modifier,
+        onClick = { navigateTo(ScreenRoute.Achieves(achieve.id)) }
     ) {
-        AchieveImage(
-            achieveItem = achieve,
-            modifier = Modifier.size(55.dp)
-        )
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = achieve.title,
-                color = WordyColor.colors.textPrimary,
-                style = WordyTypography.bodyLarge,
-                fontSize = 16.sp
+            AchieveImage(
+                achieveItem = achieve,
+                modifier = Modifier.size(55.dp)
             )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = achieve.title,
+                    color = WordyColor.colors.textPrimary,
+                    style = WordyTypography.bodyLarge,
+                    fontSize = 16.sp
+                )
 
                 Box(
                     modifier = Modifier
@@ -475,6 +484,7 @@ private fun FinishAchieveCard(
                     style = WordyTypography.bodyMedium,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
         }
     }
 }

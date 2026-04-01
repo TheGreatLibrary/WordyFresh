@@ -1,10 +1,12 @@
 package com.sinya.projects.wordle.data.local.database
 
+import android.content.Context
+import android.util.Log
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import java.util.UUID
 
-object DatabaseMigrations {
+class DatabaseMigrations(private val context: Context) {
     val MIGRATION_1_2 = object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("PRAGMA foreign_keys = OFF")
@@ -469,6 +471,198 @@ object DatabaseMigrations {
             db.execSQL("CREATE INDEX index_sync_statistics_mode_id ON sync_statistics(mode_id)")
             db.execSQL("CREATE INDEX index_sync_statistics_user_id ON sync_statistics(user_id)")
             db.execSQL("CREATE INDEX index_sync_statistics_created_at ON sync_statistics(created_at)")
+
+            db.execSQL("PRAGMA foreign_keys = ON")
+        }
+    }
+
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("PRAGMA foreign_keys = OFF")
+
+            var ruDeleted = 0
+            var ruShitAdded = 0
+            var enDeleted = 0
+            var enShitAdded = 0
+            var csAdded = 0
+            var csShitAdded = 0
+
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_words_word_language ON words(word, language)")
+
+            // Удаляем русские слова
+            val russianToDelete = context.assets.open("to_delete_ru_upper.txt")
+                .bufferedReader(Charsets.UTF_8)
+                .readLines()
+                .filter { it.isNotBlank() }
+
+            russianToDelete.chunked(400) { batch ->
+                val placeholders = batch.joinToString(",") { "?" }
+                db.execSQL(
+                    "DELETE FROM words WHERE word IN ($placeholders) AND language = 'ru'",
+                    batch.toTypedArray()
+                )
+                ruDeleted += batch.size
+            }
+            Log.d("MIGRATION_3_4", "RU deleted: $ruDeleted")
+
+            val extraWords = listOf("АУДИТ", "КРОНА", "ЮКАТА", "БРОНЯ", "ВБРОС", "КЕНДО")
+            extraWords.forEach { word ->
+                db.execSQL(
+                    "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 0)",
+                    arrayOf(word.uppercase(), word.length)
+                )
+            }
+
+            val rusShit = context.assets.open("ru_shit.txt")
+                .bufferedReader(Charsets.UTF_8)
+                .readLines()
+                .filter { it.isNotBlank() && it.length in 4..11 }
+
+            rusShit.chunked(400) { batch ->
+                batch.forEach { word ->
+                    val w = word.trim().uppercase()
+                    db.execSQL(
+                        "UPDATE words SET rating = 1 WHERE word = ? AND language = 'ru'",
+                        arrayOf(w)
+                    )
+                    db.execSQL(
+                        "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 1)",
+                        arrayOf(w, w.length)
+                    )
+                    ruShitAdded++
+                }
+            }
+
+            // Удаляем английские слова
+            val englishToDelete = context.assets.open("to_delete_en_upper.txt")
+                .bufferedReader(Charsets.UTF_8)
+                .readLines()
+                .filter { it.isNotBlank() }
+
+            englishToDelete.chunked(400) { batch ->
+                val placeholders = batch.joinToString(",") { "?" }
+                db.execSQL(
+                    "DELETE FROM words WHERE word IN ($placeholders) AND language = 'en'",
+                    batch.toTypedArray()
+                )
+                enDeleted += batch.size
+            }
+
+            val englishShit = context.assets.open("en_shit.txt")
+                .bufferedReader(Charsets.UTF_8)
+                .readLines()
+                .filter { it.isNotBlank() && it.length in 4..11 }
+
+            englishShit.chunked(400) { batch ->
+                batch.forEach { word ->
+                    val w = word.trim().uppercase()
+                    db.execSQL(
+                        "UPDATE words SET rating = 1 WHERE word = ? AND language = 'en'",
+                        arrayOf(w)
+                    )
+                    db.execSQL(
+                        "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'en', 1)",
+                        arrayOf(w, w.length)
+                    )
+                    enShitAdded++
+                }
+
+            }
+
+            // Добавляем чешские слова
+            val czechWords = context.assets.open("cs_nouns_upper.txt")
+                .bufferedReader(Charsets.UTF_8)
+                .readLines()
+                .filter { it.isNotBlank() && it.length in 4..11 }
+
+            czechWords.chunked(400) { batch ->
+                batch.forEach { word ->
+                    db.execSQL(
+                        "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'cs', 0)",
+                        arrayOf(word.trim().uppercase(), word.trim().length)
+                    )
+                    csAdded++
+                }
+
+            }
+
+            val czechShit = context.assets.open("cs_shit.txt")
+                .bufferedReader(Charsets.UTF_8)
+                .readLines()
+                .filter { it.isNotBlank() && it.length in 4..11 }
+
+            czechShit.chunked(400) { batch ->
+                batch.forEach { word ->
+                    val w = word.trim().uppercase()
+                    db.execSQL(
+                        "UPDATE words SET rating = 1 WHERE word = ? AND language = 'cs'",
+                        arrayOf(w)
+                    )
+                    db.execSQL(
+                        "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'cs', 1)",
+                        arrayOf(w, w.length)
+                    )
+                    csShitAdded++
+                }
+
+            }
+
+            db.execSQL("""
+                INSERT INTO category_achieve_translations (category_id, lang, name)
+                VALUES
+                    (1, 'cs', 'Padawan'),
+                    (2, 'cs', 'Amatér'),
+                    (3, 'cs', 'Veterán'),
+                    (4, 'cs', 'Starý mazák')
+            """.trimIndent()
+            )
+
+            db.execSQL("""
+              INSERT INTO achievement_translations (achieve_id, lang, title, description, condition)
+              VALUES
+                (1,  'cs', 'První slovo',      'Ma-ma? Ta-ta? Ne, Bobr.',                                    'Odehrát 1 hru'),
+                (2,  'cs', 'Normální',         'Nic zvláštního. Doslova.',                                    'Uhodnout 1 slovo v Normálním režimu'),
+                (3,  'cs', 'Hardcore hráč',    'Zničená psychika a hromada proher — ale jaká odměna!',        'Uhodnout 1 slovo v Těžkém režimu'),
+                (4,  'cs', 'Náhodný debut',    'Byl to jednou obyčejný bobr',                                 'Uhodnout 1 slovo v Náhodném režimu'),
+                (5,  'cs', 'Ty nejsi můj kamarád!', 'Uhodli tvoje slovo zpátky?',                            'Uhodnout 1 slovo v Přátelském režimu'),
+                (6,  'cs', 'Vítěz',            'Příjemné vyhrávat, že?',                                      'Vyhrát 20 her'),
+                (7,  'cs', 'Smolař',           'Příště to určitě vyjde!',                                     'Prohrát 10 her'),
+                (8,  'cs', 'WordleFilia',      'Lékaři jsou znepokojeni.',                                    'Odehrát 50 her'),
+                (9,  'cs', 'Součást systému',  'Teď tě sleduju!',                                             'Zaregistrovat účet'),
+                (10, 'cs', 'Učenec I',         'Co to máš v rukávu — tajný slovník?',                         'Sestavit slovník z 50 slov'),
+                (11, 'cs', 'Sériový maniak',   'Možná by bylo dobré zajít k psychiatrovi…',                   'Dosáhnout série 10 výher'),
+                (12, 'cs', 'Šťastlivec',       'Možná je čas zkusit loterii :3',                              'Uhodnout slovo na první pokus. Přátelský režim se nepočítá!'),
+                (13, 'cs', 'Učenec II',        'Tvoje slovní zásoba překonává celou abecedu!',                'Sestavit slovník ze 150 slov'),
+                (14, 'cs', 'Rychlostřelec',    'Polehoučku, kovboji!',                                        'Uhodnout slovo za méně než 30 sekund'),
+                (15, 'cs', 'Zlý génius',       'Ty přece máš plán… že jo?',                                   'Prohrát 5 her v řadě'),
+                (16, 'cs', 'Dříč',             'Polyglot? Polygraf? Kdo jsi, bojovníku?',                     'Uhodnout 1000 slov'),
+                (17, 'cs', 'Slon',             'Skutečný patriot',                                             'Uhodnout 1000 ruských slov'),
+                (18, 'cs', 'Tester',           'Čas poslat životopis na QA…',                                 'Odeslat zprávu na podporu'),
+                (19, 'cs', 'Piknik',           'To je jako ten web s obrázky?',                               'Uhodnout slovo… které?'),
+                (20, 'cs', 'Bobr',             'Správní vědí',                                                'Uhodnout slovo ''Бобер'''),
+                (21, 'cs', 'Šílenství',        'Už jsem ti říkal, co je to šílenství?',                       'Zadat stejné slovo několikrát za sebou'),
+                (22, 'cs', 'Hodinář',          'Jak dlouho je navždy? Někdy jen jednu vteřinu',               'Hrát 999 999 sekund'),
+                (23, 'cs', 'Abeceda',          'Páni, znáš písmenka. Působivé',                               'Vyhrát 10 her se slovy o 4 písmenech'),
+                (24, 'cs', 'Slabikář',         'Mohlo být hůř, předpokládám',                                 'Vyhrát 10 her se slovy o 5 písmenech'),
+                (25, 'cs', 'Gramotný',         'Maminka by byla pyšná. Asi',                                  'Vyhrát 10 her se slovy o 6 písmenech'),
+                (26, 'cs', 'Čtenář',           'Nebo jen příliš mnoho volného času',                          'Vyhrát 10 her se slovy o 7 písmenech'),
+                (27, 'cs', 'Lexikon',          'Mluvíš takhle i na rande?',                                   'Vyhrát 10 her se slovy o 8 písmenech'),
+                (28, 'cs', 'Erudit',           'Normální lidi prostě koukají na Netflix',                     'Vyhrát 10 her se slovy o 9 písmenech'),
+                (29, 'cs', 'Polyglot',         'Jasně, to slovo jsi určitě znal',                             'Vyhrát 10 her se slovy o 10 písmenech'),
+                (30, 'cs', 'Lingvista',        'Jdi už učit, co tu děláš',                                    'Vyhrát 10 her se slovy o 11 písmenech'),
+                (100, 'cs', 'Platina', '— Dostanu za to něco?' || char(10) || '— Nic. Jen čest a nekonečný respekt.' || char(10) || '— Vlaječku, pero…' || char(10) || '— Nic.' || char(10) || '— Kartičku?' || char(10) || '— Ne.', 'Odemknout všechna úspěchy')
+            """.trimIndent()
+            )
+
+            db.execSQL("""
+                INSERT INTO mode_statistics_translations(mode_id, lang, name)
+                VALUES
+                    (0, 'cs', 'Klasika'),
+                    (1, 'cs', 'Těžký'),
+                    (2, 'cs', 'Náhodný'),
+                    (3, 'cs', 'Přátelský')
+            """.trimIndent()
+            )
 
             db.execSQL("PRAGMA foreign_keys = ON")
         }

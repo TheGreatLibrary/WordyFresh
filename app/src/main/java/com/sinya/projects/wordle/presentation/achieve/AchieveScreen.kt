@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -96,10 +98,15 @@ private fun AchieveScreenView(
         }
     }
 
-    Box(Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(pullToRefreshState.nestedScrollConnection),
+        contentAlignment = Alignment.TopCenter
+    ) {
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
+                .widthIn(max = 550.dp)
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(9.dp)

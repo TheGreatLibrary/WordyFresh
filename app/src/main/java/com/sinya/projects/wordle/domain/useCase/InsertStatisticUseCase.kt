@@ -8,12 +8,6 @@ class InsertStatisticUseCase @Inject constructor(
     private val repository: StatisticRepository
 ) {
     suspend operator fun invoke(updated: OfflineStatistics): Result<Unit> {
-        return try {
-            repository.insertGame(updated)
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        return repository.insertGame(updated)
     }
 }

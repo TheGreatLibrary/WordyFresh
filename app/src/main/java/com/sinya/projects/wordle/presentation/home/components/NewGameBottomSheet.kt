@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.presentation.home.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
@@ -49,21 +51,24 @@ fun NewGameBottomSheet(
         LaunchedEffect(Unit) {
             navigateTo(pendingRoute!!)
         }
-    }
-    else {
+    } else {
         CustomModalSheet(onDismissRequest) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 5.dp, bottom = 45.dp, start = 16.dp, end = 16.dp),
+                    .padding(top = 5.dp, bottom = 45.dp, start = 24.dp, end = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SheetSection(title = stringResource(R.string.word_size)) {
-                    WordSizeSelector(
-                        selected = selectedWordSize,
-                        onSelected = { selectedWordSize = it }
-                    )
+                AnimatedVisibility(
+                    selectedGameMode != GameMode.RANDOM
+                ) {
+                    SheetSection(title = stringResource(R.string.word_size)) {
+                        WordSizeSelector(
+                            selected = selectedWordSize,
+                            onSelected = { selectedWordSize = it }
+                        )
+                    }
                 }
                 SheetSection(title = stringResource(R.string.language_of_game)) {
                     LanguageSelector(
@@ -151,7 +156,8 @@ private fun GameModeSelector(
     val modes = remember {
         listOf(
             GameMode.NORMAL to R.string.classic_mode,
-            GameMode.HARD to R.string.hard_mode_horizontal
+            GameMode.HARD to R.string.hard_mode_horizontal,
+            GameMode.RANDOM to R.string.random_m
         )
     }
 
@@ -214,7 +220,14 @@ private fun SelectableButton(
         contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
         onClick = onClick,
     ) {
-        Text(text, fontSize = 14.sp, style = WordyTypography.bodyMedium)
+        Text(
+            text,
+            fontSize = 14.sp,
+            style = WordyTypography.bodyMedium,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = true,
+            maxLines = 1
+        )
     }
 }
 

@@ -132,7 +132,7 @@ private fun FriendModalForm(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 5.dp, bottom = 45.dp, start = 16.dp, end = 16.dp),
+                .padding(top = 5.dp, bottom = 45.dp, start = 24.dp, end = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(

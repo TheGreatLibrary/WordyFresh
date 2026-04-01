@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.presentation.game.components.WordCell
-import com.sinya.projects.wordle.presentation.onboarding.OnboardingData
+import com.sinya.projects.wordle.utils.OnboardingData
 import com.sinya.projects.wordle.presentation.onboarding.components.NavigationInstructions
 import com.sinya.projects.wordle.presentation.onboarding.components.OnboardingPageTemplate
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -40,13 +41,7 @@ fun PageAttempts() {
                 color = WordyColor.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
-            Text(
-                text = stringResource(R.string.attemts_descr1),
-                style = WordyTypography.bodyMedium,
-                fontSize = 16.sp,
-                color = WordyColor.colors.textPrimary,
-                textAlign = TextAlign.Center
-            )
+
         }
 
         FlowRow(
@@ -63,7 +58,15 @@ fun PageAttempts() {
                 )
             }
         }
+        Text(
+            text = stringResource(R.string.attemts_descr2),
+            style = WordyTypography.bodyMedium,
+            fontSize = 16.sp,
+            color = WordyColor.colors.textPrimary,
+            textAlign = TextAlign.Center
+        )
 
-        NavigationInstructions()
+        Spacer(Modifier)
+
     }
 }

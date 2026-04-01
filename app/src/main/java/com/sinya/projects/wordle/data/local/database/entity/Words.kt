@@ -11,7 +11,8 @@ import androidx.room.PrimaryKey
         Index(value = ["language"]),
         Index(value = ["length"]),
         Index(value = ["word"]),
-        Index(value = ["language", "length"])
+        Index(value = ["language", "length"]),
+        Index(value = ["word", "language"], unique = true)
     ]
 )
 data class Words(

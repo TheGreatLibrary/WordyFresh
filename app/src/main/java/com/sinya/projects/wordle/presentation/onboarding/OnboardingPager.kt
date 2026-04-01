@@ -2,14 +2,17 @@ package com.sinya.projects.wordle.presentation.onboarding
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -33,6 +36,7 @@ import com.sinya.projects.wordle.presentation.onboarding.components.DotsIndicato
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageAttempts
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageCellColors
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageFinish
+import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageKeyboard
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageMagic
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageRules
 import com.sinya.projects.wordle.presentation.onboarding.subscreen.PageWelcome
@@ -63,82 +67,91 @@ fun OnboardingPager(
     }
     val pagerState = rememberPagerState(pageCount = { pages.size })
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        AnimatedVisibility(
-            visible = pagerState.currentPage == 0 && onboardingCompletedStatus != true
+        Column(
+            modifier = Modifier
+                .widthIn(max = 550.dp)
+                .fillMaxHeight()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Absolute.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            AnimatedVisibility(
+                visible = pagerState.currentPage == 0 && onboardingCompletedStatus != true
             ) {
-                ImageButton(
-                    image = if (!currentIsDark) R.drawable.set_light else R.drawable.set_night,
-                    modifierImage = Modifier.size(32.dp),
-                    colorFilter = ColorFilter.tint(WordyColor.colors.textPrimary),
-                    onClick = {
-                        engine.clearBackground()
-                        engine.setDark(!currentIsDark)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ImageButton(
+                        image = if (!currentIsDark) R.drawable.set_light else R.drawable.set_night,
+                        modifierImage = Modifier.size(32.dp),
+                        colorFilter = ColorFilter.tint(WordyColor.colors.textPrimary),
+                        onClick = {
+                            engine.clearBackground()
+                            engine.setDark(!currentIsDark)
+                        }
+                    )
+                    TextButton(
+                        colors = ButtonDefaults.textButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = WordyColor.colors.textPrimary,
+                        ),
+                        onClick = {
+                            engine.setOnboardingState(true)
+                            navigateTo()
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.skip),
+                            style = WordyTypography.labelSmall
+                        )
                     }
+                }
+            }
+
+            AnimatedVisibility(
+                visible = pagerState.currentPage != 0 || onboardingCompletedStatus == true
+            ) {
+                DotsIndicator(
+                    totalDots = pages.size,
+                    selectedIndex = pagerState.currentPage
                 )
-                TextButton(
-                    colors = ButtonDefaults.textButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = WordyColor.colors.textPrimary,
-                    ),
-                    onClick = {
+            }
+
+            HorizontalPager(
+                state = pagerState,
+                userScrollEnabled = pagerState.currentPage != 0 || onboardingCompletedStatus == true
+            ) { page ->
+                when (pages[page]) {
+                    OnboardingState.WELCOME -> PageWelcome(
+                        onNext = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(1)
+                            }
+                        },
+                        changeLang = engine::setLang
+                    )
+
+                    OnboardingState.CELL_COLORS -> PageCellColors()
+
+                    OnboardingState.KEYBOARD -> PageKeyboard()
+
+                    OnboardingState.ATTEMPTS -> PageAttempts()
+
+                    OnboardingState.RULES -> PageRules()
+
+                    OnboardingState.MAGIC -> PageMagic()
+
+                    OnboardingState.FINISH -> PageFinish {
                         engine.setOnboardingState(true)
                         navigateTo()
                     }
-                ) {
-                    Text(
-                        text = stringResource(R.string.skip),
-                        style = WordyTypography.labelSmall
-                    )
-                }
-            }
-        }
-
-        AnimatedVisibility(
-            visible = pagerState.currentPage != 0 || onboardingCompletedStatus == true
-        ) {
-            DotsIndicator(
-                totalDots = pages.size,
-                selectedIndex = pagerState.currentPage
-            )
-        }
-
-        HorizontalPager(
-            state = pagerState,
-            userScrollEnabled = pagerState.currentPage != 0 || onboardingCompletedStatus == true
-        ) { page ->
-            when (pages[page]) {
-                OnboardingState.WELCOME -> PageWelcome(
-                    onNext = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(1)
-                        }
-                    },
-                    changeLang = engine::setLang
-                )
-
-                OnboardingState.CELL_COLORS -> PageCellColors()
-
-                OnboardingState.ATTEMPTS -> PageAttempts()
-
-                OnboardingState.RULES -> PageRules()
-
-                OnboardingState.MAGIC -> PageMagic()
-
-                OnboardingState.FINISH -> PageFinish {
-                    engine.setOnboardingState(true)
-                    navigateTo()
                 }
             }
         }

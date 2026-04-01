@@ -32,7 +32,7 @@ fun ContinueGameButton(
     val context = LocalContext.current
 
     RoundedButton(
-        modifier = Modifier.fillMaxWidth(0.7f),
+        modifier = Modifier.fillMaxWidth(0.6f),
         colors = ButtonDefaults.buttonColors(
             containerColor = WordyColor.colors.backgroundActiveBtnMkI
         ),

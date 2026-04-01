@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.domain.enums.TypeLanguages
 import com.sinya.projects.wordle.domain.model.AttemptData
 import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.ui.features.CustomCard
@@ -186,8 +187,10 @@ private fun AttemptsProgressCard(
                         horizontalArrangement = Arrangement.spacedBy(20.dp, alignment = Alignment.CenterHorizontally)
                     ) {
                         attempts.forEach { attemptData ->
+                            val res = TypeLanguages.getShortName(attemptData.number)
+
                             VerticalProgressBar(
-                                number = attemptData.number,
+                                number = if (res!=null) stringResource(res) else attemptData.number,
                                 count = attemptData.count.toString(),
                                 percent = attemptData.percent
                             )

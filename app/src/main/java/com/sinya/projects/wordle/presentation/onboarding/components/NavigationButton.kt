@@ -2,7 +2,7 @@ package com.sinya.projects.wordle.presentation.onboarding.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,7 +16,7 @@ import com.sinya.projects.wordle.ui.theme.WordyTypography
 
 @Composable
 fun NavigationButton(
-    key: Char,
+    key: Key,
     description: String
 ) {
     Row(
@@ -24,9 +24,10 @@ fun NavigationButton(
         verticalAlignment = Alignment.CenterVertically
     ) {
         KeyboardKey(
-            key = Key(key),
+            key = key,
             onClick = { },
-            modifier = Modifier.width(40.dp)
+            fontSize = 13,
+            modifier = Modifier.size(30.dp)
         )
         Text(
             text = "-",

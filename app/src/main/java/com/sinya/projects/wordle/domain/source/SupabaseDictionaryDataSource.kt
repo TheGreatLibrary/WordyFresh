@@ -120,8 +120,11 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
                 syncDictionaryDao.clearAll()
 
                 if (remote.isNotEmpty()) {
-                    syncDictionaryDao.insertList(remote)
+                    val existingWordIds = syncDictionaryDao.getAllIds().toSet()
+                    val filtered = remote.filter { it.wordId in existingWordIds }
+                    if (filtered.isNotEmpty()) syncDictionaryDao.insertList(filtered)
                 }
+
                 Result.success(Unit)
             } catch (e: Exception) {
                 Log.e("SupabaseDictionaryDataSource", "Error syncing from Supabase", e)

@@ -3,6 +3,7 @@ package com.sinya.projects.wordle.domain.enums
 enum class OnboardingState {
     WELCOME,
     CELL_COLORS,
+    KEYBOARD,
     ATTEMPTS,
     RULES,
     MAGIC,

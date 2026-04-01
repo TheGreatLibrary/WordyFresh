@@ -87,7 +87,7 @@ private fun EmailConfirmScreenView(
                 error = stringResource(R.string.is_email_error)
             )
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.7f),
+                modifier = Modifier.fillMaxWidth(0.6f),
                 colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 onClick = { onEvent(EmailConfirmEvent.GoToLoading) }

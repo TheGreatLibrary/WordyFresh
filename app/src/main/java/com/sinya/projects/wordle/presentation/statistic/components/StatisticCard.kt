@@ -8,10 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -208,49 +212,46 @@ private fun WinRateContent(
     ) {
         Box(
             modifier = Modifier
-                .height(IntrinsicSize.Min)
-                .padding(horizontal = 15.dp),
+                .fillMaxWidth()
+                .padding(horizontal = 15.dp, vertical = 5.dp),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(2f)
+            ) {
                 val diameter = size.width
-                val center = Offset(diameter / 2, diameter / 2)
+                val strokeWidth = diameter * 0.08f  // адаптивная толщина вместо фиксированных 26f
 
                 drawArc(
                     color = Color.Gray.copy(alpha = 0.2f),
                     startAngle = 180f,
                     sweepAngle = 180f,
                     useCenter = false,
-                    style = Stroke(width = 26f, cap = StrokeCap.Round),
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
                     size = Size(diameter, diameter),
-                    topLeft = Offset(center.x - diameter / 2, center.y - diameter / 2)
+                    topLeft = Offset(0f, 0f)
                 )
 
-                // Progress arc
                 if (statistic.countGame != 0) {
-                    val startAngle = if (showLosses) {
-                        180f + 180f * winRate
-                    } else {
-                        180f
-                    }
-                    val sweepAngle = 180f * displayRate
-
+                    val startAngle = if (showLosses) 180f + 180f * winRate else 180f
                     drawArc(
                         color = if (showLosses) red else green800,
                         startAngle = startAngle,
-                        sweepAngle = sweepAngle,
+                        sweepAngle = 180f * displayRate,
                         useCenter = false,
-                        style = Stroke(width = 26f, cap = StrokeCap.Round),
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
                         size = Size(diameter, diameter),
-                        topLeft = Offset(center.x - diameter / 2, center.y - diameter / 2)
+                        topLeft = Offset(0f, 0f)
                     )
                 }
             }
 
             Column(
-                modifier = Modifier.padding(top = 10.dp),
+                modifier = Modifier.padding(top = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
+                verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.Bottom)
             ) {
                 Text(
                     text = progress,
@@ -268,7 +269,6 @@ private fun WinRateContent(
                 )
             }
         }
-
         Text(
             text = stringResource(
                 if (showLosses) R.string.percent_lose else R.string.percent_win

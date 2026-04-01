@@ -2,6 +2,7 @@ package com.sinya.projects.wordle.data.local.achievement
 
 import com.sinya.projects.wordle.domain.enums.TypeAchievement
 import com.sinya.projects.wordle.domain.enums.GameMode
+import com.sinya.projects.wordle.domain.enums.TypeLanguages
 
 object ConditionFactory {
     fun create(achieve: AchievementId?): AchievementCondition = when (achieve) {
@@ -36,7 +37,7 @@ object ConditionFactory {
 
         // ——————————— Олд ————————————
         AchievementId.GRINDER -> LangWordsGuessedCondition()
-        AchievementId.RUSSIAN_ELEPHANT -> LangWordsGuessedCondition("ru")
+        AchievementId.RUSSIAN_ELEPHANT -> LangWordsGuessedCondition(TypeLanguages.RU.code)
         AchievementId.TESTER -> SupportMessageSentCondition()
         AchievementId.SECRET_PICNIC -> MysteryCondition("ПИКНИК")
         AchievementId.SECRET_BOBER -> MysteryCondition("БОБЕР")

@@ -68,7 +68,7 @@ fun TabContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             RoundedButton(
-                modifier = Modifier.fillMaxWidth(0.7f),
+                modifier = Modifier.fillMaxWidth(0.6f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = WordyColor.colors.backgroundActiveBtnMkI,
                     contentColor = WordyColor.colors.textForActiveBtnMkI

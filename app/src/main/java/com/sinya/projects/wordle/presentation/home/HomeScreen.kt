@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -51,9 +53,10 @@ fun HomeScreen(
 
     Box(
         Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(start = 16.dp, end = 16.dp, bottom = 50.dp),
+        contentAlignment = Alignment.TopCenter
     ) {
         when (state) {
             HomeUiState.Loading -> HomePlaceholder()
@@ -97,7 +100,7 @@ private fun HomeScreenView(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.widthIn(max = 550.dp)) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -116,10 +119,15 @@ private fun HomeScreenView(
                     onHardClick = {
                         onEvent(HomeEvent.BottomSheetUploadMode(mode = GameMode.HARD))
                     },
-                    onRandomClick = { navigateTo(ScreenRoute.Game(mode = GameMode.RANDOM.id)) },
+                    onRandomClick = {
+                        onEvent(HomeEvent.BottomSheetUploadMode(mode = GameMode.RANDOM))
+                    },
                 )
             }
-            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(9.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 state.savedGame?.let {
                     ContinueGameButton(
                         savedGame = it,

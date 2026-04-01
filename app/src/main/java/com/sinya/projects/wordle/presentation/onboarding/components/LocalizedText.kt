@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.domain.enums.TypeLanguages
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 import com.sinya.projects.wordle.utils.withLocale
@@ -24,7 +25,7 @@ fun LocalizedText(
         context.resources.configuration.locales[0].language
     }
     val nextLang = remember(currentLang) {
-        if (currentLang == "en") "ru" else "en"
+        if (currentLang == TypeLanguages.EN.code) TypeLanguages.RU.code else TypeLanguages.EN.code
     }
     val buttonText = remember(nextLang) {
         val nextContext = context.withLocale(Locale(nextLang))

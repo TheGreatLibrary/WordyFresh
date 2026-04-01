@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wordy Fresh</string>
+
+    <!-- Режимы игры (карточки) -->
+    <string name="friend_mode">Přátelská výzva</string>
+    <string name="hard_mode">Těžký\nrežim</string>
+    <string name="random_mode">Náhodný režim</string>
+
+    <!-- Режимы игры (статистика и диалоговое окно) -->
+    <string name="all_modes">Všechny režimy</string>
+    <string name="classic_mode">Klasika</string>
+    <string name="hard_m">Těžký</string>
+    <string name="random_m">Náhodný</string>
+    <string name="friend_m">Přátelský</string>
+
+    <!-- Страницы -->
+    <string name="statistic_screen">Statistiky</string>
+    <string name="settings_screen">Nastavení</string>
+    <string name="achievements">Úspěchy</string>
+    <string name="profile_screen">Profil</string>
+    <string name="dictionary">Slovník</string>
+    <string name="home">Domů</string>
+    <string name="rewrite_screen">Upravit profil</string>
+    <string name="about_app_screen">O hře</string>
+    <string name="policy_privacy">Zásady ochrany soukromí</string>
+    <string name="terms_of_use">Podmínky použití</string>
+    <string name="create_account">Vytvořit účet</string>
+    <string name="reset_password">Obnovit heslo</string>
+    <string name="edit">Upravit</string>
+    <string name="reset_email">Změnit e-mail</string>
+
+    <!-- Тема -->
+    <string name="change_theme">Téma</string>
+    <string name="light">Světlé</string>
+    <string name="dark">Tmavé</string>
+
+    <!-- Язык -->
+    <string name="change_lang">Jazyk</string>
+    <string name="russian">Ruština</string>
+    <string name="english">Angličtina</string>
+
+    <!-- Клавиатура -->
+    <string name="keyboard_classic">Klasická</string>
+    <string name="keyboard_wordle">Wordle</string>
+    <string name="keyboard_reverse">Zrcadlová</string>
+    <string name="keyboard_big_enter">Velký Enter</string>
+
+    <string name="play">Hrát</string>
+    <string name="continue_text">Pokračovat</string>
+    <string name="new_game">Nová hra</string>
+
+    <!-- Форма для регистраций -->
+    <string name="sign_up">Registrovat se</string>
+    <string name="sign_in">Přihlásit se</string>
+    <string name="check_your_mail">Zkontrolujte svůj e-mail</string>
+    <string name="put_email_of_account">Zadejte svůj e-mail pro obnovení hesla</string>
+    <string name="send_letter">Odeslat e-mail</string>
+
+    <string name="put_new_password">Nastavte nové heslo</string>
+    <string name="put_new_nickname">Nastavte nové jméno!</string>
+    <string name="put_new_email">Zadejte nový e-mail!</string>
+    <string name="welcome">Vítejte zpět! Čekali jsme na vás!</string>
+    <string name="put_string_and_play">Vyplňte pole a ponořte se do hry!</string>
+
+    <string name="sync_to_save_stat">Synchronizujte a ukládejte statistiky.</string>
+    <string name="play_with_friends">Hrajte s přáteli a posílejte jim slova přímo z aplikace!</string>
+    <string name="login_in_wordy">Přihlášení do Wordy</string>
+
+    <string name="forgot_password">Zapomněli jste heslo?</string>
+    <string name="no_account">Nemáte účet?</string>
+    <string name="already_have_account">Již máte účet?</string>
+    <string name="sing_in_1">Přihlaste se!</string>
+    <string name="sign_up_1">Zaregistrujte se!</string>
+    <string name="terms_and_privacy">Souhlasím s %1$s a %2$s</string>
+    <string name="terms_of_use_clickable">podmínkami použití</string>
+    <string name="privacy_policy_clickable">zásadami ochrany soukromí</string>
+
+    <!-- Категории настроек -->
+    <string name="background_fon">Vzhled</string>
+    <string name="change_keyboard">Klávesnice</string>
+    <string name="guide">Jak hrát</string>
+    <string name="start">Začít</string>
+    <string name="vibration">Vibrace</string>
+    <string name="confetti">Animace konfet</string>
+    <string name="abuse_words">Nevhodná slova</string>
+    <string name="send_to_support">Kontaktovat podporu</string>
+    <string name="version">Verze</string>
+
+    <!-- Статистика -->
+    <string name="all_count_game">Odehraných her</string>
+    <string name="now_serial">Aktuální série</string>
+    <string name="best_serial">Nejlepší série</string>
+    <string name="percent_win">Míra výher</string>
+    <string name="percent_lose">Míra proher</string>
+    <string name="abs_time">Průměrný čas</string>
+    <string name="sum_time">Celkový čas</string>
+    <string name="stat_progress_title">Rozdělení výherních pokusů</string>
+
+    <string name="confirm_delete">Potvrdit smazání</string>
+    <string name="text_dialog_delete_stat">Opravdu chcete vymazat statistiky? Všechna lokální a synchronizovaná data budou ztracena.</string>
+    <string name="cancel">Zrušit</string>
+    <string name="delete">Smazat</string>
+
+    <plurals name="letters_count">
+        <item quantity="one">%d písmeno</item>
+        <item quantity="few">%d písmena</item>
+        <item quantity="many">%d písmen</item>
+        <item quantity="other">%d písmen</item>
+    </plurals>
+
+    <!-- Категории профиля -->
+    <string name="password_recovery">Změnit heslo</string>
+    <string name="email_recovery">Změnit e-mail</string>
+    <string name="exit">Odhlásit se</string>
+
+    <!-- Словарь -->
+    <string name="put_text">Zadejte slovo</string>
+    <string name="share_text">Co je %1$s? %2$s. Zjistil jsem to ve Wordy Fresh — podívejte se zde: %3$s</string>
+    <string name="no_description">Definice nenalezena. Klepnutím na první tlačítko vyhledejte online</string>
+    <string name="shared_to">Sdílet přes</string>
+
+    <!-- Игра (конец партии) -->
+    <string name="hard_hint_exact_position">Jejda! Písmeno %1$s musí být na pozici %2$d</string>
+    <string name="hard_hint_letter_required">Nezapomeňte! Slovo musí obsahovat písmeno %1$s</string>
+
+    <string name="not_found_word">Hmm… Takové slovo neexistuje</string>
+    <string name="hidden_word">Správné slovo bylo:</string>
+    <string name="put_enter_to_play">Nebo stiskněte Enter pro novou hru</string>
+
+    <string name="placeholder"> </string>
+    <string name="win">Vyhrál jsi!</string>
+    <string name="lose">Tentokrát ne</string>
+
+    <!-- окошко перед началом игры -->
+    <string name="word_size">Délka slova</string>
+    <string name="language_of_game">Jazyk hry</string>
+    <string name="mode_of_game">Herní režim</string>
+    <string name="hard_mode_horizontal">Těžký režim</string>
+
+    <!-- Дружеский режим окошко -->
+    <string name="get_shifr_word">Zadat slovo</string>
+    <string name="put_shifr_word">Uhodnout slovo</string>
+    <string name="is_word_in_database_error">Toto slovo není v databázi!</string>
+    <string name="put_here">Zadejte zde!</string>
+
+    <!-- onboarding -->
+    <string name="skip">Přeskočit</string>
+    <string name="continue_in_lang">Pokračovat v češtině</string>
+    <string name="onboard_welcome">Perfektní způsob jak zabít čas při cestování nebo čekání!</string>
+    <string name="start_learn">Začít tutoriál</string>
+    <string name="color_cell">Barva buňky je nápověda</string>
+    <string name="good_try">Správně!</string>
+    <string name="not_bad_try">Správné písmeno, špatné místo</string>
+    <string name="bad_try">Není ve slově</string>
+    <string name="tryes_6">Máte 6 pokusů!</string>
+    <string name="navigation_btns">Pro navigaci použijte klávesy</string>
+    <string name="rule1">Pouze podstatná jména*</string>
+    <string name="rule1_descr">* Autor nenese odpovědnost za jiné slovní druhy, které se mohou vyskytnout</string>
+    <string name="rule2">Jednotné číslo</string>
+    <string name="rule2_descr">Slova musí být v jednotném čísle, kromě správných tvarů množného čísla</string>
+    <string name="rule3">Háčky a čárky jsou součástí hry</string>
+    <string name="rule3_descr">Na rozdíl od ruštiny, diakritika v češtině je plně zahrnuta</string>
+    <string name="finish_onboard">Teď je řada na tobě zazářit!</string>
+    <string name="duplicate_descr">Pouze jedno písmeno bude zvýrazněno, pokud se ve slově vyskytuje jednou</string>
+    <string name="duplicate">Duplicitní písmeno</string>
+    <string name="open_the_game">Začít dobrodružství!</string>
+
+    <!-- label для текстовых полей -->
+    <string name="new_email">Nový e-mail</string>
+    <string name="new_nickname">Nové jméno</string>
+    <string name="email">E-mail</string>
+    <string name="new_password">Nové heslo</string>
+    <string name="repeat_new_password">Zopakovat nové heslo</string>
+    <string name="name">Jméno</string>
+    <string name="password">Heslo</string>
+
+    <!-- placeholder для текстовых полей -->
+    <string name="password_sample">f92F37fAX01Gef!</string>
+    <string name="email_sample">examle@gmail.com</string>
+    <string name="scary_bober">Strašný bobr</string>
+
+    <!-- ошибка для текстовых полей -->
+    <string name="is_password_error">Neplatné heslo</string>
+    <string name="is_email_error">Neplatný e-mail</string>
+    <string name="is_name_error">Neplatné jméno</string>
+
+    <string name="send_mail">Odeslat e-mail</string>
+    <string name="save_result">Uložit</string>
+    <string name="license">© 2025 Alexsander Limanskiy. Všechna práva vyhrazena.</string>
+
+    <string name="we_send_mail_to_confirm">Poslali jsme potvrzovací e-mail na %1$s</string>
+    <string name="saved_game">Uložená hra</string>
+    <string name="start_game">Začít</string>
+    <string name="cipher_copied">Šifra zkopírována do schránky!</string>
+    <string name="enter_word_to_encode">Zadejte slovo pro vytvoření šifry</string>
+    <string name="enter_cipher_to_decode">Zadejte šifru pro zahájení hry</string>
+    <string name="cipher_placeholder">Vložte šifru</string>
+    <string name="get_cipher">Získat šifru</string>
+    <string name="invalid_cipher_error">Neplatná šifra nebo slovo nenalezeno</string>
+
+    <string name="achieve_is_unlocked">Úspěch odemčen!</string>
+    <string name="avg_time">Průměr. čas</string>
+    <string name="current_streak">Akt. série</string>
+    <string name="current_mode">Akt. režim</string>
+    <string name="per_win">Míra výher</string>
+    <string name="parsing_word">Zjistit význam slova →</string>
+    <string name="share_button_text">Co je %1$s? %2$s. Zjistil jsem to ve Wordy Fresh během hry:\n\n%3$s\n\nPřidejte se: %4$s</string>
+    <string name="create_profile">Vytvořte svůj profil</string>
+    <string name="put_nickname_and_avatar">Zvolte přezdívku a avatar!</string>
+
+    <string name="share_invite">Přítel tě vyzývá na souboj! Přijmeš výzvu ve Wordy Fresh? Klikni na odkaz: %1$s!</string>
+    <string name="load_saved_game_text_dialog">Máte nedohranou hru! Chcete pokračovat nebo začít novou? Zahájením nové hry přepíšete uložený postup!</string>
+    <string name="load_saved_game_title_dialog">Pokračovat v uložené hře?</string>
+    <string name="load_saved_game">Pokračovat ve hře</string>
+    <string name="green_letters_hint">Nápovědy zelených písmen</string>
+    <string name="dont_take_warning">Nezobrazovat varování ve hře</string>
+    <string name="show_warning_dialog_in_game">Zobrazit varování ve hře</string>
+
+    <string name="not_has_hints">Nápovědy jsou vyčerpány</string>
+    <string name="hints_round_limit_reached">Limit %1$s nápověd za kolo byl dosažen</string>
+
+    <!-- ОШИБКИ -->
+    <string name="error_definition_not_found">Definice nenalezena.</string>
+    <string name="error_invalid_nickname">Přezdívka nemůže být prázdná.</string>
+    <string name="error_no_internet">Žádný internet. Omezený přístup.</string>
+    <string name="error_no_profile">Nastavení účtu nebylo dokončeno. Zkuste to znovu.</string>
+    <string name="error_not_authenticated">Vyžaduje se autorizace.</string>
+    <string name="error_word_not_found">Slovo nenalezeno.</string>
+    <string name="error_unknown">Něco se pokazilo. Zkuste to později.</string>
+    <string name="error_session_restore">Nepodařilo se obnovit relaci. Přihlaste se znovu.</string>
+
+    <string name="stat_lengths_progress_title">Hry podle délky slov</string>
+    <string name="stat_langs_progress_title">Hry podle jazyka</string>
+    <string name="over_your_step">Docházejí pokusy?</string>
+    <string name="use_2_magic_of_game">Použijte až 2 nápovědy za hru! Odhalí náhodné chybějící písmeno.</string>
+    <string name="use_magic_with_brain">Odhalená písmena nelze smazat — používejte je moudře!</string>
+    <string name="simple_tap_btn"> — jednoduše stiskněte tlačítko</string>
+    <string name="no_one">Nezadáno</string>
+    <string name="all">Vše</string>
+    <string name="languages">Jazyky</string>
+    <string name="lengths">Délky slov</string>
+    <string name="rus_short">Rus.</string>
+    <string name="eng_short">Ang.</string>
+    <string name="czech">Čeština</string>
+    <string name="cz_short">Češ.</string>
+    <string name="attemts_descr2">Uhodnutá písmena jsou nápovědou v dalších pokusech poloprůhlednou barvou</string>
+    <string name="hint_funs_keys">Skryté funkce klávesnice</string>
+    <string name="feautres_keyboards">Klávesnice má více variant rozvržení pro každý jazyk — včetně speciálního pro češtinu!</string>
+    <string name="long_press_btn1">Barvy jsou rozděleny zleva doprava pro každé písmeno klávesy!</string>
+    <string name="previous_btn">Přesun o jedno pole zpět, dlouhý stisk přeskočí více polí</string>
+    <string name="next_btn">Přesun vpřed, nebo začátek nové hry na konci!</string>
+</resources>

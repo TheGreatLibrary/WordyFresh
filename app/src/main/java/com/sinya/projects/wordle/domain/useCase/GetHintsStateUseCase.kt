@@ -18,6 +18,7 @@ class GetHintsStateUseCase @Inject constructor(
             is HintsRaw.Tampered  -> initDefault()
             is HintsRaw.Valid     -> computeState(raw)
         }
+
     }
 
     private suspend fun initDefault(): HintsState {

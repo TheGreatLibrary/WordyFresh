@@ -3,8 +3,7 @@ package com.sinya.projects.wordle.di
 import android.content.Context
 import androidx.room.Room
 import com.sinya.projects.wordle.data.local.database.AppDatabase
-import com.sinya.projects.wordle.data.local.database.DatabaseMigrations.MIGRATION_1_2
-import com.sinya.projects.wordle.data.local.database.DatabaseMigrations.MIGRATION_2_3
+import com.sinya.projects.wordle.data.local.database.DatabaseMigrations
 import com.sinya.projects.wordle.data.local.database.dao.AchievementsDao
 import com.sinya.projects.wordle.data.local.database.dao.OfflineAchievementsDao
 import com.sinya.projects.wordle.data.local.database.dao.OfflineDictionaryDao
@@ -30,13 +29,15 @@ object DatabaseModule {
     fun provideDatabase(
         @ApplicationContext context: Context
     ): AppDatabase {
+        val migrations = DatabaseMigrations(context)
+
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
             "wordy.db"
         )
             .createFromAsset("wordy.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(migrations.MIGRATION_1_2, migrations.MIGRATION_2_3, migrations.MIGRATION_3_4)
             .build()
     }
 

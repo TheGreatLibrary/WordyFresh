@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -46,6 +47,7 @@ import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryCa
 import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryPlaceholder
 import com.sinya.projects.wordle.presentation.dictionary.components.SearchContainer
 import com.sinya.projects.wordle.ui.features.Header
+import com.sinya.projects.wordle.ui.features.SortBlock
 
 @Composable
 fun DictionaryScreen(
@@ -76,9 +78,16 @@ private fun DictionaryScreenView(
     state: DictionaryUiState.Success,
     onEvent: (DictionaryEvent) -> Unit,
     navigateToBackStack: () -> Unit,
-    filtredList: List<DictionaryItem>
+    filtredList: List<DictionaryItem>,
 ) {
     val context = LocalContext.current
+    val modesFlattened = remember(state.dictionaryList, state.modes) {
+        state.modes.flatMap { mode ->
+            mode.categories<Any, Any>(state.dictionaryList, context).map { filter ->
+                filter to mode
+            }
+        }
+    }
 
     val onOpenUrl: (String) -> Unit = remember {
         { word ->
@@ -139,12 +148,15 @@ private fun DictionaryScreenView(
     }
 
     Box(
-        modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection)
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(pullToRefreshState.nestedScrollConnection),
+        contentAlignment = Alignment.TopCenter
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier
-                .fillMaxSize()
+                .widthIn(max = 550.dp)
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(horizontal = 16.dp)
         ) {
@@ -161,6 +173,21 @@ private fun DictionaryScreenView(
                             navigateTo = navigateToBackStack,
                             trashOnClick = { onEvent(DictionaryEvent.OnClearAll) }
                         )
+                        modesFlattened.forEach { (filter, mode) ->
+                            SortBlock(
+                                title = stringResource(filter.titleRes),
+                                selectedOption = filter.selectedValue,
+                                radioOptions = filter.options,
+                                onOptionSelected = { value ->
+                                    onEvent(
+                                        DictionaryEvent.SortParamChange(
+                                            mode,
+                                            filter.onSelect(value)
+                                        )
+                                    )
+                                }
+                            )
+                        }
                         SearchContainer(
                             searchQuery = state.searchQuery,
                             onValueChanged = { query ->

@@ -17,7 +17,7 @@ import com.sinya.projects.wordle.ui.theme.WordyTypography
 @Composable
 fun NewGameButton(onClick: () -> Unit) {
     RoundedButton(
-        modifier = Modifier.fillMaxWidth(0.7f),
+        modifier = Modifier.fillMaxWidth(0.6f),
         colors = ButtonDefaults.buttonColors(
             containerColor = WordyColor.colors.backgroundActiveBtnMkII
         ),

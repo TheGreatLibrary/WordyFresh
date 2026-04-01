@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
@@ -95,7 +96,8 @@ private fun GameScreenView(
 ) {
     FinishBottomSheet(
         state = state.showFinishDialog,
-        onEvent = onEvent
+        onEvent = onEvent,
+        navigateTo = navigateTo
     ) { paddingValues, onClick ->
         LaunchedEffect(state.showWarningMessage) {
             if (state.showWarningMessage != null) {
@@ -104,57 +106,66 @@ private fun GameScreenView(
             }
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(15.dp)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
         ) {
-            GameHeader(
-                navigateToBackStack = navigateToBackStack,
-                navigateTo = navigateTo,
-                onEvent = onEvent,
-                state = state
-            )
 
-            GamePlace(
-                state = state,
-                onEvent = onEvent
-            )
-
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 550.dp)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(paddingValues),
+                verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                TextResult(
-                    state.result.res
-                )
-            }
-            Box(
-                modifier = Modifier.wrapContentHeight(),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                CustomKeyboard(
-                    state = state,
+                GameHeader(
+                    navigateToBackStack = navigateToBackStack,
+                    navigateTo = navigateTo,
                     onEvent = onEvent,
-                    onClick = onClick
+                    state = state
                 )
+
+                GamePlace(
+                    state = state,
+                    onEvent = onEvent
+                )
+
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextResult(
+                        state.result.res
+                    )
+                }
+                Box(
+                    modifier = Modifier.wrapContentHeight(),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    CustomKeyboard(
+                        keyboardState = state.keyboardState,
+                        lang = state.lang,
+                        result = state.result,
+                        onEvent = onEvent,
+                        onClick = onClick,
+
+                    )
+                }
             }
+
+            NotRightWordDialog(
+                state.showWarningMessage
+            )
+
+            if (state.showLoadSavedGameDialog) LoadSavedGameDialog(
+                onLoadGameClick = { onEvent(GameEvent.LoadSavedGame) },
+                onNewGameClick = { onEvent(GameEvent.LoadNewGame) },
+                onDismissRequest = { onEvent(GameEvent.ShownLoadSavedGameDialog) },
+                checked = !state.showGameDialog,
+                checkBoxToggle = { onEvent(GameEvent.SetWarningDialogState(it)) }
+            )
+
+            if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
         }
-
-        NotRightWordDialog(
-            state.showWarningMessage
-        )
-
-        if (state.showLoadSavedGameDialog) LoadSavedGameDialog(
-            onLoadGameClick = { onEvent(GameEvent.LoadSavedGame) },
-            onNewGameClick = { onEvent(GameEvent.LoadNewGame) },
-            onDismissRequest = { onEvent(GameEvent.ShownLoadSavedGameDialog) },
-            checked = !state.showGameDialog,
-            checkBoxToggle = { onEvent(GameEvent.SetWarningDialogState(it)) }
-        )
-
-        if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
     }
 }

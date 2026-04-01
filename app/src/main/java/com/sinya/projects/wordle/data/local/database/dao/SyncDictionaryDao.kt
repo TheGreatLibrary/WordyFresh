@@ -16,6 +16,10 @@ interface SyncDictionaryDao {
 
     // SyncViewModel
 
+
+    @Query("SELECT id FROM words")
+    suspend fun getAllIds(): List<Int>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertList(dictionaryEntity: List<SyncDictionary>)
 }

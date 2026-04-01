@@ -11,6 +11,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
+import com.sinya.projects.wordle.domain.enums.GameColors
+import com.sinya.projects.wordle.domain.model.Key
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 
@@ -29,12 +31,17 @@ fun NavigationInstructions() {
         )
 
         NavigationButton(
-            key = '<',
-            description = stringResource(R.string.previos_btn)
+            key = Key('R', color = GameColors.GRAY, diacriticChar = 'Ř', diacriticColor = GameColors.GREEN),
+            description = stringResource(R.string.long_press_btn1)
         )
 
         NavigationButton(
-            key = '>',
+            key = Key('<'),
+            description = stringResource(R.string.previous_btn)
+        )
+
+        NavigationButton(
+            key = Key('>'),
             description = stringResource(R.string.next_btn)
         )
     }

@@ -20,10 +20,8 @@
     <string name="achievements">Achievements</string>
     <string name="profile_screen">Profile</string>
     <string name="dictionary">Dictionary</string>
-    <string name="friends_screen">Friends</string>
     <string name="home">Home</string>
     <string name="rewrite_screen">Edit Profile</string>
-    <string name="notification_screen">Notifications</string>
     <string name="about_app_screen">About the Game</string>
     <string name="policy_privacy">Privacy Policy</string>
     <string name="terms_of_use">Terms of Use</string>
@@ -70,9 +68,7 @@
     <string name="login_in_wordy">Log in to Wordy</string>
 
    <string name="forgot_password">Forgot your password?</string>
-    <string name="or_login_with">Or sign in with</string>
     <string name="no_account">Don’t have an account?</string>
-    <string name="or_sign_up_with">Or sign up with</string>
     <string name="already_have_account">Already have an account?</string>
     <string name="sing_in_1">Sign in!</string>
     <string name="sign_up_1">Sign up!</string>
@@ -80,14 +76,10 @@
     <string name="terms_of_use_clickable">Terms of Use</string>
     <string name="privacy_policy_clickable">Privacy Policy</string>
 
-
-    <!-- Категории настроек -->
     <string name="background_fon">Appearance</string>
     <string name="change_keyboard">Keyboard</string>
     <string name="guide">How to Play</string>
     <string name="start">Start</string>
-    <string name="music">Music</string>
-    <string name="sounds">Sound Effects</string>
     <string name="vibration">Vibration</string>
     <string name="confetti">Confetti Animation</string>
     <string name="abuse_words">Explicit Words</string>
@@ -127,10 +119,6 @@
     <string name="share_text">What is %1$s? %2$s. I found it in Wordy Fresh — check it out here: %3$s</string>
     <string name="no_description">No definition found in the dictionary. Tap the first button to search online</string>
     <string name="shared_to">Share via</string>
-    <string name="no_internet_error">Error: No internet connection</string>
-    <string name="definition_not_found">Definition not found</string>
-
-
 
     <!-- Игра (конец партии)-->
     <string name="hard_hint_exact_position">Oops! The letter %1$s should be in position %2$d</string>
@@ -167,10 +155,7 @@
     <string name="not_bad_try">Right letter, wrong spot</string>
     <string name="bad_try">Not in the word</string>
     <string name="tryes_6">You have 6 tries!</string>
-    <string name="attemts_descr1">Type words using the game keyboard into the green underlined cells!</string>
     <string name="navigation_btns">Use the keys to navigate</string>
-    <string name="previos_btn">to the previous cell</string>
-    <string name="next_btn">to the next cell</string>
     <string name="rule1">Nouns only*</string>
     <string name="rule1_descr">* The author takes no responsibility for any non-noun words you may encounter</string>
     <string name="rule2">Singular form</string>
@@ -181,9 +166,6 @@
     <string name="duplicate_descr">Only one letter will be highlighted if it appears once in the word</string>
     <string name="duplicate">Duplicate Letter</string>
     <string name="open_the_game">Start the journey!</string>
-
-
-
 
     <!-- label для текстовых полей-->
     <string name="new_email">New Email</string>
@@ -208,21 +190,12 @@
     <string name="save_result">Save</string>
     <string name="license">© 2025 Alexsander Limanskiy. All rights reserved.</string>
 
-    <string name="confirmation_email_sent">We\'ve sent a confirmation email to %1$s</string>
-    <string name="resend">Resend</string>
-    <string name="resend_again">Didn’t get the email? Let’s try again!</string>
-    <string name="resend_status_not_confirmed">Email has not been confirmed. Please try again later.</string>
-    <string name="resend_status_sent">The email has been resent.</string>
-    <string name="resend_status_error">Error: failed to send the email.</string>
-
-    <!-- -->
     <string name="we_send_mail_to_confirm">We sent a confirmation email to %1$s</string>
     <string name="saved_game">Saved game</string>
     <string name="start_game">Start</string>
     <string name="cipher_copied">Cipher copied to clipboard!</string>
     <string name="enter_word_to_encode">Enter a word to create a cipher</string>
     <string name="enter_cipher_to_decode">Enter a cipher to start the game</string>
-    <string name="word_placeholder">Example: DOG</string>
     <string name="cipher_placeholder">Paste cipher</string>
     <string name="get_cipher">Get cipher</string>
     <string name="invalid_cipher_error">Invalid cipher or word not found</string>
@@ -260,9 +233,23 @@
 
     <string name="stat_lengths_progress_title">Games by Word Length</string>
     <string name="stat_langs_progress_title">Games by Language</string>
-    <string name="no_data">No data yet</string>
     <string name="over_your_step">Running out of tries?</string>
     <string name="use_2_magic_of_game">Use up to 2 hints per game! They\'ll reveal a random missing letter.</string>
     <string name="use_magic_with_brain">Revealed letters can\'t be removed — use them wisely!</string>
     <string name="simple_tap_btn"> — just tap the button</string>
+    <string name="no_one">Not specified</string>
+    <string name="all">All</string>
+    <string name="languages">Languages</string>
+    <string name="lengths">Word lengths</string>
+    <string name="rus_short">Rus.</string>
+    <string name="eng_short">Eng.</string>
+    <string name="czech">Czech</string>
+    <string name="cz_short">Cz.</string>
+    <string name="attemts_descr2">Guessed letters are hinted in subsequent attempts with a semi-transparent color</string>
+    <string name="hint_funs_keys">Hidden keyboard features</string>
+    <string name="feautres_keyboards">The keyboard has multiple layouts for each language — including a special one for Czech!</string>
+    <string name="long_press_btn1">Colors are split left-to-right for each letter of the key!</string>
+    <string name="previous_btn">Move one cell back, or long press to jump several cells</string>
+    <string name="next_btn">Move forward, or start a new game at the end!</string>
+
 </resources>

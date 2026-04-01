@@ -13,7 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
-import com.sinya.projects.wordle.presentation.onboarding.OnboardingData
+import com.sinya.projects.wordle.utils.OnboardingData
 import com.sinya.projects.wordle.presentation.onboarding.components.OnboardingPageTemplate
 import com.sinya.projects.wordle.presentation.onboarding.components.RuleSection
 import com.sinya.projects.wordle.ui.theme.WordyColor
@@ -45,6 +45,7 @@ fun PageRules() {
                 text = stringResource(R.string.rule1),
                 style = WordyTypography.titleLarge,
                 fontSize = 24.sp,
+                textAlign = TextAlign.Center,
                 color = WordyColor.colors.textPrimary,
             )
             Text(

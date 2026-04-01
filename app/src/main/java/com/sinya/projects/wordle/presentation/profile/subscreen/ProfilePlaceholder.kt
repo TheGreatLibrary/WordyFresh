@@ -36,14 +36,12 @@ fun ProfilePlaceholder(navigateBack: () -> Unit, title: String) {
             shape = CircleShape
         )
         Spacer(Modifier)
-        repeat(2) {
-            PlaceholderBox(
-                Modifier
-                    .fillMaxWidth()
-                    .height(138.dp),
-                shape = RoundedCornerShape(12.dp)
-            )
-        }
+        PlaceholderBox(
+            Modifier
+                .fillMaxWidth()
+                .height(138.dp),
+            shape = RoundedCornerShape(12.dp)
+        )
         PlaceholderBox(
             modifier = Modifier
                 .fillMaxWidth()

@@ -1,6 +1,5 @@
 package com.sinya.projects.wordle.domain.source
 
-import android.util.Log
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.domain.error.DefinitionNotFoundException
 import com.sinya.projects.wordle.domain.error.NoInternetException
@@ -60,9 +59,8 @@ class WiktionaryDataSource @Inject constructor() : DefinitionDataSource {
         return withContext(Dispatchers.IO) {
             try {
                 val encodedWord = URLEncoder.encode(word.lowercase(), "UTF-8")
-                val urlStr = LegalLinks.formatWiktionaryUrl(lang, encodedWord)
+                val url = URL(LegalLinks.formatWiktionaryUrl(lang, encodedWord))
 
-                val url = URL(urlStr)
                 (url.openConnection() as? HttpURLConnection)?.run {
                     requestMethod = "GET"
                     connectTimeout = 5000
@@ -74,29 +72,20 @@ class WiktionaryDataSource @Inject constructor() : DefinitionDataSource {
 
                     inputStream.bufferedReader().use { reader ->
                         val json = JSONObject(reader.readText())
-
-                        Log.d("Wiktionary", "JSON $json")
-
                         val pages = json
                             .optJSONObject("query")
                             ?.optJSONObject("pages")
                             ?: return@withContext Result.failure(DefinitionNotFoundException())
-
-                        Log.d("Wiktionary", "Pages $pages")
 
                         val pageKey = pages.keys().next()
                         if (pageKey == "-1") {
                             return@withContext Result.failure(DefinitionNotFoundException())
                         }
 
-                        Log.d("Wiktionary", "Pages key $pageKey")
-
                         val extract = pages
                             .optJSONObject(pageKey)
                             ?.optString("extract", null)
                             ?: return@withContext Result.failure(DefinitionNotFoundException())
-
-                        Log.d("Wiktionary", "extract $extract")
 
                         val definition = parseDefinition(extract, lang)
                             ?: return@withContext Result.failure(DefinitionNotFoundException())
@@ -110,57 +99,89 @@ class WiktionaryDataSource @Inject constructor() : DefinitionDataSource {
         }
     }
 
-    private fun extractLanguageSection(text: String, header: String): String? {
-        val startIndex = text.indexOf(header).takeIf { it >= 0 } ?: return null
-        val afterHeader = text.indexOf("\n= ", startIndex + header.length)
-        return if (afterHeader >= 0) {
-            text.substring(startIndex, afterHeader)
-        } else {
-            text.substring(startIndex)
-        }
-    }
-
     private fun parseDefinition(extract: String, lang: String): String? {
-        val languageHeader = when (lang) {
-            "ru" -> "= Русский ="
-            "en" -> "= English ="
+        return when (lang) {
+            "ru" -> extractLanguageSection(extract, "= Русский =", "\n= ")
+                ?.let { extractMeaningSection(it, "==== Значение ====") }
+
+            "en" -> extractLanguageSection(extract, "== English ==", "\n== ")
+                ?.let { extractEnWiktionaryDefinition(it) }
+
+            "cs" -> {
+                val section = extractLanguageSection(extract, "== čeština ==", "\n== ")
+                    ?: extractLanguageSection(extract, "== Czech ==", "\n== ")
+                    ?: return null
+                extractMeaningSection(section, "==== význam ====")
+                    ?: extractEnWiktionaryDefinition(section)
+            }
+
             else -> null
         }
-
-        val targetSection = if (languageHeader != null) {
-            // Если секция языка не найдена — сразу отдаём null, не фоллбечимся на весь текст
-            extractLanguageSection(extract, languageHeader) ?: return null
-        } else {
-            extract
-        }
-
-        return extractMeaningSection(targetSection)
     }
 
-    private fun extractMeaningSection(text: String): String? {
-        val meaningHeader = "==== Значение ===="
-        val startIndex = text.indexOf(meaningHeader).takeIf { it >= 0 } ?: return null
-        val contentStart = startIndex + meaningHeader.length
+    private fun extractLanguageSection(
+        text: String,
+        header: String,
+        sectionDelimiter: String
+    ): String? {
+        val start = text.indexOf(header).takeIf { it >= 0 } ?: return null
+        val end = text.indexOf(sectionDelimiter, start + header.length)
+        return if (end >= 0) text.substring(start, end) else text.substring(start)
+    }
 
-        val nextHeader = text.indexOf("\n==", contentStart)
-        val sectionText = if (nextHeader >= 0) {
-            text.substring(contentStart, nextHeader)
-        } else {
-            text.substring(contentStart)
-        }
+    private fun extractMeaningSection(text: String, meaningHeader: String): String? {
+        val start = text.indexOf(meaningHeader).takeIf { it >= 0 } ?: return null
+        val contentStart = start + meaningHeader.length
+        val end = text.indexOf("\n==", contentStart)
+        val sectionText =
+            if (end >= 0) text.substring(contentStart, end)
+            else text.substring(contentStart)
 
-        val definitions = sectionText.lines()
+        return sectionText.lines()
+            .asSequence()
             .map { it.trim() }
-            // Строки не нумерованы — берём любую непустую строку, не являющуюся заголовком
             .filter { it.isNotBlank() && !it.startsWith("=") }
-            // Отрезаем цитату после ◆
-            .map { line ->
-                val cutIndex = line.indexOf(" ◆")
-                if (cutIndex > 0) line.substring(0, cutIndex).trim() else line
-            }
-            // Убираем "Отсутствует пример употребления (см. рекомендации)."
+            .map { line -> line.indexOf(" ◆").takeIf { it > 0 }?.let { line.substring(0, it).trim() } ?: line }
             .filter { it.isNotBlank() && !it.startsWith("Отсутствует пример") }
+            .joinToString("\n")
+            .ifBlank { null }
+    }
 
-        return definitions.joinToString("\n").ifBlank { null }
+    private fun extractEnWiktionaryDefinition(section: String): String? {
+        var inPosSection = false
+        var inflectionSkipped = false
+
+        for (line in section.lines()) {
+            val trimmed = line.trim()
+
+            val headerMatch = POS_HEADER_REGEX.find(trimmed)
+            if (headerMatch != null) {
+                inPosSection = headerMatch.groupValues[1] in CONTENT_POS_HEADERS
+                inflectionSkipped = false
+                continue
+            }
+
+            if (!inPosSection || trimmed.isBlank()) continue
+            if (trimmed.startsWith("=")) { inPosSection = false; continue }
+
+            if (!inflectionSkipped) { inflectionSkipped = true; continue }
+
+            val definition = POS_MARKER_REGEX.find(trimmed)
+                ?.let { trimmed.substring(it.range.last + 1) }
+                ?: trimmed
+
+            if (definition.isNotBlank()) return definition
+        }
+        return null
+    }
+
+    companion object {
+        private val POS_HEADER_REGEX = Regex("^={3,4}\\s*(.+?)\\s*={3,4}$")
+        private val POS_MARKER_REGEX = Regex("^\\([^)]+\\)\\s")
+
+        private val CONTENT_POS_HEADERS = setOf(
+            "Noun", "Verb", "Adjective", "Adverb", "Pronoun",
+            "Preposition", "Conjunction", "Interjection", "Numeral"
+        )
     }
 }

@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.presentation.game.components.WordCell
-import com.sinya.projects.wordle.presentation.onboarding.OnboardingData
+import com.sinya.projects.wordle.utils.OnboardingData
 import com.sinya.projects.wordle.presentation.onboarding.components.OnboardingPageTemplate
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyShapes
@@ -57,6 +57,26 @@ fun PageMagic() {
                 color = WordyColor.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
+        }
+
+
+
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(
+                space = 4.dp,
+                alignment = Alignment.CenterHorizontally
+            ),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            maxItemsInEachRow = 5
+        ) {
+            cells.forEachIndexed { rowIndex, row ->
+                WordCell(
+                    cell = row,
+                    isFocused = focusedCell == rowIndex,
+                    onClick = { },
+                    modifier = Modifier.size(45.dp)
+                )
+            }
         }
 
         Row(
@@ -95,24 +115,6 @@ fun PageMagic() {
                 color = WordyColor.colors.textPrimary,
                 textAlign = TextAlign.Center
             )
-        }
-
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(
-                space = 4.dp,
-                alignment = Alignment.CenterHorizontally
-            ),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            maxItemsInEachRow = 5
-        ) {
-            cells.forEachIndexed { rowIndex, row ->
-                WordCell(
-                    cell = row,
-                    isFocused = focusedCell == rowIndex,
-                    onClick = { },
-                    modifier = Modifier.size(45.dp)
-                )
-            }
         }
 
         Text(

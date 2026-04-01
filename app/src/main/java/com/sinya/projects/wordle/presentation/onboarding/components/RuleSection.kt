@@ -28,6 +28,7 @@ fun RuleSection(
             text = title,
             style = WordyTypography.titleLarge,
             fontSize = 24.sp,
+            textAlign = TextAlign.Center,
             color = WordyColor.colors.textPrimary,
         )
 

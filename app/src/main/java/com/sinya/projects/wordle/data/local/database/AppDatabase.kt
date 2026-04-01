@@ -43,7 +43,7 @@ import com.sinya.projects.wordle.data.local.database.entity.Words
         SyncStatistics::class,
         Words::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

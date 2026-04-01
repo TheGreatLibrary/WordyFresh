@@ -17,7 +17,7 @@ import com.sinya.projects.wordle.presentation.game.GameEvent
 import com.sinya.projects.wordle.presentation.game.GameUiState
 
 @Composable
-fun ColumnScope.GamePlace(
+fun GamePlace(
     state: GameUiState.Ready,
     onEvent: (GameEvent) -> Unit
 ) {
@@ -41,7 +41,6 @@ fun ColumnScope.GamePlace(
     LazyColumn(
         modifier = Modifier
             .wrapContentHeight()
-//            .weight(0.9f)
             .padding(horizontal = horizontalPadding),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

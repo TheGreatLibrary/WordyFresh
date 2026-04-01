@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementEvent
 import com.sinya.projects.wordle.data.local.achievement.AchievementTrigger
-import com.sinya.projects.wordle.domain.model.StatAggregated
 import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
 import com.sinya.projects.wordle.data.local.datastore.HintsDataSource
 import com.sinya.projects.wordle.data.local.datastore.SavedGameState
@@ -13,30 +12,33 @@ import com.sinya.projects.wordle.data.local.datastore.SettingsEngine
 import com.sinya.projects.wordle.domain.enums.GameColors
 import com.sinya.projects.wordle.domain.enums.GameMode
 import com.sinya.projects.wordle.domain.enums.GameState
+import com.sinya.projects.wordle.domain.enums.TypeLanguages
 import com.sinya.projects.wordle.domain.enums.VibrationType
 import com.sinya.projects.wordle.domain.model.Cell
 import com.sinya.projects.wordle.domain.model.Game
 import com.sinya.projects.wordle.domain.model.GameSettings
+import com.sinya.projects.wordle.domain.model.StatAggregated
+import com.sinya.projects.wordle.domain.model.UseHintResult
+import com.sinya.projects.wordle.domain.model.WarningUiText
 import com.sinya.projects.wordle.domain.model.getWord
 import com.sinya.projects.wordle.domain.model.toEmojiGridFromULong
 import com.sinya.projects.wordle.domain.model.updateColor
+import com.sinya.projects.wordle.domain.model.updateHint
 import com.sinya.projects.wordle.domain.model.updateText
 import com.sinya.projects.wordle.domain.useCase.CheckAchievementUseCase
 import com.sinya.projects.wordle.domain.useCase.CheckHardModeRulesUseCase
-import com.sinya.projects.wordle.domain.useCase.GenerateKeyboardLayoutUseCase
 import com.sinya.projects.wordle.domain.useCase.GetAllStatisticsByModeUseCase
+import com.sinya.projects.wordle.domain.useCase.GetHintsStateUseCase
 import com.sinya.projects.wordle.domain.useCase.GetRandomWordUseCase
 import com.sinya.projects.wordle.domain.useCase.GetWordRatingUseCase
 import com.sinya.projects.wordle.domain.useCase.InsertOrUpdateDefinitionUseCase
 import com.sinya.projects.wordle.domain.useCase.InsertStatisticUseCase
+import com.sinya.projects.wordle.domain.useCase.UseHintUseCase
 import com.sinya.projects.wordle.domain.useCase.ValidateWordColorsUseCase
 import com.sinya.projects.wordle.domain.useCase.WordExistsUseCase
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishStatisticGame
-import com.sinya.projects.wordle.domain.model.WarningUiText
-import com.sinya.projects.wordle.domain.model.updateHint
-import com.sinya.projects.wordle.domain.useCase.GetHintsStateUseCase
-import com.sinya.projects.wordle.domain.model.UseHintResult
-import com.sinya.projects.wordle.domain.useCase.UseHintUseCase
+import com.sinya.projects.wordle.utils.GeneratorKeyboardLayout
+import com.sinya.projects.wordle.utils.HintsConfig
 import com.sinya.projects.wordle.utils.VibrationManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -51,6 +53,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -75,7 +78,6 @@ class GameViewModel @AssistedInject constructor(
     private val useHint: UseHintUseCase,
     private val hintsDataSource: HintsDataSource,
 
-    private val generateKeyboardLayoutUseCase: GenerateKeyboardLayoutUseCase,
     private val validateWordColorsUseCase: ValidateWordColorsUseCase,
     private val checkHardModeRulesUseCase: CheckHardModeRulesUseCase,
 
@@ -145,9 +147,10 @@ class GameViewModel @AssistedInject constructor(
         }
 
         val actualLang = when (mode) {
-            GameMode.RANDOM -> listOf("ru", "en").random()
-            GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.lang ?: "ru"
-            else -> lang ?: "ru"
+            GameMode.SAVED -> (config.lastGame as? SavedGameState.Loaded)?.game?.lang
+                ?: TypeLanguages.RU.code
+
+            else -> lang ?: TypeLanguages.RU.code
         }
 
         val actualHiddenWord = when (mode) {
@@ -161,7 +164,7 @@ class GameViewModel @AssistedInject constructor(
             else -> mode
         }
 
-        val keyboardLayout = generateKeyboardLayoutUseCase(
+        val keyboardLayout = GeneratorKeyboardLayout.getKeyboard(
             lang = actualLang,
             code = config.keyboardMode
         )
@@ -173,7 +176,6 @@ class GameViewModel @AssistedInject constructor(
             wordLength = actualWordLength,
             lang = actualLang,
             hiddenWord = actualHiddenWord,
-            result = GameState.IN_PROGRESS,
             confettiStatus = config.confetti,
             ratingStatus = config.ratingWords,
             keyboardCode = config.keyboardMode,
@@ -189,14 +191,11 @@ class GameViewModel @AssistedInject constructor(
     private fun observeHints() {
         getHintsState()
             .onEach { hints ->
-                Log.d("Magic", hints.toString())
-                updateIfReady { current ->
-                    current.copy(hintsState = hints)
-                }
-                if ((hints.available) == 0 && (hints.nextRestoreIn
-                        ?: Duration.ZERO) > Duration.ZERO
-                ) {
-                    startRestoreTimer()
+                updateIfReady { current -> current.copy(hintsState = hints) }
+
+                if (hints.available < HintsConfig.MAX_HINTS && hints.nextRestoreIn != null && hints.nextRestoreIn > Duration.ZERO) {
+                    Log.d("Magic", hints.toString())
+                    startRestoreTimer(hints.nextRestoreIn)
                 } else {
                     restoreTimerJob?.cancel()
                 }
@@ -213,7 +212,7 @@ class GameViewModel @AssistedInject constructor(
         }.collectLatest { (config, gameState) ->
 
             val ratingStatus = if (gameState.result != GameState.IN_PROGRESS) {
-                when (mode) {
+                when (gameState.mode) {
                     GameMode.FRIENDLY -> getWordRatingUseCase(hiddenWord).getOrElse { config.ratingWords }
                     GameMode.SAVED -> (config.lastGame as SavedGameState.Loaded).game?.settings?.ratingStatus
                         ?: config.ratingWords
@@ -284,24 +283,20 @@ class GameViewModel @AssistedInject constructor(
         stopTimer()
     }
 
-    private fun startRestoreTimer() {
+    private fun startRestoreTimer(initialRemaining: Duration) {
         restoreTimerJob?.cancel()
         restoreTimerJob = viewModelScope.launch {
-            while (true) {
+            var remaining = initialRemaining
+
+            while (remaining > Duration.ZERO) {
                 delay(1000)
+                remaining -= 1.seconds
                 updateIfReady { current ->
                     val hints = current.hintsState ?: return@updateIfReady current
-                    if (hints.available > 0) {
-                        restoreTimerJob?.cancel()
-                        return@updateIfReady current
-                    }
-                    val newRemaining = ((hints.nextRestoreIn
-                        ?: Duration.ZERO) - 1.seconds).coerceAtLeast(Duration.ZERO)
-                    current.copy(
-                        hintsState = hints.copy(nextRestoreIn = newRemaining)
-                    )
+                    current.copy(hintsState = hints.copy(nextRestoreIn = remaining))
                 }
             }
+            getHintsState().first()
         }
     }
 
@@ -314,8 +309,7 @@ class GameViewModel @AssistedInject constructor(
         if (game != null) {
             restoreGame(game)
             startTimer()
-        }
-        else {
+        } else {
             updateFinishDialog(
                 FinishStatisticGame(
                     hiddenWord, "", GameState.NONE, 0, mode, "",
@@ -333,36 +327,47 @@ class GameViewModel @AssistedInject constructor(
             getRandomWord()
         }
         startTimer()
+        updateIfReady { it.copy(result = GameState.IN_PROGRESS) }
     }
 
     private fun reloadGame() {
-        updateIfReady {
-            it.copy(
-                showFinishDialog = null,
-                focusedCell = 0,
-                timePassed = 0,
-                result = GameState.IN_PROGRESS,
-                mode = if (it.mode == GameMode.FRIENDLY) GameMode.NORMAL else it.mode,
-                gridState = it.gridState.map { row ->
-                    row.copy(
-                        letter = "",
-                        backgroundColor = GameColors.DEFAULT_CELL,
-                        hint = ""
-                    )
-                },
-                keyboardState = it.keyboardState.map { row -> row.map { key -> key.copy(color = GameColors.DEFAULT_KEY) } },
-            )
-        }
-
         viewModelScope.launch {
+            updateIfReady {
+                it.copy(
+                    mode = if (it.mode == GameMode.FRIENDLY) GameMode.NORMAL else it.mode,
+                    result = GameState.NONE,
+                    ratingStatus = settingsEngine.uiState.value.ratingWords,
+                    hiddenWord = ""
+                )
+            }
+
             hintsDataSource.resetRoundUsage()
             getRandomWord()
+
+            updateIfReady {
+                it.copy(
+                    showFinishDialog = null,
+                    focusedCell = 0,
+                    timePassed = 0,
+                    result = GameState.IN_PROGRESS,
+                    gridState = it.gridState.map { row ->
+                        row.copy(letter = "", backgroundColor = GameColors.DEFAULT_CELL, hint = "")
+                    },
+                    keyboardState = it.keyboardState.map { row ->
+                        row.map { key ->
+                            key.copy(color = GameColors.DEFAULT_KEY, diacriticColor = GameColors.DEFAULT_KEY)
+                        }
+                    },
+                )
+            }
         }
+
         startTimer()
     }
 
     private fun restoreGame(game: Game) {
-        val firstEmptyIndex = game.board.indexOfFirst { it.backgroundColor == GameColors.DEFAULT_CELL }
+        val firstEmptyIndex =
+            game.board.indexOfFirst { it.backgroundColor == GameColors.DEFAULT_CELL }
         updateIfReady {
             it.copy(
                 ratingStatus = game.settings.ratingStatus,
@@ -371,6 +376,7 @@ class GameViewModel @AssistedInject constructor(
                 mode = game.mode,
                 wordLength = game.length,
                 lang = game.lang,
+                result = GameState.IN_PROGRESS,
                 hiddenWord = game.targetWord,
                 focusedCell = if (firstEmptyIndex != -1) firstEmptyIndex else 0,
                 timePassed = game.totalSeconds,
@@ -425,7 +431,7 @@ class GameViewModel @AssistedInject constructor(
     private fun generateKeyboard() {
         val s = _state.value as? GameUiState.Ready ?: return
 
-        val layout = generateKeyboardLayoutUseCase(
+        val layout = GeneratorKeyboardLayout.getKeyboard(
             lang = s.lang,
             code = s.keyboardCode
         )
@@ -436,11 +442,15 @@ class GameViewModel @AssistedInject constructor(
             else {
                 val currentColors = ready.keyboardState
                     .flatten()
-                    .associate { it.char to it.color }
+                    .associate { it.char to Pair(it.color, it.diacriticColor) }
 
                 layout.map { row ->
                     row.map { key ->
-                        key.copy(color = currentColors[key.char] ?: GameColors.DEFAULT_KEY)
+                        val saved = currentColors[key.char]
+                        key.copy(
+                            color = saved?.first ?: GameColors.DEFAULT_KEY,
+                            diacriticColor = saved?.second ?: GameColors.DEFAULT_KEY
+                        )
                     }
                 }
             }
@@ -453,8 +463,6 @@ class GameViewModel @AssistedInject constructor(
 
         val row = state.focusedCell / state.wordLength
         val col = state.focusedCell % state.wordLength
-
-
 
         when (char) {
             '<' -> {
