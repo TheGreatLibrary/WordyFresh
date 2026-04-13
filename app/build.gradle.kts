@@ -25,8 +25,8 @@ android {
         applicationId = "com.sinya.projects.wordle"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "2.0"
+        versionCode = 18
+        versionName = "2.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

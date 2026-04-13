@@ -19,3 +19,4 @@ fun Throwable.getErrorMessage(): Int = when (this) {
     is SessionRestoreException -> R.string.error_session_restore
     else -> R.string.error_unknown
 }
+

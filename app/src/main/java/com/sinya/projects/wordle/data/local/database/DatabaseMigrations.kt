@@ -667,4 +667,33 @@ class DatabaseMigrations(private val context: Context) {
             db.execSQL("PRAGMA foreign_keys = ON")
         }
     }
+
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("PRAGMA foreign_keys = OFF")
+
+            val extraWords = listOf("ВИЛЫ", "ГРЕНКА", "ФИЗИКА", "ВОРОНА", "МАСКОТ", "РУККОЛА", "ЦУНДЕРЕ", "МУЛЬТИМЕДИА", "МУЛЬТИВАРКА")
+            val shitWords = listOf("ШЕЛУПОНЬ")
+            val deleteWords = listOf("ПАРОК", "ВОЛГА", "ПОЙКА", "ФИЛЯ", "РОССИЯ", "АМЕРИКА", "УКРАИНА", "АГИТПРОП")
+            extraWords.forEach { word ->
+                db.execSQL(
+                    "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 0)",
+                    arrayOf(word.uppercase(), word.length)
+                )
+            }
+            shitWords.forEach { word ->
+                db.execSQL(
+                    "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 1)",
+                    arrayOf(word.uppercase(), word.length)
+                )
+            }
+            deleteWords.forEach { word ->
+                db.execSQL(
+                    "DELETE FROM words WHERE word = ?",
+                    arrayOf(word.uppercase())
+                )
+            }
+            db.execSQL("PRAGMA foreign_keys = ON")
+        }
+    }
 }

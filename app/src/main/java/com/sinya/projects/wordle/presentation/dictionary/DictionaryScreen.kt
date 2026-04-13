@@ -1,14 +1,7 @@
 package com.sinya.projects.wordle.presentation.dictionary
 
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,14 +21,21 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,10 +44,10 @@ import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.domain.model.DictionaryItem
 import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryCard
+import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryHeader
 import com.sinya.projects.wordle.presentation.dictionary.components.DictionaryPlaceholder
-import com.sinya.projects.wordle.presentation.dictionary.components.SearchContainer
-import com.sinya.projects.wordle.ui.features.Header
-import com.sinya.projects.wordle.ui.features.SortBlock
+import com.sinya.projects.wordle.utils.openUrl
+import com.sinya.projects.wordle.utils.shareDescription
 
 @Composable
 fun DictionaryScreen(
@@ -81,42 +81,20 @@ private fun DictionaryScreenView(
     filtredList: List<DictionaryItem>,
 ) {
     val context = LocalContext.current
-    val modesFlattened = remember(state.dictionaryList, state.modes) {
-        state.modes.flatMap { mode ->
-            mode.categories<Any, Any>(state.dictionaryList, context).map { filter ->
-                filter to mode
-            }
-        }
-    }
+    val density = LocalDensity.current
 
     val onOpenUrl: (String) -> Unit = remember {
-        { word ->
-            val url = LegalLinks.formatAcademicUrl(word)
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            context.startActivity(intent)
-        }
+        { word -> context.openUrl(LegalLinks.formatAcademicUrl(word)) }
     }
     val onShare: (String, String) -> Unit = remember {
-        { word, description ->
-            val text = context.getString(
-                R.string.share_text,
-                word,
-                description.ifEmpty { "" },
-                LegalLinks.WORDY_APP_URL
-            )
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, text)
-            }
-            context.startActivity(
-                Intent.createChooser(intent, context.getString(R.string.shared_to))
-            )
-        }
+        { word, description -> context.shareDescription(word, description) }
     }
 
     val pullToRefreshState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
     val errorText = state.errorMessage?.let { stringResource(it) }
+
+    val listState = rememberLazyListState()
 
     LaunchedEffect(state.errorMessage, state.isRefreshing) {
         errorText?.let { message ->
@@ -138,70 +116,44 @@ private fun DictionaryScreenView(
         }
     }
 
-    val listState = rememberLazyListState()
+    var headerHeightPx by remember { mutableFloatStateOf(0f) }
+    var headerOffsetPx by remember { mutableFloatStateOf(0f) }
 
-    val showHeader by remember {
-        derivedStateOf {
-            listState.firstVisibleItemIndex == 0 &&
-                    listState.firstVisibleItemScrollOffset < 350
+    val headerScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                val newOffset = headerOffsetPx + delta
+
+                if (headerHeightPx > 0f) {
+                    headerOffsetPx = newOffset.coerceIn(-headerHeightPx, 0f)
+                }
+
+                return Offset.Zero
+            }
         }
+    }
+
+    if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
+        headerOffsetPx = 0f
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(pullToRefreshState.nestedScrollConnection),
+            .widthIn(max = 550.dp)
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .nestedScroll(pullToRefreshState.nestedScrollConnection)
+            .nestedScroll(headerScrollConnection),
         contentAlignment = Alignment.TopCenter
     ) {
+        val headerHeightDp = with(density) { headerHeightPx.toDp() }
+
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .widthIn(max = 550.dp)
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(top = headerHeightDp + 8.dp)
         ) {
-            item {
-                AnimatedVisibility(
-                    visible = showHeader,
-                    enter = fadeIn() + slideInVertically(),
-                    exit = fadeOut() + slideOutVertically()
-                ) {
-                    Column {
-                        Header(
-                            title = stringResource(R.string.dictionary),
-                            trashVisible = true,
-                            navigateTo = navigateToBackStack,
-                            trashOnClick = { onEvent(DictionaryEvent.OnClearAll) }
-                        )
-                        modesFlattened.forEach { (filter, mode) ->
-                            SortBlock(
-                                title = stringResource(filter.titleRes),
-                                selectedOption = filter.selectedValue,
-                                radioOptions = filter.options,
-                                onOptionSelected = { value ->
-                                    onEvent(
-                                        DictionaryEvent.SortParamChange(
-                                            mode,
-                                            filter.onSelect(value)
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                        SearchContainer(
-                            searchQuery = state.searchQuery,
-                            onValueChanged = { query ->
-                                onEvent(DictionaryEvent.OnSearchQueryChanged(query))
-                            },
-                            onVibrate = { type ->
-                                onEvent(DictionaryEvent.OnVibrate(type))
-                            }
-                        )
-                        Spacer(Modifier.height(18.dp))
-                    }
-                }
-            }
-
             items(
                 items = filtredList,
                 key = { it.word }
@@ -218,6 +170,23 @@ private fun DictionaryScreenView(
                 Spacer(modifier = Modifier.height(18.dp))
             }
         }
+
+        DictionaryHeader(
+            modifier = Modifier
+                .onSizeChanged { size ->
+                    headerHeightPx = size.height.toFloat()
+                }
+                .graphicsLayer {
+                    translationY = headerOffsetPx
+
+                    if (headerHeightPx > 0f) {
+                        alpha = 1f - (-headerOffsetPx / headerHeightPx)
+                    }
+                },
+            navigateToBackStack = navigateToBackStack,
+            onEvent = onEvent,
+            state = state
+        )
 
         PullToRefreshContainer(
             modifier = Modifier

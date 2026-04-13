@@ -44,7 +44,10 @@ class SyncManager @Inject constructor(
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onStart(owner: LifecycleOwner) {
                 if (sessionManager.currentUserId != null) {
-                    scope.launch { performSync() }
+                    scope.launch {
+                        delay(500)
+                        performSync()
+                    }
                 }
             }
         })

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +36,7 @@ import com.sinya.projects.wordle.ui.features.RoundedButton
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewGameBottomSheet(
     navigateTo: (ScreenRoute) -> Unit,

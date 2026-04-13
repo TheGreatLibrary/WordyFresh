@@ -44,65 +44,59 @@ fun CustomTextField(
     imeAction: ImeAction = ImeAction.Done,
     onNext: (() -> Unit) = { }
 ) {
-    val customSelectionColors = TextSelectionColors(
-        backgroundColor = green400,
-        handleColor = green400
-    )
 
-    CompositionLocalProvider(LocalTextSelectionColors provides customSelectionColors) {
-        Column {
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                singleLine = singleLine,
-                maxLines = maxLines,
-                minLines = minLines,
-                textStyle = TextStyle(
-                    fontSize = 14.sp,
-                    fontFamily = Montserrat,
-                    fontWeight = FontWeight.Medium,
-                    color = if (isError) WordyColor.colors.secondary else WordyColor.colors.primary
-                ),
-                cursorBrush = SolidColor(WordyColor.colors.primary),
-                modifier = Modifier
-                    .border(
-                        width = 1.dp,
-                        color = if (isError) WordyColor.colors.secondary else color,
-                        shape = WordyShapes.extraLarge
-                    )
-                    .then(modifier),
-                keyboardOptions = KeyboardOptions(imeAction = imeAction),
-                keyboardActions = KeyboardActions(onNext = { onNext() }),
-                decorationBox = { innerTextField ->
-                    Box(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (value.isEmpty()) {
-                            Text(
-                                text = placeholder,
-                                color = gray400,
-                                fontSize = 14.sp,
-                                fontFamily = Montserrat,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        innerTextField()
+    Column {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = singleLine,
+            maxLines = maxLines,
+            minLines = minLines,
+            textStyle = TextStyle(
+                fontSize = 14.sp,
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Medium,
+                color = if (isError) WordyColor.colors.secondary else WordyColor.colors.primary
+            ),
+            cursorBrush = SolidColor(WordyColor.colors.primary),
+            modifier = Modifier
+                .border(
+                    width = 1.dp,
+                    color = if (isError) WordyColor.colors.secondary else color,
+                    shape = WordyShapes.extraLarge
+                )
+                .then(modifier),
+            keyboardOptions = KeyboardOptions(imeAction = imeAction),
+            keyboardActions = KeyboardActions(onNext = { onNext() }),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            color = gray400,
+                            fontSize = 14.sp,
+                            fontFamily = Montserrat,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
+                    innerTextField()
                 }
-            )
-            if (!errorMessage.isNullOrBlank()) {
-                if (isError) {
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Text(
-                        text = errorMessage,
-                        color = WordyColor.colors.secondary,
-                        fontSize = 12.sp,
-                        fontFamily = Montserrat,
-                        fontWeight = FontWeight.Normal,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else Spacer(modifier = Modifier.height(20.dp))
             }
+        )
+        if (!errorMessage.isNullOrBlank()) {
+            if (isError) {
+                Spacer(modifier = Modifier.height(5.dp))
+                Text(
+                    text = errorMessage,
+                    color = WordyColor.colors.secondary,
+                    fontSize = 12.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

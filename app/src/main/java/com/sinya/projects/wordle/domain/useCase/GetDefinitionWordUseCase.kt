@@ -5,6 +5,7 @@ import com.sinya.projects.wordle.domain.error.NoInternetException
 import com.sinya.projects.wordle.domain.source.DefinitionDataSource
 import com.sinya.projects.wordle.domain.source.WikipediaDataSource
 import com.sinya.projects.wordle.domain.source.WiktionaryDataSource
+import com.sinya.projects.wordle.utils.getTitleString
 import jakarta.inject.Inject
 
 class GetDefinitionWordUseCase @Inject constructor(
@@ -12,8 +13,8 @@ class GetDefinitionWordUseCase @Inject constructor(
     private val wiktionaryDataSource: WiktionaryDataSource,
 ) {
     private val sources: List<DefinitionDataSource> = listOf(
-        wikipediaDataSource,
-        wiktionaryDataSource
+        wiktionaryDataSource,
+        wikipediaDataSource
     )
 
     suspend operator fun invoke(word: String, lang: String): Result<String> {
@@ -22,7 +23,7 @@ class GetDefinitionWordUseCase @Inject constructor(
         for (source in sources) {
             val result = source.getDefinition(word, lang)
             result.fold(
-                onSuccess = { return Result.success(it) },
+                onSuccess = { return Result.success(it.getTitleString()) },
                 onFailure = { error ->
                     when (error) {
                         is NoInternetException -> return Result.failure(error)

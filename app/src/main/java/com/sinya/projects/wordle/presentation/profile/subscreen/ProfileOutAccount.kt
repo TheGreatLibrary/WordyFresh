@@ -75,7 +75,7 @@ fun ProfileOutAccount(
                 verticalArrangement = Arrangement.spacedBy(9.dp)
             ) {
                 RoundedButton(
-                    modifier = Modifier.fillMaxWidth(0.6f),
+                    modifier = Modifier.fillMaxWidth(0.7f),
                     colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkI),
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                     onClick = { navigateTo(ScreenRoute.Register) }
@@ -88,7 +88,7 @@ fun ProfileOutAccount(
                     )
                 }
                 RoundedButton(
-                    modifier = Modifier.fillMaxWidth(0.6f),
+                    modifier = Modifier.fillMaxWidth(0.7f),
                     colors = ButtonDefaults.buttonColors(containerColor = WordyColor.colors.backgroundActiveBtnMkII),
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                     onClick = { navigateTo(ScreenRoute.Login) }

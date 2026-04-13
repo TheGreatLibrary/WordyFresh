@@ -5,11 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -66,9 +67,8 @@ fun GameScreen(
                 navigateToBackStack = navigateToBackStack,
                 navigateTo = navigateTo,
                 state = state as GameUiState.Ready,
-                onEvent = viewModel::onEvent
+                onEvent = viewModel::onEvent,
             )
-
             val lifecycleOwner = LocalLifecycleOwner.current
             DisposableEffect(lifecycleOwner) {
                 val observer = LifecycleEventObserver { _, event ->
@@ -87,6 +87,7 @@ fun GameScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GameScreenView(
     navigateToBackStack: () -> Unit,
@@ -94,78 +95,82 @@ private fun GameScreenView(
     state: GameUiState.Ready,
     onEvent: (GameEvent) -> Unit
 ) {
-    FinishBottomSheet(
-        state = state.showFinishDialog,
-        onEvent = onEvent,
-        navigateTo = navigateTo
-    ) { paddingValues, onClick ->
-        LaunchedEffect(state.showWarningMessage) {
-            if (state.showWarningMessage != null) {
-                delay(600)
-                onEvent(GameEvent.ShowHardModeHint(null))
-            }
-        }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
+    LaunchedEffect(state.showWarningMessage) {
+        if (state.showWarningMessage != null) {
+            delay(600)
+            onEvent(GameEvent.ShowHardModeHint(null))
+        }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 550.dp)
+                .windowInsetsPadding(WindowInsets.statusBars),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
+            GameHeader(
+                navigateToBackStack = navigateToBackStack,
+                navigateTo = navigateTo,
+                onEvent = onEvent,
+                state = state
+            )
 
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 550.dp)
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+            GamePlace(
+                state = state,
+                onEvent = onEvent
+            )
+
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
             ) {
-                GameHeader(
-                    navigateToBackStack = navigateToBackStack,
-                    navigateTo = navigateTo,
-                    onEvent = onEvent,
-                    state = state
+                TextResult(
+                    state.result.res
                 )
-
-                GamePlace(
-                    state = state,
-                    onEvent = onEvent
-                )
-
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    TextResult(
-                        state.result.res
-                    )
-                }
-                Box(
-                    modifier = Modifier.wrapContentHeight(),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    CustomKeyboard(
-                        keyboardState = state.keyboardState,
-                        lang = state.lang,
-                        result = state.result,
-                        onEvent = onEvent,
-                        onClick = onClick,
-
-                    )
-                }
             }
-
-            NotRightWordDialog(
-                state.showWarningMessage
-            )
-
-            if (state.showLoadSavedGameDialog) LoadSavedGameDialog(
-                onLoadGameClick = { onEvent(GameEvent.LoadSavedGame) },
-                onNewGameClick = { onEvent(GameEvent.LoadNewGame) },
-                onDismissRequest = { onEvent(GameEvent.ShownLoadSavedGameDialog) },
-                checked = !state.showGameDialog,
-                checkBoxToggle = { onEvent(GameEvent.SetWarningDialogState(it)) }
-            )
-
-            if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
+            Box(
+                modifier = Modifier.wrapContentHeight(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                CustomKeyboard(
+                    keyboardState = state.keyboardState,
+                    lang = state.lang,
+                    result = state.result,
+                    onEvent = onEvent,
+                    onClick = { onEvent(GameEvent.ShowFinishDialog(true)) }
+                )
+            }
         }
+
+    if (state.showFinishDialog) {
+        FinishBottomSheet(
+            sheetState,
+            state = state.finishContentDialog,
+            onEvent = onEvent,
+            navigateTo = navigateTo,
+            onDismiss = { onEvent(GameEvent.ShowFinishDialog(false)) }
+        )
+    }
+
+    NotRightWordDialog(
+        state.showWarningMessage
+    )
+
+    if (state.showLoadSavedGameDialog) LoadSavedGameDialog(
+        onLoadGameClick = { onEvent(GameEvent.LoadSavedGame) },
+        onNewGameClick = { onEvent(GameEvent.LoadNewGame) },
+        onDismissRequest = { onEvent(GameEvent.ShownLoadSavedGameDialog) },
+        checked = !state.showGameDialog,
+        checkBoxToggle = { onEvent(GameEvent.SetWarningDialogState(it)) }
+    )
+
+    if (state.confettiStatus && state.result == GameState.WIN) ReactiveConfetti(start = true)
+
     }
 }

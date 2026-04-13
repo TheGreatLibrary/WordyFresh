@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
@@ -13,6 +14,7 @@ import com.sinya.projects.wordle.ui.theme.WordyColor
 @Composable
 fun CustomModalSheet(
     onDismissRequest: () -> Unit,
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     sheetContent: @Composable (ColumnScope.() -> Unit)
 ) {
     ModalBottomSheet(
@@ -21,7 +23,7 @@ fun CustomModalSheet(
         onDismissRequest = {
             onDismissRequest()
         },
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = sheetState,
         containerColor = WordyColor.colors.background
     ) {
         sheetContent()

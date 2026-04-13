@@ -113,7 +113,7 @@
 
     <!-- Категории профиля -->
     <string name="password_recovery">Сменить пароль</string>
-    <string name="email_recovery">Сменить Почту</string>
+    <string name="email_recovery">Сменить почту</string>
     <string name="exit">Выйти из аккаунта</string>
 
     <!-- Словарь -->

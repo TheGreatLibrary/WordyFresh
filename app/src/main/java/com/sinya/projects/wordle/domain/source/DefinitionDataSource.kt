@@ -1,5 +1,6 @@
 package com.sinya.projects.wordle.domain.source
 
+import androidx.core.content.ContextCompat.getString
 import com.sinya.projects.wordle.data.remote.web.LegalLinks
 import com.sinya.projects.wordle.domain.error.DefinitionNotFoundException
 import com.sinya.projects.wordle.domain.error.NoInternetException

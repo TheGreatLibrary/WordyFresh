@@ -36,6 +36,7 @@ val ROUTES_WITHOUT_IMAGE = setOf(
     ScreenRoute.Profile.route,
     ScreenRoute.Login.route,
     ScreenRoute.Edit.route,
+    ScreenRoute.Dictionary.route,
     ScreenRoute.CreateProfile.route,
     ScreenRoute.ResetPassword.route,
     ScreenRoute.ResetEmail.route,
@@ -49,6 +50,16 @@ val ROUTES_WITHOUT_BOTTOM_BAR = setOf(
     ScreenRoute.Game(-1).route,
     ScreenRoute.Achieves().route,
     ScreenRoute.SettingWithoutBar.route,
+    ScreenRoute.Profile.route,
+    ScreenRoute.Login.route,
+    ScreenRoute.Edit.route,
+    ScreenRoute.CreateProfile.route,
+    ScreenRoute.ResetPassword.route,
+    ScreenRoute.ResetEmail.route,
+    ScreenRoute.EmailConfirm.route,
+    ScreenRoute.Register.route,
+    ScreenRoute.Onboarding.route,
+    ScreenRoute.About.route,
 )
 
 val NavDestination.simpleName: String?

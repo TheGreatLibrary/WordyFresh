@@ -18,7 +18,8 @@ sealed interface GameUiState {
         val keyboardState: List<List<Key>> = emptyList(),
 
         val showWarningMessage: WarningUiText? = null,
-        val showFinishDialog: FinishStatisticGame? = null,
+        val finishContentDialog: FinishStatisticGame? = null,
+        val showFinishDialog: Boolean = false,
 
         val focusedCell: Int = 0,
         val result: GameState = GameState.NONE,

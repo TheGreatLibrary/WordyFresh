@@ -9,6 +9,8 @@ import com.sinya.projects.wordle.domain.repository.StatisticRepository
 import com.sinya.projects.wordle.domain.source.SupabaseAuthDataSource
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 
 class SyncDataUseCase @Inject constructor(
@@ -23,24 +25,28 @@ class SyncDataUseCase @Inject constructor(
             val userId = authRepository.getCurrentUser()
                 ?: return@withContext Result.failure(UserNotAuthenticatedException())
 
-            Log.d("SyncUseCase", "Синхронизация для пользователя: $userId")
+            val pushTasks = listOf(
+                async { profileRepository.syncFromLocal() },
+                async { achievementsRepository.syncFromLocal() },
+                async { statisticsRepository.syncFromLocal() },
+                async { dictionaryRepository.syncFromLocal() }
+            )
+            pushTasks.awaitAll() // Ждем завершения всех отправок
+            Log.d("SyncUseCase", "Всё локальное улетело в Supabase")
 
-            profileRepository.syncFromLocal().getOrThrow()
-            achievementsRepository.syncFromLocal().getOrThrow()
-            statisticsRepository.syncFromLocal().getOrThrow()
-            dictionaryRepository.syncFromLocal().getOrThrow()
-
-            Log.d("SupabaseSync", "Данные успешно отправлены")
-
-            profileRepository.syncFromSupabase().getOrThrow()
-            achievementsRepository.syncFromSupabase().getOrThrow()
-            statisticsRepository.syncFromSupabase().getOrThrow()
-            dictionaryRepository.syncFromSupabase().getOrThrow()
+            // 2. Теперь забираем свежее (Pull)
+            val pullTasks = listOf(
+                async { profileRepository.syncFromSupabase() },
+                async { achievementsRepository.syncFromSupabase() },
+                async { statisticsRepository.syncFromSupabase() },
+                async { dictionaryRepository.syncFromSupabase() }
+            )
+            pullTasks.awaitAll()
 
             Log.d("SyncUseCase", "✅ Синхронизация завершена")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("SyncUseCase", "❌ Ошибка синхронизации: ${e.message}")
+            Log.e("SyncUseCase", "❌ Ошибка: ${e.message}")
             Result.failure(e)
         }
     }

@@ -39,9 +39,7 @@ fun MainContent(startRoute: ScreenRoute) {
     val currentRoute = entry?.destination?.simpleName
 
     val withOutImage = remember(currentRoute) { currentRoute in ROUTES_WITHOUT_IMAGE }
-    val withOutBottomBar = remember(currentRoute, withOutImage) {
-        currentRoute in ROUTES_WITHOUT_BOTTOM_BAR || withOutImage
-    }
+    val withOutBottomBar = remember(currentRoute) { currentRoute in ROUTES_WITHOUT_BOTTOM_BAR }
 
     val navigateTo = remember(navController) {
         { route: ScreenRoute, popUp: PopUpStrategy ->

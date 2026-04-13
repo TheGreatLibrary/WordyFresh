@@ -1,6 +1,8 @@
 package com.sinya.projects.wordle.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -8,7 +10,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 @Immutable
-data class WordyColors (
+data class WordyColors(
     val background: Color, // фоновый цвет для приложения
     val textPrimary: Color, // основной цвет текста для приложений
 
@@ -114,10 +116,17 @@ fun WordleTheme(
 ) {
     val wordyColors = if (darkTheme) DarkWordyColors else LightWordyColors
 
-    CompositionLocalProvider(LocalWordyColors provides wordyColors) {
-        MaterialTheme(
-            typography = WordyTypography,
-            shapes = WordyShapes,
+    val customSelectionColors = TextSelectionColors(
+        backgroundColor = green400,
+        handleColor = green400
+    )
+    MaterialTheme(
+        typography = WordyTypography,
+        shapes = WordyShapes
+    ) {
+        CompositionLocalProvider(
+            LocalTextSelectionColors provides customSelectionColors,
+            LocalWordyColors provides wordyColors,
             content = content
         )
     }

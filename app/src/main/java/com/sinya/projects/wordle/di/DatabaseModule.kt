@@ -37,7 +37,12 @@ object DatabaseModule {
             "wordy.db"
         )
             .createFromAsset("wordy.db")
-            .addMigrations(migrations.MIGRATION_1_2, migrations.MIGRATION_2_3, migrations.MIGRATION_3_4)
+            .addMigrations(
+                migrations.MIGRATION_1_2,
+                migrations.MIGRATION_2_3,
+                migrations.MIGRATION_3_4,
+                migrations.MIGRATION_4_5,
+            )
             .build()
     }
 
@@ -45,14 +50,16 @@ object DatabaseModule {
     fun provideAchievementsDao(db: AppDatabase): AchievementsDao = db.achievementsDao()
 
     @Provides
-    fun provideOfflineAchievementsDao(db: AppDatabase): OfflineAchievementsDao = db.offlineAchievementsDao()
+    fun provideOfflineAchievementsDao(db: AppDatabase): OfflineAchievementsDao =
+        db.offlineAchievementsDao()
 
     @Provides
     fun provideSyncAchievementsDao(db: AppDatabase): SyncAchievementsDao = db.syncAchievementsDao()
 
 
     @Provides
-    fun provideOfflineDictionaryDao(db: AppDatabase): OfflineDictionaryDao = db.offlineDictionaryDao()
+    fun provideOfflineDictionaryDao(db: AppDatabase): OfflineDictionaryDao =
+        db.offlineDictionaryDao()
 
     @Provides
     fun provideSyncDictionaryDao(db: AppDatabase): SyncDictionaryDao = db.syncDictionaryDao()

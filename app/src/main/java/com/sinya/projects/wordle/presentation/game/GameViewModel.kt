@@ -1,6 +1,9 @@
 package com.sinya.projects.wordle.presentation.game
 
 import android.util.Log
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.local.achievement.AchievementEvent
@@ -92,6 +95,7 @@ class GameViewModel @AssistedInject constructor(
 
     private var timerJob: Job? = null
     private var restoreTimerJob: Job? = null
+    private var timerWasRunning = false
 
     private val _state = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val state: StateFlow<GameUiState> = _state.asStateFlow()
@@ -117,6 +121,8 @@ class GameViewModel @AssistedInject constructor(
             launch { observeSettings() }
 
             launch { observeHints() }
+
+            observeLifecycle()
 
             val config = settingsEngine.uiState.value
             val game = (config.lastGame as? SavedGameState.Loaded)?.game
@@ -241,6 +247,19 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
+    private fun observeLifecycle() {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onStop(owner: LifecycleOwner) {
+                    pauseTimer()
+                }
+                override fun onStart(owner: LifecycleOwner) {
+                    resumeTimer()
+                }
+            }
+        )
+    }
+
     fun onEvent(event: GameEvent) {
         when (event) {
             is GameEvent.GameFinished -> finishGame(event.message)
@@ -300,6 +319,21 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
+
+    private fun pauseTimer() {
+        timerWasRunning = timerJob?.isActive == true
+        timerJob?.cancel()
+    }
+
+    private fun resumeTimer() {
+        val s = _state.value as? GameUiState.Ready ?: return
+        if (timerWasRunning && s.result == GameState.IN_PROGRESS) {
+            startTimer()
+        }
+    }
+
+
+
     /** сохраненная игра */
 
     private fun loadSavedGame() = viewModelScope.launch {
@@ -326,8 +360,9 @@ class GameViewModel @AssistedInject constructor(
         if (s.hiddenWord.isEmpty()) {
             getRandomWord()
         }
-        startTimer()
+
         updateIfReady { it.copy(result = GameState.IN_PROGRESS) }
+        startTimer()
     }
 
     private fun reloadGame() {
@@ -346,7 +381,8 @@ class GameViewModel @AssistedInject constructor(
 
             updateIfReady {
                 it.copy(
-                    showFinishDialog = null,
+                    showFinishDialog = false,
+                    finishContentDialog = null,
                     focusedCell = 0,
                     timePassed = 0,
                     result = GameState.IN_PROGRESS,
@@ -360,9 +396,9 @@ class GameViewModel @AssistedInject constructor(
                     },
                 )
             }
-        }
+            startTimer()
 
-        startTimer()
+        }
     }
 
     private fun restoreGame(game: Game) {
@@ -382,7 +418,7 @@ class GameViewModel @AssistedInject constructor(
                 timePassed = game.totalSeconds,
                 gridState = game.board.toList(),
                 keyboardState = game.keyboard.toList(),
-                showFinishDialog = null
+                finishContentDialog = null
             )
         }
     }
@@ -793,8 +829,6 @@ class GameViewModel @AssistedInject constructor(
         val randomPos = unrevealedPositions.random()
         val letterToReveal = targetWord[randomPos]
 
-        Log.d("Magic", "${alreadyRevealedPositions} ${letterToReveal}")
-
         updateCellText(
             row = state.focusedCell / state.wordLength,
             col = randomPos,
@@ -832,7 +866,8 @@ class GameViewModel @AssistedInject constructor(
 
         updateIfReady {
             it.copy(
-                showFinishDialog = FinishStatisticGame(
+                showFinishDialog = true,
+                finishContentDialog = FinishStatisticGame(
                     hiddenWord = it.hiddenWord,
                     description = null,
                     mode = it.mode,
@@ -861,7 +896,7 @@ class GameViewModel @AssistedInject constructor(
 
         updateIfReady {
             it.copy(
-                showFinishDialog = it.showFinishDialog?.copy(
+                finishContentDialog = it.finishContentDialog?.copy(
                     countGame = newTotalGames,
                     percentWin = listOf(
                         if (countGame != 0) oldStat.winGame.toFloat() / oldStat.countGame else 0f,
@@ -901,7 +936,7 @@ class GameViewModel @AssistedInject constructor(
 
         updateIfReady {
             it.copy(
-                showFinishDialog = it.showFinishDialog?.copy(
+                finishContentDialog = it.finishContentDialog?.copy(
                     achieves = allAchieveChanges
                 )
             )
@@ -911,7 +946,7 @@ class GameViewModel @AssistedInject constructor(
 
         updateIfReady {
             it.copy(
-                showFinishDialog = it.showFinishDialog?.copy(
+                finishContentDialog = it.finishContentDialog?.copy(
                     description = definition
                 )
             )
@@ -951,9 +986,11 @@ class GameViewModel @AssistedInject constructor(
 
 
     /** update-методы для атомарного обновления state */
+    private fun updateFinishDialog(state: Boolean) =
+        updateIfReady { it.copy(showFinishDialog = state) }
 
     private fun updateFinishDialog(state: FinishStatisticGame?) =
-        updateIfReady { it.copy(showFinishDialog = state) }
+        updateIfReady { it.copy(finishContentDialog = state) }
 
     private fun updateHardModeHintDialog(state: WarningUiText?) =
         updateIfReady { it.copy(showWarningMessage = state) }
