@@ -42,7 +42,4 @@ interface ProfilesDao {
     """
     )
     suspend fun updateImageProfile(img: String, userId: String)
-
-    @Query("SELECT * FROM profiles")
-    suspend fun getProfiles(): List<Profiles?>
 }

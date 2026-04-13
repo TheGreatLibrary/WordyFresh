@@ -693,6 +693,9 @@ class DatabaseMigrations(private val context: Context) {
                     arrayOf(word.uppercase())
                 )
             }
+
+            db.execSQL("CREATE INDEX index_achievements_category_id ON achievements(category_id)")
+
             db.execSQL("PRAGMA foreign_keys = ON")
         }
     }
