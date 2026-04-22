@@ -1,4 +1,4 @@
-package com.sinya.projects.sportsdiary.presentation.error
+package com.sinya.projects.wordle.ui.features
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box

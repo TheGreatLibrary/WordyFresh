@@ -121,24 +121,6 @@ sealed class ModeOfSorting(
             )
         }
     }
-
-    companion object {
-        fun fromCode(code: Int?): ModeOfSorting =
-            when (code) {
-                1 -> Language("")
-                2 -> Length("")
-                else -> Length()
-            }
-
-        fun trainingsModes(): List<RadioItem<Int?>> =
-            listOf(
-                Language().radioItem,
-                Length("").radioItem
-            ).mapIndexed { i, it ->
-                it.copy(value = i)
-            }
-
-    }
 }
 
 sealed interface SortParam {

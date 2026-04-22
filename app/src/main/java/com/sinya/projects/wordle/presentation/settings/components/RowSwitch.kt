@@ -44,9 +44,9 @@ fun RowSwitch(
                 .scale(0.73f),
             colors = SwitchDefaults.colors(
                 checkedThumbColor = WordyColor.colors.checkedThumbColor,
-                checkedTrackColor = WordyColor.colors.checkedTrackColor, // Цвет трека в включенном состоянии
-                uncheckedThumbColor = WordyColor.colors.uncheckedThumbColor, // Цвет кружка в выключенном состоянии
-                uncheckedTrackColor = WordyColor.colors.uncheckedTrackColor, // Цвет трека в выключенном состоянии
+                checkedTrackColor = WordyColor.colors.checkedTrackColor, // Цвет трека во включенном состоянии
+                uncheckedThumbColor = WordyColor.colors.uncheckedThumbColor, // Цвет кружка во выключенном состоянии
+                uncheckedTrackColor = WordyColor.colors.uncheckedTrackColor, // Цвет трека во выключенном состоянии
                 uncheckedBorderColor = Color.Transparent
             )
         )

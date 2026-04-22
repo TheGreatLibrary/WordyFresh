@@ -96,6 +96,8 @@ class GameViewModel @AssistedInject constructor(
     private var timerJob: Job? = null
     private var restoreTimerJob: Job? = null
     private var timerWasRunning = false
+    private var warningDismissJob: Job? = null
+    private var animationJob: Job? = null
 
     private val _state = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val state: StateFlow<GameUiState> = _state.asStateFlow()
@@ -333,12 +335,27 @@ class GameViewModel @AssistedInject constructor(
     }
 
 
+    private fun updateHardModeHintDialog(state: WarningUiText?) {
+        warningDismissJob?.cancel()
+        updateIfReady { it.copy(showWarningMessage = state) }
+
+        if (state != null) {
+            warningDismissJob = viewModelScope.launch {
+                delay(600)
+                updateIfReady { it.copy(showWarningMessage = null) }
+            }
+        }
+    }
+
+
 
     /** сохраненная игра */
 
     private fun loadSavedGame() = viewModelScope.launch {
         val config = settingsEngine.uiState.value
         val game = (config.lastGame as? SavedGameState.Loaded)?.game
+
+        animationJob?.cancel()
 
         if (game != null) {
             restoreGame(game)
@@ -356,6 +373,8 @@ class GameViewModel @AssistedInject constructor(
     private suspend fun loadNewGame() {
         val s = _state.value as? GameUiState.Ready ?: return
 
+        animationJob?.cancel()
+
         hintsDataSource.resetRoundUsage()
         if (s.hiddenWord.isEmpty()) {
             getRandomWord()
@@ -366,6 +385,8 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private fun reloadGame() {
+        animationJob?.cancel()
+
         viewModelScope.launch {
             updateIfReady {
                 it.copy(
@@ -657,7 +678,9 @@ class GameViewModel @AssistedInject constructor(
 
         val len = s.wordLength
 
-        viewModelScope.launch {
+        animationJob?.cancel()
+
+        animationJob = viewModelScope.launch {
             launch {
                 for (i in 0 until len) {
                     val index = row * len + i
@@ -991,9 +1014,6 @@ class GameViewModel @AssistedInject constructor(
 
     private fun updateFinishDialog(state: FinishStatisticGame?) =
         updateIfReady { it.copy(finishContentDialog = state) }
-
-    private fun updateHardModeHintDialog(state: WarningUiText?) =
-        updateIfReady { it.copy(showWarningMessage = state) }
 
     private fun updateKeyboardLayout(newCode: Int) {
         val s = _state.value as? GameUiState.Ready ?: return

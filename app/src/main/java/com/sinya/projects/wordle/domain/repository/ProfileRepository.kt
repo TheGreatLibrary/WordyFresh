@@ -24,6 +24,7 @@ interface ProfileRepository {
 
     // LoginScreen and ResetPasswordScreen
     suspend fun signIn(email: String, password: String): Result<UserInfo?>
+    suspend fun signInWithGoogle(tokenId: String) : Result<UserInfo?>
     suspend fun resetPassword(email: String): Result<Unit>
     suspend fun updatePassword(password: String): Result<Unit>
 
@@ -87,6 +88,20 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun signIn(email: String, password: String): Result<UserInfo?> {
         return try {
             supabaseAuthDataSource.logIn(email, password)
+
+            val user = supabaseAuthDataSource.getCurrentUser()
+                ?: return Result.failure(UserNotAuthenticatedException())
+
+            Result.success(user)
+        } catch (e: Exception) {
+            Log.e("LoginUseCase", "Error during login", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun signInWithGoogle(tokenId: String): Result<UserInfo?> {
+        return try {
+            supabaseAuthDataSource.signInWithGoogle(tokenId)
 
             val user = supabaseAuthDataSource.getCurrentUser()
                 ?: return Result.failure(UserNotAuthenticatedException())
@@ -248,7 +263,8 @@ class ProfileRepositoryImpl @Inject constructor(
                         emit(Result.failure(UserHasNotProfileException()))
                     }
                 }
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             emit(Result.failure(e))
         }
     }

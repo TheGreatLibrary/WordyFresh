@@ -321,14 +321,14 @@ class DatabaseMigrations(private val context: Context) {
                     repeat(batch) {
                         db.execSQL(
                             "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
-                            arrayOf(modeId, normalTries.removeFirstOrNull(), avgTime, ts())
+                            arrayOf<Any?>(modeId, normalTries.removeFirstOrNull(), avgTime, ts())
                         )
                         winsLeft--
                     }
                     if (lossesLeft > 0) {
                         db.execSQL(
                             "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 0, NULL, NULL, NULL, ?, ?)",
-                            arrayOf(modeId, avgTime, ts())
+                            arrayOf<Any?>(modeId, avgTime, ts())
                         )
                         lossesLeft--
                     }
@@ -340,13 +340,13 @@ class DatabaseMigrations(private val context: Context) {
                     repeat(bestStreak) {
                         db.execSQL(
                             "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
-                            arrayOf(modeId, streakTries.getOrNull(it), avgTime, ts())
+                            arrayOf<Any?>(modeId, streakTries.getOrNull(it), avgTime, ts())
                         )
                     }
                     // поражение после bestStreak
                     db.execSQL(
                         "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 0, NULL, NULL, NULL, ?, ?)",
-                        arrayOf(modeId, avgTime, ts())
+                        arrayOf<Any?>(modeId, avgTime, ts())
                     )
                 }
 
@@ -354,7 +354,7 @@ class DatabaseMigrations(private val context: Context) {
                 repeat(currentStreak) {
                     db.execSQL(
                         "INSERT INTO offline_statistics (mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, 1, ?, NULL, NULL, ?, ?)",
-                        arrayOf(modeId, streakTries.getOrNull(bestStreak + it), avgTime, ts())
+                        arrayOf<Any?>(modeId, streakTries.getOrNull(bestStreak + it), avgTime, ts())
                     )
                 }
             }
@@ -430,7 +430,7 @@ class DatabaseMigrations(private val context: Context) {
 
                 db.execSQL(
                     "INSERT INTO offline_statistics_new (id, mode_id, result, try_number, word_length, word_lang, time_game, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    arrayOf(
+                    arrayOf<Any?>(
                         UUID.randomUUID().toString(),
                         cursor.getInt(cursor.getColumnIndexOrThrow("mode_id")),
                         cursor.getInt(cursor.getColumnIndexOrThrow("result")),
@@ -509,7 +509,7 @@ class DatabaseMigrations(private val context: Context) {
             extraWords.forEach { word ->
                 db.execSQL(
                     "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 0)",
-                    arrayOf(word.uppercase(), word.length)
+                    arrayOf<Any?>(word.uppercase(), word.length)
                 )
             }
 
@@ -527,7 +527,7 @@ class DatabaseMigrations(private val context: Context) {
                     )
                     db.execSQL(
                         "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 1)",
-                        arrayOf(w, w.length)
+                        arrayOf<Any?>(w, w.length)
                     )
                     ruShitAdded++
                 }
@@ -562,7 +562,7 @@ class DatabaseMigrations(private val context: Context) {
                     )
                     db.execSQL(
                         "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'en', 1)",
-                        arrayOf(w, w.length)
+                        arrayOf<Any?>(w, w.length)
                     )
                     enShitAdded++
                 }
@@ -579,7 +579,7 @@ class DatabaseMigrations(private val context: Context) {
                 batch.forEach { word ->
                     db.execSQL(
                         "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'cs', 0)",
-                        arrayOf(word.trim().uppercase(), word.trim().length)
+                        arrayOf<Any?>(word.trim().uppercase(), word.trim().length)
                     )
                     csAdded++
                 }
@@ -600,7 +600,7 @@ class DatabaseMigrations(private val context: Context) {
                     )
                     db.execSQL(
                         "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'cs', 1)",
-                        arrayOf(w, w.length)
+                        arrayOf<Any?>(w, w.length)
                     )
                     csShitAdded++
                 }
@@ -678,13 +678,13 @@ class DatabaseMigrations(private val context: Context) {
             extraWords.forEach { word ->
                 db.execSQL(
                     "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 0)",
-                    arrayOf(word.uppercase(), word.length)
+                    arrayOf<Any?>(word.uppercase(), word.length)
                 )
             }
             shitWords.forEach { word ->
                 db.execSQL(
                     "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 1)",
-                    arrayOf(word.uppercase(), word.length)
+                    arrayOf<Any?>(word.uppercase(), word.length)
                 )
             }
             deleteWords.forEach { word ->
@@ -695,6 +695,22 @@ class DatabaseMigrations(private val context: Context) {
             }
 
             db.execSQL("CREATE INDEX index_achievements_category_id ON achievements(category_id)")
+
+            db.execSQL("PRAGMA foreign_keys = ON")
+        }
+    }
+
+    val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("PRAGMA foreign_keys = OFF")
+
+            val extraWords = listOf("КОВЕНАНТ", "ПРОСТЫНЯ")
+            extraWords.forEach { word ->
+                db.execSQL(
+                    "INSERT OR IGNORE INTO words (word, length, language, rating) VALUES (?, ?, 'ru', 0)",
+                    arrayOf<Any?>(word.uppercase(), word.length)
+                )
+            }
 
             db.execSQL("PRAGMA foreign_keys = ON")
         }

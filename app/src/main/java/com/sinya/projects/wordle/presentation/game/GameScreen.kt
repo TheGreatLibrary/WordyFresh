@@ -13,7 +13,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +34,6 @@ import com.sinya.projects.wordle.presentation.game.components.NotRightWordDialog
 import com.sinya.projects.wordle.presentation.game.components.ReactiveConfetti
 import com.sinya.projects.wordle.presentation.game.components.TextResult
 import com.sinya.projects.wordle.presentation.game.finishSheet.FinishBottomSheet
-import kotlinx.coroutines.delay
 
 @Composable
 fun GameScreen(
@@ -96,13 +94,6 @@ private fun GameScreenView(
     onEvent: (GameEvent) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-
-    LaunchedEffect(state.showWarningMessage) {
-        if (state.showWarningMessage != null) {
-            delay(600)
-            onEvent(GameEvent.ShowHardModeHint(null))
-        }
-    }
 
     Box(
         modifier = Modifier.fillMaxSize(),

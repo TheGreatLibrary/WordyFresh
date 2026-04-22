@@ -251,5 +251,6 @@
     <string name="long_press_btn1">Colors are split left-to-right for each letter of the key!</string>
     <string name="previous_btn">Move one cell back, or long press to jump several cells</string>
     <string name="next_btn">Move forward, or start a new game at the end!</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
 
 </resources>

@@ -11,6 +11,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.io.File
 import java.io.FileOutputStream
+import androidx.core.graphics.scale
 
 interface ImageCompressor {
     fun compressToSquareWebP(uri: Uri, userId: String, size: Int = 500): File
@@ -31,7 +32,7 @@ class BitmapImageCompressor @Inject constructor(
         val offsetY = (original.height - side) / 2
 
         val squared = Bitmap.createBitmap(original, offsetX, offsetY, side, side)
-        val scaled = Bitmap.createScaledBitmap(squared, size, size, true)
+        val scaled = squared.scale(size, size)
 
         val file = File(context.cacheDir, getAvatarFileName(userId))
         FileOutputStream(file).use {

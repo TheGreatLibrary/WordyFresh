@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.sinya.projects.wordle.R
 import kotlinx.serialization.Serializable
+import androidx.core.graphics.toColorInt
 
 enum class BackgroundSettings(
     val type: TypeBackground,
@@ -69,6 +70,6 @@ data class BrushData(
     val angle: Float = 90f    // угол
 ) {
     fun toBrush(): Brush = Brush.linearGradient(
-        colors = colors.map { Color(android.graphics.Color.parseColor(it)) },
+        colors = colors.map { Color(it.toColorInt()) },
     )
 }

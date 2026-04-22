@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.serialization.json.jsonPrimitive
 
 @HiltViewModel
 class CreateProfileViewModel @Inject constructor(
@@ -33,11 +34,21 @@ class CreateProfileViewModel @Inject constructor(
     private val _state = MutableStateFlow<CreateProfileUiState>(CreateProfileUiState.CreateForm())
     val state: StateFlow<CreateProfileUiState> = _state.asStateFlow()
 
+    init {
+        val nickname = sessionManager.userInfo.value?.userMetadata?.get("full_name")?.jsonPrimitive?.content
+        _state.value = CreateProfileUiState.CreateForm(
+            nickname = nickname ?: ""
+        )
+    }
+
     fun handleDeepLink(deepLinkUri: String?) = viewModelScope.launch {
         if (deepLinkUri != null) {
             importSessionUseCase(deepLinkUri).fold(
                 onSuccess = {
-                    _state.value = CreateProfileUiState.CreateForm()
+                    _state.value = CreateProfileUiState.CreateForm(
+                        nickname = sessionManager.userInfo.value?.userMetadata?.get("full_name")?.jsonPrimitive?.content
+                            ?: ""
+                    )
                 },
                 onFailure = { error ->
                     _state.value = CreateProfileUiState.CreateForm(

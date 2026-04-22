@@ -13,7 +13,6 @@ import com.sinya.projects.wordle.domain.enums.GameState
 import com.sinya.projects.wordle.domain.enums.TypeLanguages
 import com.sinya.projects.wordle.domain.model.Key
 import com.sinya.projects.wordle.presentation.game.GameEvent
-import com.sinya.projects.wordle.presentation.game.GameUiState
 
 @Composable
 fun CustomKeyboard(

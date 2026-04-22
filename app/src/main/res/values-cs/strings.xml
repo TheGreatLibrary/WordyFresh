@@ -250,4 +250,6 @@
     <string name="long_press_btn1">Barvy jsou rozděleny zleva doprava pro každé písmeno klávesy!</string>
     <string name="previous_btn">Přesun o jedno pole zpět, dlouhý stisk přeskočí více polí</string>
     <string name="next_btn">Přesun vpřed, nebo začátek nové hry na konci!</string>
+    <string name="sign_in_with_google">Přihlásit se přes Google</string>
+
 </resources>

@@ -7,7 +7,9 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.parseSessionFromFragment
+import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.auth.user.UserSession
@@ -25,6 +27,8 @@ interface SupabaseAuthDataSource {
     suspend fun signOut()
     suspend fun logIn(email: String, password: String)
     suspend fun signUp(email: String, password: String)
+
+    suspend fun signInWithGoogle(idToken: String): Result<Unit>
     suspend fun resetPassword(email: String)
     suspend fun updatePassword(password: String)
     suspend fun updateEmail(email: String)
@@ -72,6 +76,20 @@ class SupabaseAuthDataSourceImpl @Inject constructor(
         supabaseClient.auth.signUpWith(Email) {
             this.email = email
             this.password = password
+        }
+    }
+
+    override suspend fun signInWithGoogle(idToken: String): Result<Unit> {
+        return try {
+            if (!networkChecker.isInternetAvailable()) return Result.failure(NoInternetException())
+
+            supabaseClient.auth.signInWith(IDToken) {
+                provider = Google
+                this.idToken = idToken
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

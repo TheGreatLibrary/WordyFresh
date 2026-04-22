@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import com.sinya.projects.wordle.R
 import com.sinya.projects.wordle.presentation.game.components.WordCell
 import com.sinya.projects.wordle.utils.OnboardingData
-import com.sinya.projects.wordle.presentation.onboarding.components.NavigationInstructions
 import com.sinya.projects.wordle.presentation.onboarding.components.OnboardingPageTemplate
 import com.sinya.projects.wordle.ui.theme.WordyColor
 import com.sinya.projects.wordle.ui.theme.WordyTypography

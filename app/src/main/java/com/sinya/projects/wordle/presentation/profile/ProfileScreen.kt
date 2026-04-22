@@ -34,7 +34,11 @@ fun ProfileScreen(
             navigateTo = navigateTo,
         )
 
-        is ProfileUiState.NoAccount -> ProfileOutAccount(navigateTo = navigateTo)
+        is ProfileUiState.NoAccount -> ProfileOutAccount(
+            viewModel = viewModel,
+            navigateTo = navigateTo,
+            onEvent = viewModel::onEvent
+        )
 
         ProfileUiState.CreateProfile -> {
             LaunchedEffect(Unit) {

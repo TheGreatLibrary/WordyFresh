@@ -6,4 +6,7 @@ sealed interface ProfileEvent {
     data class UpdateAvatar(val uri: Uri) : ProfileEvent
     data object ErrorShown : ProfileEvent
     data object SignOut : ProfileEvent
+    object SignInWithGoogle : ProfileEvent
+    data class GoogleIdTokenReceived(val idToken: String) : ProfileEvent
+    data class GoogleSignInFailed(val error: Exception) : ProfileEvent
 }

@@ -19,14 +19,14 @@ val props = Properties().apply {
 
 android {
     namespace = "com.sinya.projects.wordle"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.sinya.projects.wordle"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 18
-        versionName = "2.0.2"
+        targetSdk = 36
+        versionCode = 19
+        versionName = "2.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -44,6 +44,11 @@ android {
             "String",
             "HINTS_SALT",
             "\"${props.getProperty("HINTS_SALT") ?: ""}\""
+        )
+        buildConfigField(
+            "String",
+            "WEB_CLIENT_ID",
+            "\"${props.getProperty("WEB_CLIENT_ID") ?: ""}\""
         )
     }
 
@@ -88,20 +93,25 @@ android {
 
 dependencies {
     // splashScreen
-    implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation(libs.androidx.core.splashscreen)
 
     // coil для загрузки изображений
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
 
     // supabase
-    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.0"))
-    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.github.jan-tennert.supabase:auth-kt")
-    implementation("io.github.jan-tennert.supabase:storage-kt")
-    implementation("io.github.jan-tennert.supabase:realtime-kt")
+    implementation(platform(libs.bom))
+    implementation(libs.postgrest.kt)
+    implementation(libs.auth.kt)
+    implementation(libs.storage.kt)
+    implementation(libs.realtime.kt)
+
+    // google
+    implementation(libs.google.id)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play)
 
     // ktor
-    implementation("io.ktor:ktor-client-okhttp:3.1.0")
+    implementation(libs.ktor.client.okhttp)
 
     // room
     implementation(libs.androidx.room.runtime)
@@ -109,12 +119,12 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // hilt
-    implementation("com.google.dagger:hilt-android:2.57.1")
-    ksp("com.google.dagger:hilt-compiler:2.57.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // datastore
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -127,9 +137,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     testImplementation(libs.junit)
-    testImplementation("io.mockk:mockk:1.13.10")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
-    testImplementation("app.cash.turbine:turbine:1.1.0")
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
 
     // Ui-тесты
     androidTestImplementation(libs.androidx.junit)

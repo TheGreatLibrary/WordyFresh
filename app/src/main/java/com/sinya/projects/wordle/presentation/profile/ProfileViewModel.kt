@@ -1,6 +1,7 @@
 package com.sinya.projects.wordle.presentation.profile
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinya.projects.wordle.data.remote.supabase.SessionManager
@@ -10,13 +11,18 @@ import com.sinya.projects.wordle.domain.error.UserHasNotProfileException
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.useCase.GetLocalProfileUseCase
 import com.sinya.projects.wordle.domain.useCase.GetProfileUseCase
+import com.sinya.projects.wordle.domain.useCase.SignInWithGoogleUseCase
 import com.sinya.projects.wordle.domain.useCase.SignOutUseCase
 import com.sinya.projects.wordle.domain.useCase.UpdateImageUseCase
 import com.sinya.projects.wordle.utils.getErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.postgrest.exception.PostgrestRestException
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,11 +33,15 @@ class ProfileViewModel @Inject constructor(
     private val getProfileUseCase: GetProfileUseCase,
     private val updateImageUseCase: UpdateImageUseCase,
     private val getLocalProfileUseCase: GetLocalProfileUseCase,
+    private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
     private val signOutUseCase: SignOutUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val state: StateFlow<ProfileUiState> = _state.asStateFlow()
+
+    private val _launchGoogleSignIn = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val launchGoogleSignIn: SharedFlow<Unit> = _launchGoogleSignIn.asSharedFlow()
 
     init {
         loadProfile()
@@ -42,7 +52,44 @@ class ProfileViewModel @Inject constructor(
             ProfileEvent.SignOut -> signOut()
             ProfileEvent.ErrorShown -> updateIfInAccount { it.copy(errorMessage = null) }
             is ProfileEvent.UpdateAvatar -> updateAvatar(event.uri)
+            ProfileEvent.SignInWithGoogle -> _launchGoogleSignIn.tryEmit(Unit)
+            is ProfileEvent.GoogleIdTokenReceived -> signInWithGoogle(event.idToken)
+            is ProfileEvent.GoogleSignInFailed -> {
+                Log.e("GoogleError", "error", event.error)
+            }
         }
+    }
+
+    private fun signInWithGoogle(idToken: String) = viewModelScope.launch {
+        signInWithGoogleUseCase(idToken).fold(
+            onSuccess = {
+                loadProfile()
+            },
+            onFailure = { error ->
+                when (error) {
+                    is NoInternetException -> loadLocalProfile(error)
+                    is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
+                    is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
+                    else -> _state.value = ProfileUiState.NoAccount
+                }
+            }
+        )
+    }
+
+    private fun loadLocalProfile(error: Throwable) = viewModelScope.launch {
+        getLocalProfileUseCase().fold(
+            onSuccess = {
+                _state.value = ProfileUiState.InAccount(
+                    profile = it,
+                    avatarUri = sessionManager.avatar.value,
+                    email = sessionManager.userInfo.value?.email ?: "",
+                    errorMessage = error.getErrorMessage()
+                )
+            },
+            onFailure = {
+                _state.value = ProfileUiState.NoAccount
+            }
+        )
     }
 
     private fun loadProfile() = viewModelScope.launch {
@@ -57,24 +104,10 @@ class ProfileViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     when (error) {
-                        is NoInternetException -> {
-                            getLocalProfileUseCase().fold(
-                                onSuccess = {
-                                    _state.value = ProfileUiState.InAccount(
-                                        profile = it,
-                                        avatarUri = sessionManager.avatar.value,
-                                        email = sessionManager.userInfo.value?.email ?: "",
-                                        errorMessage = error.getErrorMessage()
-                                    )
-                                },
-                                onFailure = {
-                                    _state.value = ProfileUiState.NoAccount
-                                }
-                            )
-
-                        }
+                        is NoInternetException -> loadLocalProfile(error)
                         is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
                         is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
+                        is PostgrestRestException -> _state.value = ProfileUiState.CreateProfile
                         else -> _state.value = ProfileUiState.NoAccount
                     }
                 }

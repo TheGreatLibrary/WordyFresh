@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,11 +14,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -72,7 +71,6 @@ fun DictionaryScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DictionaryScreenView(
     state: DictionaryUiState.Success,
@@ -96,23 +94,13 @@ private fun DictionaryScreenView(
 
     val listState = rememberLazyListState()
 
-    LaunchedEffect(state.errorMessage, state.isRefreshing) {
+    LaunchedEffect(state.errorMessage) {
         errorText?.let { message ->
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short
             )
             onEvent(DictionaryEvent.OnErrorShown)
-        }
-
-        if (!state.isRefreshing) {
-            pullToRefreshState.endRefresh()
-        }
-    }
-
-    if (pullToRefreshState.isRefreshing && !state.isRefreshing) {
-        LaunchedEffect(Unit) {
-            onEvent(DictionaryEvent.OnRefresh)
         }
     }
 
@@ -138,68 +126,67 @@ private fun DictionaryScreenView(
         headerOffsetPx = 0f
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .widthIn(max = 550.dp)
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .nestedScroll(pullToRefreshState.nestedScrollConnection)
-            .nestedScroll(headerScrollConnection),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        val headerHeightDp = with(density) { headerHeightPx.toDp() }
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = headerHeightDp + 8.dp)
-        ) {
-            items(
-                items = filtredList,
-                key = { it.word }
-            ) { word ->
-                DictionaryCard(
-                    onOpenUrl = onOpenUrl,
-                    onShare = onShare,
-                    item = word,
-                    onEvent = onEvent
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(18.dp))
-            }
-        }
-
-        DictionaryHeader(
-            modifier = Modifier
-                .onSizeChanged { size ->
-                    headerHeightPx = size.height.toFloat()
-                }
-                .graphicsLayer {
-                    translationY = headerOffsetPx
-
-                    if (headerHeightPx > 0f) {
-                        alpha = 1f - (-headerOffsetPx / headerHeightPx)
-                    }
-                },
-            navigateToBackStack = navigateToBackStack,
-            onEvent = onEvent,
-            state = state
-        )
-
-        PullToRefreshContainer(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .alpha(if (pullToRefreshState.isRefreshing) 1f else 0f),
+    Box(modifier = Modifier.fillMaxSize()) {
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { onEvent(DictionaryEvent.OnRefresh) },
             state = pullToRefreshState,
-        )
-
-        SnackbarHost(
-            hostState = snackbarHostState,
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-        )
+                .fillMaxSize()
+                .widthIn(max = 550.dp)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .nestedScroll(headerScrollConnection),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            val headerHeightDp = with(density) { headerHeightPx.toDp() }
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxHeight(),
+                contentPadding = PaddingValues(top = headerHeightDp + 8.dp)
+            ) {
+                items(
+                    items = filtredList,
+                    key = { it.word }
+                ) { word ->
+                    DictionaryCard(
+                        onOpenUrl = onOpenUrl,
+                        onShare = onShare,
+                        item = word,
+                        onEvent = onEvent
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(18.dp))
+                }
+            }
+
+            DictionaryHeader(
+                modifier = Modifier
+                    .onSizeChanged { size ->
+                        headerHeightPx = size.height.toFloat()
+                    }
+                    .graphicsLayer {
+                        translationY = headerOffsetPx
+
+                        if (headerHeightPx > 0f) {
+                            alpha = 1f - (-headerOffsetPx / headerHeightPx)
+                        }
+                    },
+                navigateToBackStack = navigateToBackStack,
+                onEvent = onEvent,
+                state = state
+            )
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+            )
+        }
     }
 }
