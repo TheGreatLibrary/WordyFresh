@@ -11,12 +11,15 @@ import kotlinx.coroutines.flow.first
 class UseHintUseCase @Inject constructor(
     private val dataSource: HintsDataSource
 ) {
-    suspend operator fun invoke(currentState: HintsState): UseHintResult {
-        if (currentState.available <= 0) return UseHintResult.NoHints
-        if (!currentState.canUseThisRound) return UseHintResult.RoundLimitReached
-
+    suspend operator fun invoke(): UseHintResult {
         val prefs = dataSource.hintsFlow.first()
         val raw = prefs as? HintsRaw.Valid ?: return UseHintResult.NoHints
+
+        if (raw.count <= 0) return UseHintResult.NoHints
+
+        if (raw.usedInRound >= HintsConfig.MAX_HINTS_PER_ROUND) {
+            return UseHintResult.RoundLimitReached
+        }
 
         val newCount = raw.count - 1
         val newRestoredAt = if (raw.count == HintsConfig.MAX_HINTS) {

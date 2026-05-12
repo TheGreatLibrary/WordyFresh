@@ -102,6 +102,8 @@ class GameViewModel @AssistedInject constructor(
     private val _state = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val state: StateFlow<GameUiState> = _state.asStateFlow()
 
+    private var isHintProcessing = false
+
     @AssistedFactory
     interface Factory {
         fun create(
@@ -321,7 +323,6 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
-
     private fun pauseTimer() {
         timerWasRunning = timerJob?.isActive == true
         timerJob?.cancel()
@@ -333,7 +334,6 @@ class GameViewModel @AssistedInject constructor(
             startTimer()
         }
     }
-
 
     private fun updateHardModeHintDialog(state: WarningUiText?) {
         warningDismissJob?.cancel()
@@ -347,9 +347,7 @@ class GameViewModel @AssistedInject constructor(
         }
     }
 
-
-
-    /** сохраненная игра */
+    /** Сохраненная игра */
 
     private fun loadSavedGame() = viewModelScope.launch {
         val config = settingsEngine.uiState.value
@@ -483,7 +481,7 @@ class GameViewModel @AssistedInject constructor(
         )
     }
 
-    /** основной геймплей */
+    /** Основной геймплей */
 
     private fun generateKeyboard() {
         val s = _state.value as? GameUiState.Ready ?: return
@@ -802,28 +800,32 @@ class GameViewModel @AssistedInject constructor(
     }
 
     private fun onHintClicked() {
+        if (isHintProcessing) return
         val s = _state.value as? GameUiState.Ready ?: return
-        val state = s.hintsState ?: return
         if (s.result != GameState.IN_PROGRESS || s.hiddenWord.isEmpty()) return
 
         Log.d("Magic", "${s.result} LLL")
+        isHintProcessing = true
         viewModelScope.launch {
-            when (useHint(state)) {
-                is UseHintResult.Success -> {
-                    revealRandomLetter()
-                }
+            try {
+                when (useHint()) {
+                    is UseHintResult.Success -> {
+                        revealRandomLetter()
+                    }
 
-                UseHintResult.NoHints -> {
-                    updateHardModeHintDialog(WarningUiText.NotHasHints)
-                    Log.d("Magic", "нет подсказок, восстановятся через X")
-                }
+                    UseHintResult.NoHints -> {
+                        updateHardModeHintDialog(WarningUiText.NotHasHints)
+                        Log.d("Magic", "нет подсказок, восстановятся через X")
+                    }
 
-                UseHintResult.RoundLimitReached -> {
-                    updateHardModeHintDialog(WarningUiText.HintsRoundLimitReached)
-                    Log.d("Magic", "только 2 подсказки за раунд")
+                    UseHintResult.RoundLimitReached -> {
+                        updateHardModeHintDialog(WarningUiText.HintsRoundLimitReached)
+                        Log.d("Magic", "только 2 подсказки за раунд")
+                    }
                 }
+            } finally {
+                isHintProcessing = false
             }
-
         }
         return
     }
@@ -862,7 +864,6 @@ class GameViewModel @AssistedInject constructor(
             GameColors.GREEN
         )
         updateKeyColor(letterToReveal, GameColors.GREEN)
-
     }
 
     /** Конец игры, Обновление статистики */

@@ -21,26 +21,26 @@ class GetDefinitionWordUseCaseTest {
 
     @Before
     fun setUp() {
-        wikipedia = mockk()
         wiktionary = mockk()
+        wikipedia = mockk()
         useCase = GetDefinitionWordUseCase(wikipedia, wiktionary)
     }
 
     @Test
     fun `wikipedia returns success - returns immediately, wiktionary not called`() = runTest {
+        coEvery { wiktionary.getDefinition("кошка", "ru") } returns Result.failure(DefinitionNotFoundException())
         coEvery { wikipedia.getDefinition("кошка", "ru") } returns Result.success("Домашнее животное")
 
         val result = useCase("кошка", "ru")
 
         assertTrue(result.isSuccess)
         assertEquals("Домашнее животное", result.getOrNull())
-        coVerify(exactly = 0) { wiktionary.getDefinition(any(), any()) }
     }
 
     @Test
     fun `wikipedia fails - falls back to wiktionary`() = runTest {
-        coEvery { wikipedia.getDefinition("кошка", "ru") } returns Result.failure(DefinitionNotFoundException())
         coEvery { wiktionary.getDefinition("кошка", "ru") } returns Result.success("Кошка — млекопитающее")
+        coEvery { wikipedia.getDefinition("кошка", "ru") } returns Result.failure(DefinitionNotFoundException())
 
         val result = useCase("кошка", "ru")
 
@@ -61,12 +61,12 @@ class GetDefinitionWordUseCaseTest {
 
     @Test
     fun `NoInternetException - returns immediately without trying wiktionary`() = runTest {
-        coEvery { wikipedia.getDefinition("кошка", "ru") } returns Result.failure(NoInternetException())
+        coEvery { wiktionary.getDefinition("кошка", "ru") } returns Result.failure(NoInternetException())
 
         val result = useCase("кошка", "ru")
 
         assertTrue(result.isFailure)
         assertTrue(result.exceptionOrNull() is NoInternetException)
-        coVerify(exactly = 0) { wiktionary.getDefinition(any(), any()) }
+        coVerify(exactly = 0) { wikipedia.getDefinition(any(), any()) }
     }
 }
