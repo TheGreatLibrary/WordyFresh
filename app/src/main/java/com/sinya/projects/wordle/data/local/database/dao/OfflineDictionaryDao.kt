@@ -1,10 +1,14 @@
 package com.sinya.projects.wordle.data.local.database.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.sinya.projects.wordle.data.local.database.entity.OfflineDictionary
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncDictionary
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistics
 import com.sinya.projects.wordle.domain.model.DictionaryItem
 import kotlinx.coroutines.flow.Flow
 
@@ -55,4 +59,13 @@ interface OfflineDictionaryDao {
 
     @Query("SELECT * FROM offline_dictionary")
     suspend fun getDictionary(): List<OfflineDictionary>
+
+    @Transaction
+    suspend fun moveOfflineToSync(list: List<SyncDictionary>) {
+        insertList(list)
+        clearAll()
+    }
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertList(dictionaryEntity: List<SyncDictionary>)
 }

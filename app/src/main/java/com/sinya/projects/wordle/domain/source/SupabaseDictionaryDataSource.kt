@@ -98,9 +98,8 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
 
                 if (offline.isNotEmpty()) {
                     upsertDictionary(offline).getOrThrow()
+                    offlineDictionaryDao.moveOfflineToSync(offline)
                 }
-
-                offlineDictionaryDao.clearAll()
 
                 Result.success(Unit)
             } catch (e: Exception) {
@@ -117,13 +116,12 @@ class SupabaseDictionaryDataSourceImpl @Inject constructor(
 
                 val remote = fetchDictionary(userId).getOrThrow()
 
-                syncDictionaryDao.clearAll()
-
-                if (remote.isNotEmpty()) {
-                    val existingWordIds = syncDictionaryDao.getAllIds().toSet()
-                    val filtered = remote.filter { it.wordId in existingWordIds }
-                    if (filtered.isNotEmpty()) syncDictionaryDao.insertList(filtered)
+                if (remote.isEmpty()) {
+                    Log.w("Sync", "Сервер вернул пустой список. Локальный кэш сохранен.")
+                    return@withContext Result.success(Unit)
                 }
+
+                syncDictionaryDao.replaceAll(remote)
 
                 Result.success(Unit)
             } catch (e: Exception) {

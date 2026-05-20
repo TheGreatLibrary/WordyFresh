@@ -29,8 +29,8 @@ interface AchievementRepository {
     suspend fun clearLocal(): Result<Unit>
 
     // SyncViewModel
-    suspend fun syncFromSupabase(): Result<Unit>
-    suspend fun syncFromLocal() : Result<Unit>
+    suspend fun syncFromSupabase(userId: String): Result<Unit>
+    suspend fun syncFromLocal(userId: String) : Result<Unit>
 }
 
 class AchievementRepositoryImpl @Inject constructor(
@@ -127,26 +127,18 @@ class AchievementRepositoryImpl @Inject constructor(
 
     // SyncViewModel
 
-    override suspend fun syncFromSupabase(): Result<Unit> {
+    override suspend fun syncFromSupabase(userId: String): Result<Unit> {
         return try {
-            val user = supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
-
-            supabaseAchievementDataSource.syncFromSupabase(user.id).getOrThrow()
-
+            supabaseAchievementDataSource.syncFromSupabase(userId).getOrThrow()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun syncFromLocal(): Result<Unit> {
+    override suspend fun syncFromLocal(userId: String): Result<Unit> {
         return try {
-            val user = supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
-
-            supabaseAchievementDataSource.syncToSupabase(user.id).getOrThrow()
-
+            supabaseAchievementDataSource.syncToSupabase(userId).getOrThrow()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

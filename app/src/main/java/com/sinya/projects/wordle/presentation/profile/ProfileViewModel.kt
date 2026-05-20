@@ -96,19 +96,25 @@ class ProfileViewModel @Inject constructor(
         getProfileUseCase().collect { result ->
             result.fold(
                 onSuccess = { profile ->
-                    _state.value = ProfileUiState.InAccount(
-                        profile = profile!!,
-                        avatarUri = sessionManager.avatar.value,
-                        email = sessionManager.userInfo.value?.email ?: ""
-                    )
+                    if (profile != null) {
+                        _state.value = ProfileUiState.InAccount(
+                            profile = profile,
+                            avatarUri = sessionManager.avatar.value,
+                            email = sessionManager.userInfo.value?.email ?: ""
+                        )
+                    } else {
+                        _state.value = ProfileUiState.CreateProfile
+                    }
                 },
                 onFailure = { error ->
                     when (error) {
-                        is NoInternetException -> loadLocalProfile(error)
                         is UserNotAuthenticatedException -> _state.value = ProfileUiState.NoAccount
                         is UserHasNotProfileException -> _state.value = ProfileUiState.CreateProfile
                         is PostgrestRestException -> _state.value = ProfileUiState.CreateProfile
-                        else -> _state.value = ProfileUiState.NoAccount
+                        else -> {
+                            Log.e("ProfileViewModel", "Сетевая ошибка или блокировка трафика", error)
+                            loadLocalProfile(error)
+                        }
                     }
                 }
             )

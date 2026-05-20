@@ -4,9 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.sinya.projects.wordle.data.local.database.entity.ModeStatisticsTranslations
 import com.sinya.projects.wordle.data.local.database.entity.ModesStatistics
 import com.sinya.projects.wordle.data.local.database.entity.OfflineStatistics
+import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistics
 import com.sinya.projects.wordle.domain.model.GameRow
 import com.sinya.projects.wordle.domain.model.StatAggregatedEntity
 import com.sinya.projects.wordle.domain.model.StatBreakdown
@@ -27,6 +29,15 @@ interface OfflineStatisticDao {
 
     @Query("DELETE FROM offline_statistics")
     suspend fun clearAll()
+
+    @Transaction
+    suspend fun moveOfflineToSync(list: List<SyncStatistics>) {
+        insertStatistic(list)
+        clearAll()
+    }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertStatistic(list: List<SyncStatistics>)
 
     @Query("""
         SELECT *

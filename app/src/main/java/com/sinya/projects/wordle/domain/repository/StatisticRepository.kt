@@ -31,8 +31,8 @@ interface StatisticRepository {
     suspend fun clearLocal(): Result<Unit>
 
     // SyncViewModel
-    suspend fun syncFromSupabase(): Result<Unit>
-    suspend fun syncFromLocal(): Result<Unit>
+    suspend fun syncFromSupabase(userId: String): Result<Unit>
+    suspend fun syncFromLocal(userId: String): Result<Unit>
 
     // AchievementManager
     suspend fun getCurrentStreak(isWin: Boolean, currentResult: Boolean): Int
@@ -223,26 +223,18 @@ class StatisticRepositoryImpl @Inject constructor(
 
     // SyncViewModel
 
-    override suspend fun syncFromSupabase(): Result<Unit> {
+    override suspend fun syncFromSupabase(userId: String): Result<Unit> {
         return try {
-            val user = supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
-
-            supabaseStatisticsDataSource.syncFromSupabase(user.id).getOrThrow()
-
+            supabaseStatisticsDataSource.syncFromSupabase(userId).getOrThrow()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun syncFromLocal(): Result<Unit> {
+    override suspend fun syncFromLocal(userId: String): Result<Unit> {
         return try {
-            val user = supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
-
-            supabaseStatisticsDataSource.syncToSupabase(user.id).getOrThrow()
-
+            supabaseStatisticsDataSource.syncToSupabase(userId).getOrThrow()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

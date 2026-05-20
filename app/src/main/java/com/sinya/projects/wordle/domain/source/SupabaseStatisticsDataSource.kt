@@ -97,9 +97,8 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
 
                 if (offline.isNotEmpty()) {
                     upsertStatistics(offline).getOrThrow()
+                    offlineStatisticDao.moveOfflineToSync(offline)
                 }
-
-                offlineStatisticDao.clearAll()
 
                 Result.success(Unit)
             } catch (e: Exception) {
@@ -115,11 +114,13 @@ class SupabaseStatisticsDataSourceImpl @Inject constructor(
                 if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
 
                 val remote = fetchStatistics(userId).getOrThrow()
-                syncStatisticDao.clearAll()
 
-                if (remote.isNotEmpty()) {
-                    syncStatisticDao.insertStatistic(remote)
+                if (remote.isEmpty()) {
+                    Log.d("Sync", "Сервер вернул пустой список. Локальный кэш сохранен.")
+                    return@withContext Result.success(Unit)
                 }
+
+                syncStatisticDao.replaceAll(remote)
 
                 Result.success(Unit)
             } catch (e: Exception) {

@@ -1,6 +1,7 @@
 package com.sinya.projects.wordle.domain.useCase
 
 import android.util.Log
+import com.sinya.projects.wordle.data.remote.supabase.SessionManager
 import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.repository.AchievementRepository
 import com.sinya.projects.wordle.domain.repository.DictionaryRepository
@@ -14,32 +15,32 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 
 class SyncDataUseCase @Inject constructor(
-    private val authRepository: SupabaseAuthDataSource,
+    private val sessionManager: SessionManager,
     private val statisticsRepository: StatisticRepository,
     private val dictionaryRepository: DictionaryRepository,
     private val achievementsRepository: AchievementRepository,
     private val profileRepository: ProfileRepository,
 ) {
-    suspend operator fun invoke(): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val userId = authRepository.getCurrentUser()
-                ?: return@withContext Result.failure(UserNotAuthenticatedException())
-
+//            val userId = sessionManager.currentUserId
+//                ?: return@withContext Result.failure(UserNotAuthenticatedException())
+//
             val pushTasks = listOf(
-                async { profileRepository.syncFromLocal() },
-                async { achievementsRepository.syncFromLocal() },
-                async { statisticsRepository.syncFromLocal() },
-                async { dictionaryRepository.syncFromLocal() }
+                async { profileRepository.syncFromLocal(userId) },
+                async { achievementsRepository.syncFromLocal(userId) },
+                async { statisticsRepository.syncFromLocal(userId) },
+                async { dictionaryRepository.syncFromLocal(userId) }
             )
             pushTasks.awaitAll() // Ждем завершения всех отправок
             Log.d("SyncUseCase", "Всё локальное улетело в Supabase")
 
             // 2. Теперь забираем свежее (Pull)
             val pullTasks = listOf(
-                async { profileRepository.syncFromSupabase() },
-                async { achievementsRepository.syncFromSupabase() },
-                async { statisticsRepository.syncFromSupabase() },
-                async { dictionaryRepository.syncFromSupabase() }
+                async { profileRepository.syncFromSupabase(userId) },
+                async { achievementsRepository.syncFromSupabase(userId) },
+                async { statisticsRepository.syncFromSupabase(userId) },
+                async { dictionaryRepository.syncFromSupabase(userId) }
             )
             pullTasks.awaitAll()
 

@@ -4,6 +4,7 @@ import android.util.Log
 import com.sinya.projects.wordle.data.local.database.dao.OfflineAchievementsDao
 import com.sinya.projects.wordle.data.local.database.dao.SyncAchievementsDao
 import com.sinya.projects.wordle.data.remote.supabase.entity.SyncAchievements
+import com.sinya.projects.wordle.data.remote.supabase.mapper.toSyncList
 import com.sinya.projects.wordle.domain.checker.NetworkChecker
 import com.sinya.projects.wordle.domain.error.NoInternetException
 import io.github.jan.supabase.SupabaseClient
@@ -12,8 +13,10 @@ import io.github.jan.supabase.postgrest.postgrest
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.IOException
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.net.SocketTimeoutException
 
 interface SupabaseAchievementDataSource {
     suspend fun fetchAchievements(userId: String): Result<List<SyncAchievements>>
@@ -71,20 +74,25 @@ class SupabaseAchievementDataSourceImpl @Inject constructor(
                 val offline = offlineAchievementsDao.getAchievements()
 
                 if (offline.isNotEmpty()) {
-                    offline.forEach { item ->
-                        Log.d("Achieve", item.toString())
-                        supabaseClient.postgrest.rpc(
-                            "increment_achievement",
-                            buildJsonObject {
-                                put("p_user_id", userId)
-                                put("p_achieve_id", item.achieveId)
-                                put("p_count", item.count)
-                            }
-                        )
+                    for (item in offline) {
+                        try {
+                            supabaseClient.postgrest.rpc(
+                                "increment_achievement",
+                                buildJsonObject {
+                                    put("p_user_id", userId)
+                                    put("p_achieve_id", item.achieveId)
+                                    put("p_count", item.count)
+                                }
+                            )
+                            offlineAchievementsDao.moveOfflineToSync(item)
+
+                        } catch (e: Exception) {
+                            Log.e("Sync", "Не удалось отправить достижение ${item.achieveId}, попробуем позже", e)
+                            if (e is SocketTimeoutException || e is IOException) break
+                        }
                     }
                 }
 
-                offlineAchievementsDao.clearAll()
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)
@@ -99,7 +107,13 @@ class SupabaseAchievementDataSourceImpl @Inject constructor(
 
                 val remote = fetchAchievements(userId).getOrThrow()
 
+                if (remote.isEmpty()) {
+                    Log.w("Sync", "Сервер вернул пустой список. Локальный кэш сохранен.")
+                    return@withContext Result.success(Unit)
+                }
+
                 syncAchievementsDao.replaceAll(remote)
+
                 Result.success(Unit)
             } catch (e: Exception) {
                 Log.e("SupabaseDictionaryDataSource", "Error syncing from Supabase", e)

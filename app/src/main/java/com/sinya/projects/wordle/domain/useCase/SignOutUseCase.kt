@@ -1,8 +1,10 @@
 package com.sinya.projects.wordle.domain.useCase
 
 import android.util.Log
+import com.sinya.projects.wordle.data.remote.supabase.SessionManager
 import com.sinya.projects.wordle.domain.checker.NetworkChecker
 import com.sinya.projects.wordle.domain.error.NoInternetException
+import com.sinya.projects.wordle.domain.error.UserNotAuthenticatedException
 import com.sinya.projects.wordle.domain.repository.AchievementRepository
 import com.sinya.projects.wordle.domain.repository.AvatarRepository
 import com.sinya.projects.wordle.domain.repository.DictionaryRepository
@@ -14,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class SignOutUseCase @Inject constructor(
+    private val sessionManager: SessionManager,
     private val authRepository: SupabaseAuthDataSource,
     private val statisticsRepository: StatisticRepository,
     private val dictionaryRepository: DictionaryRepository,
@@ -26,14 +29,14 @@ class SignOutUseCase @Inject constructor(
         try {
             if (!networkChecker.isInternetAvailable()) return@withContext Result.failure(NoInternetException())
 
-            val user = authRepository.getCurrentUser()
+            val userId = sessionManager.currentUserId
                 ?: return@withContext Result.success(Unit)
 
-            statisticsRepository.syncFromLocal().getOrThrow()
-            dictionaryRepository.syncFromLocal().getOrThrow()
-            achievementsRepository.syncFromLocal().getOrThrow()
+            statisticsRepository.syncFromLocal(userId).getOrThrow()
+            dictionaryRepository.syncFromLocal(userId).getOrThrow()
+            achievementsRepository.syncFromLocal(userId).getOrThrow()
 
-            avatarRepository.deleteLocalAvatar(user.id)
+            avatarRepository.deleteLocalAvatar(userId)
 
             statisticsRepository.clearLocal()
             dictionaryRepository.clearLocal()

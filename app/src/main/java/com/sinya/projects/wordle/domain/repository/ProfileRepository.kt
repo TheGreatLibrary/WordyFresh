@@ -45,8 +45,8 @@ interface ProfileRepository {
     suspend fun getProfileFlow(): Flow<Result<Profiles?>>
 
     // SyncViewModel
-    suspend fun syncFromSupabase(): Result<Unit>
-    suspend fun syncFromLocal(): Result<Unit>
+    suspend fun syncFromSupabase(userId: String): Result<Unit>
+    suspend fun syncFromLocal(userId: String): Result<Unit>
 }
 
 class ProfileRepositoryImpl @Inject constructor(
@@ -272,26 +272,18 @@ class ProfileRepositoryImpl @Inject constructor(
 
     // SyncViewModel
 
-    override suspend fun syncFromSupabase(): Result<Unit> {
+    override suspend fun syncFromSupabase(userId: String): Result<Unit> {
         return try {
-            val user = supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
-
-            supabaseProfileDataSource.syncFromSupabase(user.id).getOrThrow()
-
+            supabaseProfileDataSource.syncFromSupabase(userId).getOrThrow()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun syncFromLocal(): Result<Unit> {
+    override suspend fun syncFromLocal(userId: String): Result<Unit> {
         return try {
-            val user = supabaseAuthDataSource.getCurrentUser()
-                ?: return Result.failure(UserNotAuthenticatedException())
-
-            supabaseProfileDataSource.syncToSupabase(user.id).getOrThrow()
-
+            supabaseProfileDataSource.syncToSupabase(userId).getOrThrow()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

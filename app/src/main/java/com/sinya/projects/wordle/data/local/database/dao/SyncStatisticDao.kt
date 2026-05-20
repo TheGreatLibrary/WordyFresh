@@ -10,18 +10,20 @@ import com.sinya.projects.wordle.data.remote.supabase.entity.SyncStatistics
 @Dao
 interface SyncStatisticDao {
 
+    // StatisticScreen
+
     @Query("SELECT * FROM sync_statistics")
     suspend fun getAllStatistic(): List<SyncStatistics>
 
     @Query("SELECT * FROM sync_statistics WHERE mode_id = :modeId")
     suspend fun getStatisticByMode(modeId: Int): SyncStatistics
 
+    // SyncManager
+
     @Transaction
     suspend fun replaceAll(list: List<SyncStatistics>) {
         clearAll()
-        if (list.isNotEmpty()) {
-            insertStatistic(list)
-        }
+        insertStatistic(list)
     }
 
     @Query("DELETE FROM sync_statistics")

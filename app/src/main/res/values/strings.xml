@@ -257,4 +257,5 @@
     <string name="previous_btn">Перемещение на ячейку назад, долгое нажатие — на несколько</string>
     <string name="next_btn">Перемещение вперёд, а в конце игры — начало новой партии!</string>
     <string name="sign_in_with_google">Войти с Google</string>
+    <string name="copy_errors">Копировать логи ошибок</string>
 </resources>

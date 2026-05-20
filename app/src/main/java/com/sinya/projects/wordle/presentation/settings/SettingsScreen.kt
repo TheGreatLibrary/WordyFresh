@@ -1,11 +1,16 @@
 package com.sinya.projects.wordle.presentation.settings
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,8 +30,10 @@ import com.sinya.projects.wordle.presentation.settings.components.LanguageModalS
 import com.sinya.projects.wordle.ui.features.CardColumn
 import com.sinya.projects.wordle.ui.features.RowLink
 import com.sinya.projects.wordle.ui.features.ScreenColumn
+import com.sinya.projects.wordle.utils.LogcatReader
 import com.sinya.projects.wordle.utils.sendSupportEmail
 import com.sinya.projects.wordle.utils.updateLocale
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
@@ -38,6 +45,7 @@ fun SettingsScreen(
     val showLanguageSheet by viewModel.showLanguageSheet.collectAsStateWithLifecycle()
     val showKeyboardSheet by viewModel.showKeyboardSheet.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val backgrounds = remember { BackgroundSettings.entries }
 
     when (state) {
@@ -58,6 +66,15 @@ fun SettingsScreen(
                 sendEmail = {
                     context.sendSupportEmail()
                     viewModel.onEvent(SettingsEvent.SendSupport)
+                },
+                copyErrors = {
+                    scope.launch {
+                        val systemLogs = LogcatReader.getAppLogs(context)
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("App Logcat", systemLogs)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "Логи скопированы в буфер!", Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
 
@@ -92,6 +109,7 @@ private fun SettingsScreenView(
     navigateToBackStack: () -> Unit,
     navigateToOnboarding: () -> Unit,
     sendEmail: () -> Unit,
+    copyErrors: () -> Unit,
 ) {
     ScreenColumn(
         title = stringResource(R.string.settings_screen),
@@ -156,6 +174,13 @@ private fun SettingsScreenView(
         }
 
         CardColumn {
+            RowLink(
+                title = stringResource(R.string.copy_errors),
+                mode = "",
+                icon = R.drawable.dict_search,
+                icon2 = R.drawable.arrow,
+                navigateTo = copyErrors
+            )
             RowLink(
                 title = stringResource(R.string.send_to_support),
                 mode = "",
